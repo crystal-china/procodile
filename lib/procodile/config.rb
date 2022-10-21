@@ -1,14 +1,13 @@
-require 'yaml'
-require 'fileutils'
-require 'procodile/error'
-require 'procodile/process'
+require "yaml"
+require "fileutils"
+require "procodile/error"
+require "procodile/process"
 
 module Procodile
   class Config
+    COLORS = [35, 31, 36, 32, 33, 34].freeze
 
-    COLORS = [35, 31, 36, 32, 33, 34]
-
-    def initialize(root, procfile = nil)
+    def initialize(root, procfile=nil)
       @root = root
       @procfile_path = procfile
 
@@ -20,7 +19,7 @@ module Procodile
       # configuration will override the root that we've been given.
       # If they do, we can throw away any reference to the one that the
       # configuration was initialized with and start using that immediately.
-      if new_root = (local_options['root'] || options['root'])
+      if new_root = (local_options["root"] || options["root"])
         @root = new_root
       end
 
@@ -49,11 +48,11 @@ module Procodile
             # This command is already in our list. Add it.
             if process.command != command
               process.command = command
-              Procodile.log nil, 'system', "#{name} command has changed. Updated."
+              Procodile.log nil, "system", "#{name} command has changed. Updated."
             end
             process.options = options_for_process(name)
           else
-            Procodile.log nil, 'system', "#{name} has been added to the Procfile. Adding it."
+            Procodile.log nil, "system", "#{name} has been added to the Procfile. Adding it."
             @processes[name] = create_process(name, command, COLORS[@processes.size.divmod(COLORS.size)[1]])
           end
         end
@@ -63,35 +62,29 @@ module Procodile
           if p = @processes[process_name]
             p.removed = true
             @processes.delete(process_name)
-            Procodile.log nil, 'system', "#{process_name} has been removed to the Procfile. It will be removed when it is stopped."
+            Procodile.log nil, "system", "#{process_name} has been removed to the Procfile. It will be removed when it is stopped."
           end
         end
       end
       @loaded_at = Time.now
     end
 
-    def root
-      @root
-    end
-
-    def loaded_at
-      @loaded_at
-    end
+    attr_reader :root, :loaded_at
 
     def user
-      local_options['user'] || options['user']
+      local_options["user"] || options["user"]
     end
 
     def app_name
-      @app_name ||= local_options['app_name'] || options['app_name'] || 'Procodile'
+      @app_name ||= local_options["app_name"] || options["app_name"] || "Procodile"
     end
 
     def console_command
-      local_options['console_command'] || options['console_command']
+      local_options["console_command"] || options["console_command"]
     end
 
     def exec_prefix
-      local_options['exec_prefix'] || options['exec_prefix']
+      local_options["exec_prefix"] || options["exec_prefix"]
     end
 
     def processes
@@ -107,7 +100,7 @@ module Procodile
     end
 
     def process_options
-      @process_options ||= options['processes'] || {}
+      @process_options ||= options["processes"] || {}
     end
 
     def local_options
@@ -115,7 +108,7 @@ module Procodile
     end
 
     def local_process_options
-      @local_process_options ||= local_options['processes'] || {}
+      @local_process_options ||= local_options["processes"] || {}
     end
 
     def options_for_process(name)
@@ -123,54 +116,50 @@ module Procodile
     end
 
     def environment_variables
-      @environment_variables ||= begin
-        (options['env'] || {}).merge(local_options['env'] || {}).each_with_object({}) do |(key, value), hash|
-          hash[key.to_s] = value.to_s
-        end
+      @environment_variables ||= (options["env"] || {}).merge(local_options["env"] || {}).each_with_object({}) do |(key, value), hash|
+        hash[key.to_s] = value.to_s
       end
     end
 
     def pid_root
-      File.expand_path(local_options['pid_root'] || options['pid_root'] || 'pids', self.root)
+      File.expand_path(local_options["pid_root"] || options["pid_root"] || "pids", self.root)
     end
 
     def supervisor_pid_path
-      File.join(pid_root, 'procodile.pid')
+      File.join(pid_root, "procodile.pid")
     end
 
     def log_path
-      log_path = local_options['log_path'] || options['log_path']
+      log_path = local_options["log_path"] || options["log_path"]
       if log_path
         File.expand_path(log_path, self.root)
       elsif log_path.nil? && self.log_root
-        File.join(self.log_root, 'procodile.log')
+        File.join(self.log_root, "procodile.log")
       else
         File.expand_path("procodile.log", self.root)
       end
     end
 
     def log_root
-      if log_root = (local_options['log_root'] || options['log_root'])
+      if log_root = (local_options["log_root"] || options["log_root"])
         File.expand_path(log_root, self.root)
-      else
-        nil
       end
     end
 
     def sock_path
-      File.join(pid_root, 'procodile.sock')
+      File.join(pid_root, "procodile.sock")
     end
 
     def procfile_path
-      @procfile_path || File.join(self.root, 'Procfile')
+      @procfile_path || File.join(self.root, "Procfile")
     end
 
     def options_path
-      procfile_path + ".options"
+      "#{procfile_path}.options"
     end
 
     def local_options_path
-      procfile_path + ".local"
+      "#{procfile_path}.local"
     end
 
     private
@@ -192,6 +181,5 @@ module Procodile
     def load_local_options_from_file
       File.exist?(local_options_path) ? YAML.load_file(local_options_path) : {}
     end
-
   end
 end

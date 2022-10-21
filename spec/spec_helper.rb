@@ -1,4 +1,4 @@
-require 'procodile'
+require "procodile"
 
 module ProcodileHelpers
   def change_procfile(config, &block)
@@ -14,7 +14,7 @@ module ProcodileHelpers
   end
 end
 
-APPS_ROOT = File.expand_path('../apps', __FILE__)
+APPS_ROOT = File.expand_path("apps", __dir__)
 RSpec.configure do |config|
   config.color = true
   config.expect_with :rspec do |expectations|

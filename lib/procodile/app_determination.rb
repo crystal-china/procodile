@@ -4,10 +4,9 @@ module Procodile
   # sued
   #
   class AppDetermination
-
     # Start by creating an determination ased on the root and procfile that has been provided
     # to us by the user (from --root and/or --procfile)
-    def initialize(pwd, given_root, given_procfile, global_options = {})
+    def initialize(pwd, given_root, given_procfile, global_options={})
       @pwd = pwd
       @given_root = given_root ? expand_path(given_root, pwd) : nil
       @given_procfile = given_procfile
@@ -16,14 +15,10 @@ module Procodile
     end
 
     # Return the root directory
-    def root
-      @root
-    end
+    attr_reader :root
 
     # Return the procfile
-    def procfile
-      @procfile
-    end
+    attr_reader :procfile
 
     # Are we in an app's directory?
     def in_app_directory?
@@ -50,7 +45,7 @@ module Procodile
       if ambiguous?
         hash = {}
         @global_options.each_with_index do |option, i|
-          hash[i] = option['name'] || option['root']
+          hash[i] = option["name"] || option["root"]
         end
         hash
       else
@@ -85,7 +80,7 @@ module Procodile
       else
         # The user has given us nothing. We will check to see if there's a Procfile
         # in the root of our current pwd
-        if File.file?(File.join(pwd, 'Procfile'))
+        if File.file?(File.join(pwd, "Procfile"))
           # If there's a procfile in our current pwd, we'll use our current
           # directory as the root.
           @root = pwd
@@ -95,10 +90,11 @@ module Procodile
     end
 
     def find_root_and_procfile_from_options(options)
-      if options.is_a?(Hash)
+      case options
+      when Hash
         # Use the current hash
-        find_root_and_procfile(@pwd, options['root'], options['procfile'])
-      elsif options.is_a?(Array)
+        find_root_and_procfile(@pwd, options["root"], options["procfile"])
+      when Array
         # Global options is provides a list of apps. We need to know which one of
         # these we should be looking at.
         if @app_id
@@ -107,10 +103,10 @@ module Procodile
       end
     end
 
-    def expand_path(path, root = nil)
+    def expand_path(path, root=nil)
       # Remove trailing slashes for normalization
-      path = path.gsub(/\/\z/, '')
-      if path =~ /\A\//
+      path = path.delete_suffix("/")
+      if path.start_with?("/")
         # If the path starts with a /, it's absolute. Do nothing.
         path
       else
@@ -119,6 +115,5 @@ module Procodile
         root ? File.join(root, path) : File.join(@pwd, path)
       end
     end
-
   end
 end

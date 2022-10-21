@@ -1,6 +1,5 @@
-require 'logger'
+require "logger"
 module Procodile
-
   def self.mutex
     @mutex ||= Mutex.new
   end
@@ -9,12 +8,11 @@ module Procodile
     mutex.synchronize do
       text.to_s.lines.map(&:chomp).each do |message|
         output  = ""
-        output += "#{Time.now.strftime("%H:%M:%S")} #{name.ljust(18, ' ')} | ".color(color)
+        output += "#{Time.now.strftime('%H:%M:%S')} #{name.ljust(18, ' ')} | ".color(color)
         output += message
         $stdout.puts output
         $stdout.flush
       end
     end
   end
-
 end

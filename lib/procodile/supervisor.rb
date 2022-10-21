@@ -1,27 +1,21 @@
-require 'procodile/control_server'
-require 'procodile/tcp_proxy'
+require "procodile/control_server"
+require "procodile/tcp_proxy"
 
 module Procodile
   class Supervisor
+    attr_reader :config, :processes, :started_at, :tag, :tcp_proxy, :run_options
 
-    attr_reader :config
-    attr_reader :processes
-    attr_reader :started_at
-    attr_reader :tag
-    attr_reader :tcp_proxy
-    attr_reader :run_options
-
-    def initialize(config, run_options = {})
+    def initialize(config, run_options={})
       @config = config
       @run_options = run_options
       @processes = {}
       @readers = {}
-      @signal_handler = SignalHandler.new('TERM', 'USR1', 'USR2', 'INT', 'HUP')
-      @signal_handler.register('TERM') { stop_supervisor }
-      @signal_handler.register('INT') { stop(:stop_supervisor => true) }
-      @signal_handler.register('USR1') { restart }
-      @signal_handler.register('USR2') { }
-      @signal_handler.register('HUP') { reload_config }
+      @signal_handler = SignalHandler.new("TERM", "USR1", "USR2", "INT", "HUP")
+      @signal_handler.register("TERM") { stop_supervisor }
+      @signal_handler.register("INT") { stop(:stop_supervisor => true) }
+      @signal_handler.register("USR1") { restart }
+      @signal_handler.register("USR2") { }
+      @signal_handler.register("HUP") { reload_config }
     end
 
     def allow_respawning?
@@ -41,7 +35,7 @@ module Procodile
       end
       watch_for_output
       @started_at = Time.now
-      after_start.call(self) if block_given?
+      after_start&.call(self)
       supervise!
     rescue => e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
@@ -54,25 +48,26 @@ module Procodile
       loop { supervise; sleep 3 }
     end
 
-    def start_processes(types = nil, options = {})
+    def start_processes(types=nil, options={})
       @tag = options[:tag]
       reload_config
-      Array.new.tap do |instances_started|
+      [].tap do |instances_started|
         @config.processes.each do |name, process|
           next if types && !types.include?(name.to_s)                   # Not a process we want
           next if @processes[process] && !@processes[process].empty?    # Process type already running
+
           instances = process.generate_instances(self).each(&:start)
           instances_started.push(*instances)
         end
       end
     end
 
-    def stop(options = {})
+    def stop(options={})
       if options[:stop_supervisor]
         @run_options[:stop_when_none] = true
       end
       reload_config
-      Array.new.tap do |instances_stopped|
+      [].tap do |instances_stopped|
         if options[:processes].nil?
           Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
           @processes.each do |_, instances|
@@ -92,10 +87,10 @@ module Procodile
       end
     end
 
-    def restart(options = {})
+    def restart(options={})
       @tag = options[:tag]
       reload_config
-      Array.new.tap do |instances_restarted|
+      [].tap do |instances_restarted|
         if options[:processes].nil?
           Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
           instances = @processes.values.flatten
@@ -109,6 +104,7 @@ module Procodile
 
         instances.each do |instance|
           next if instance.stopping?
+
           new_instance = instance.restart
           instances_restarted << [instance, new_instance]
         end
@@ -119,8 +115,8 @@ module Procodile
     end
 
     def stop_supervisor
-      Procodile.log nil, 'system', "Stopping Procodile supervisor"
-      FileUtils.rm_f(File.join(@config.pid_root, 'procodile.pid'))
+      Procodile.log nil, "system", "Stopping Procodile supervisor"
+      FileUtils.rm_f(File.join(@config.pid_root, "procodile.pid"))
       ::Process.exit 0
     end
 
@@ -133,17 +129,13 @@ module Procodile
 
       # Check all instances that we manage and let them do their things.
       @processes.each do |_, instances|
-        instances.each do |instance|
-          instance.check
-        end
+        instances.each(&:check)
       end
 
-      if @run_options[:stop_when_none]
-        # If the processes go away, we can stop the supervisor now
-        if @processes.all? { |_,instances| instances.reject(&:failed?).size == 0 }
-          Procodile.log nil, "system", "All processes have stopped"
-          stop_supervisor
-        end
+      # If the processes go away, we can stop the supervisor now
+      if @run_options[:stop_when_none] && @processes.all? { |_, instances| instances.reject(&:failed?).empty? }
+        Procodile.log nil, "system", "All processes have stopped"
+        stop_supervisor
       end
     end
 
@@ -152,7 +144,7 @@ module Procodile
       @config.reload
     end
 
-    def check_concurrency(options = {})
+    def check_concurrency(options={})
       Procodile.log nil, "system", "Checking process concurrency"
       reload_config unless options[:reload] == false
       result = check_instance_quantities
@@ -183,8 +175,8 @@ module Procodile
         unless process.correct_quantity?(process_instances.size)
           messages << {:type => :incorrect_quantity, :process => process.name, :current => process_instances.size, :desired => process.quantity}
         end
-        for instance in process_instances
-          if instance.should_be_running? && instance.status != 'Running'
+        process_instances.each do |instance|
+          if instance.should_be_running? && instance.status != "Running"
             messages << {:type => :not_running, :instance => instance.description, :status => instance.status}
           end
         end
@@ -197,7 +189,7 @@ module Procodile
       @signal_handler.notice
     end
 
-    def add_instance(instance, io = nil)
+    def add_instance(instance, io=nil)
       add_reader(instance, io) if io
       @processes[instance.process] ||= []
       unless @processes[instance.process].include?(instance)
@@ -221,27 +213,25 @@ module Procodile
           io = IO.select([@signal_handler.pipe[:reader]] + @readers.keys, nil, nil, 30)
           @signal_handler.handle
 
-          if io
-            io.first.each do |reader|
-              if reader == @signal_handler.pipe[:reader]
-                @signal_handler.pipe[:reader].read_nonblock(999) rescue nil
-                next
-              end
+          io&.first&.each do |reader|
+            if reader == @signal_handler.pipe[:reader]
+              @signal_handler.pipe[:reader].read_nonblock(999) rescue nil
+              next
+            end
 
-              if reader.eof?
-                reader.close
-                buffer.delete(reader)
-                @readers.delete(reader)
-              else
-                buffer[reader] ||= ""
-                buffer[reader] << reader.read_nonblock(4096)
-                while buffer[reader].index("\n")
-                  line, buffer[reader] = buffer[reader].split("\n", 2)
-                  if instance = @readers[reader]
-                    Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
-                  else
-                    Procodile.log nil, 'unknown', data
-                  end
+            if reader.eof?
+              reader.close
+              buffer.delete(reader)
+              @readers.delete(reader)
+            else
+              buffer[reader] ||= ""
+              buffer[reader] << reader.read_nonblock(4096)
+              while buffer[reader].index("\n")
+                line, buffer[reader] = buffer[reader].split("\n", 2)
+                if instance = @readers[reader]
+                  Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
+                else
+                  Procodile.log nil, "unknown", data
                 end
               end
             end
@@ -250,27 +240,22 @@ module Procodile
       end
     end
 
-    def check_instance_quantities(type = :both, processes = nil)
+    def check_instance_quantities(type=:both, processes=nil)
       {:started => [], :stopped => []}.tap do |status|
         @processes.each do |process, instances|
           next if processes && !processes.include?(process.name)
 
-          if type == :both || type == :stopped
-            if instances.size > process.quantity
-              quantity_to_stop = instances.size - process.quantity
-              Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
-              status[:stopped] = instances.first(quantity_to_stop).each(&:stop)
-            end
+          if (type == :both || type == :stopped) && (instances.size > process.quantity)
+            quantity_to_stop = instances.size - process.quantity
+            Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
+            status[:stopped] = instances.first(quantity_to_stop).each(&:stop)
           end
 
-          if type == :both || type == :started
-            if instances.size < process.quantity
-              quantity_needed = process.quantity - instances.size
-              Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
-              status[:started] = process.generate_instances(self, quantity_needed).each(&:start)
-            end
+          if (type == :both || type == :started) && (instances.size < process.quantity)
+            quantity_needed = process.quantity - instances.size
+            Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
+            status[:started] = process.generate_instances(self, quantity_needed).each(&:start)
           end
-
         end
       end
     end
@@ -291,9 +276,7 @@ module Procodile
     def remove_removed_processes
       @processes.reject! do |process, instances|
         if process.removed && instances.empty?
-          if @tcp_proxy
-            @tcp_proxy.remove_process(process)
-          end
+          @tcp_proxy&.remove_process(process)
           true
         else
           false
@@ -307,19 +290,21 @@ module Procodile
           process_name, id = $1, $2
           @processes.each do |process, instances|
             next unless process.name == process_name
+
             instances.each do |instance|
               next unless instance.id == id.to_i
+
               array << instance
             end
           end
         else
           @processes.each do |process, instances|
             next unless process.name == name
+
             instances.each { |i| array << i}
           end
         end
       end
     end
-
   end
 end

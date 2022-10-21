@@ -1,6 +1,5 @@
 module Procodile
   class TCPProxy
-
     def self.start(supervisor)
       proxy = new(supervisor)
       proxy.start
@@ -19,30 +18,30 @@ module Procodile
       @supervisor.config.processes.each { |_, p| add_process(p) }
       Thread.new do
         listen
-        Procodile.log nil, 'proxy', "Stopped listening on all ports"
+        Procodile.log nil, "proxy", "Stopped listening on all ports"
       end
     end
 
     def add_process(process)
       if process.proxy?
         @listeners[TCPServer.new(process.proxy_address, process.proxy_port)] = process
-        Procodile.log nil, 'proxy', "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".color(32)
-        @sp_writer.write_nonblock('.')
+        Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".color(32)
+        @sp_writer.write_nonblock(".")
       end
     rescue => e
-      Procodile.log nil, 'proxy', "Exception: #{e.class}: #{e.message}"
-      Procodile.log nil, 'proxy', e.backtrace[0,5].join("\n")
+      Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
+      Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
     def remove_process(process)
       @stopped_processes << process
-      @sp_writer.write_nonblock('.')
+      @sp_writer.write_nonblock(".")
     end
 
     def listen
       loop do
         io = IO.select([@sp_reader] + @listeners.keys, nil, nil, 30)
-        if io && io.first
+        if io&.first
           io.first.each do |io|
             if io == @sp_reader
               io.read_nonblock(999)
@@ -57,7 +56,7 @@ module Procodile
 
         @stopped_processes.reject do |process|
           if io = @listeners.key(process)
-            Procodile.log nil, 'proxy', "Stopped proxy listener for #{process.name}"
+            Procodile.log nil, "proxy", "Stopped proxy listener for #{process.name}"
             io.close
             @listeners.delete(io)
           end
@@ -65,29 +64,30 @@ module Procodile
         end
       end
     rescue => e
-      Procodile.log nil, 'proxy', "Exception: #{e.class}: #{e.message}"
-      Procodile.log nil, 'proxy', e.backtrace[0,5].join("\n")
+      Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
+      Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
     def handle_client(client, server)
       process = @listeners[server]
       instances = @supervisor.processes[process] || []
       if instances.empty?
-        Procodile.log nil, 'proxy', "There are no processes running for #{process.name}"
+        Procodile.log nil, "proxy", "There are no processes running for #{process.name}"
       else
         instance = instances[rand(instances.size)]
-        backend_socket = TCPSocket.new('127.0.0.1', instance.port) rescue nil
+        backend_socket = TCPSocket.new("127.0.0.1", instance.port) rescue nil
         if backend_socket.nil?
-          Procodile.log nil, 'proxy', "Could not connect to #{instance.description}:#{instance.port}"
+          Procodile.log nil, "proxy", "Could not connect to #{instance.description}:#{instance.port}"
           return
         end
         readers = {:backend => backend_socket, :client => client}
         loop do
           io = IO.select(readers.values, nil, nil, 0.5)
-          if io && io.first
+          if io&.first
             io.first.each do |io|
-              readers.keys.each do |key|
+              readers.each_key do |key|
                 next unless readers[key] == io
+
                 opposite_side = key == :client ? :backend : :client
                 if io.eof?
                   readers[opposite_side].shutdown(Socket::SHUT_WR) rescue nil
@@ -101,12 +101,11 @@ module Procodile
         end
       end
     rescue => e
-      Procodile.log nil, 'proxy', "Exception: #{e.class}: #{e.message}"
-      Procodile.log nil, 'proxy', e.backtrace[0,5].join("\n")
+      Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
+      Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     ensure
       backend_socket.close rescue nil
       client.close rescue nil
     end
-
   end
 end

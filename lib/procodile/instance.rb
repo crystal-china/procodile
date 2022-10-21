@@ -1,15 +1,11 @@
-require 'fileutils'
-require 'procodile/logger'
-require 'procodile/rbenv'
+require "fileutils"
+require "procodile/logger"
+require "procodile/rbenv"
 
 module Procodile
   class Instance
-
-    attr_accessor :pid
-    attr_reader :id
-    attr_accessor :process
-    attr_reader :tag
-    attr_accessor :port
+    attr_accessor :pid, :process, :port
+    attr_reader :id, :tag
 
     def initialize(supervisor, process, id)
       @supervisor = supervisor
@@ -31,15 +27,15 @@ module Procodile
     #
     def status
       if stopped?
-        'Stopped'
+        "Stopped"
       elsif stopping?
-        'Stopping'
+        "Stopping"
       elsif running?
-        'Running'
+        "Running"
       elsif failed?
-        'Failed'
+        "Failed"
       else
-        'Unknown'
+        "Unknown"
       end
     end
 
@@ -47,11 +43,7 @@ module Procodile
     # Should this process be running?
     #
     def should_be_running?
-      if stopped? || stopping?
-        false
-      else
-        true
-      end
+      !(stopped? || stopping?)
     end
 
     #
@@ -59,11 +51,11 @@ module Procodile
     #
     def environment_variables
       vars = @process.environment_variables.merge({
-        'PROC_NAME' => self.description,
-        'PID_FILE' => self.pid_file_path,
-        'APP_ROOT' => @process.config.root
-      })
-      vars['PORT'] = @port.to_s if @port
+                                                    "PROC_NAME" => self.description,
+                                                    "PID_FILE" => self.pid_file_path,
+                                                    "APP_ROOT" => @process.config.root
+                                                  })
+      vars["PORT"] = @port.to_s if @port
       vars
     end
 
@@ -80,9 +72,7 @@ module Procodile
     def pid_from_file
       if File.exist?(pid_file_path)
         pid = File.read(pid_file_path)
-        pid.length > 0 ? pid.strip.to_i : nil
-      else
-        nil
+        pid.empty? ? nil : pid.strip.to_i
       end
     end
 
@@ -123,7 +113,7 @@ module Procodile
         elsif @process.proxy? && @supervisor.tcp_proxy
           # Allocate a port randomly if a proxy is needed
           allocate_port
-        elsif @process.allocate_port_from && @process.restart_mode != 'start-term'
+        elsif @process.allocate_port_from && @process.restart_mode != "start-term"
           # Allocate ports to this process sequentially from the starting port
           allocated_ports = (@supervisor.processes[@process] ? @supervisor.processes[@process].select(&:running?) : []).map(&:port)
           proposed_port = @process.allocate_port_from
@@ -137,7 +127,7 @@ module Procodile
 
         if self.process.log_path && @supervisor.run_options[:force_single_log] != true
           FileUtils.mkdir_p(File.dirname(self.process.log_path))
-          log_destination = File.open(self.process.log_path, 'a')
+          log_destination = File.open(self.process.log_path, "a")
           io = nil
         else
           reader, writer = IO.pipe
@@ -150,10 +140,10 @@ module Procodile
           @pid = ::Process.spawn(environment_variables, @process.command, :out => log_destination, :err => log_destination, :pgroup => true)
         end
         log_destination.close
-        File.open(pid_file_path, 'w') { |f| f.write(@pid.to_s + "\n") }
+        File.write(pid_file_path, "#{@pid}\n")
         @supervisor.add_instance(self, io)
         ::Process.detach(@pid)
-        Procodile.log(@process.log_color, description, "Started with PID #{@pid}" + (@tag ? " (tagged with #{@tag})" : ''))
+        Procodile.log(@process.log_color, description, "Started with PID #{@pid}" + (@tag ? " (tagged with #{@tag})" : ""))
         if self.process.log_path && io.nil?
           Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
         end
@@ -222,7 +212,7 @@ module Procodile
       Procodile.log(@process.log_color, description, "Restarting using #{@process.restart_mode} mode")
       update_pid
       case @process.restart_mode
-      when 'usr1', 'usr2'
+      when "usr1", "usr2"
         if running?
           ::Process.kill(@process.restart_mode.upcase, @pid)
           @tag = @supervisor.tag if @supervisor.tag
@@ -235,12 +225,12 @@ module Procodile
           new_instance.start
         end
         self
-      when 'start-term'
+      when "start-term"
         new_instance = @process.create_instance(@supervisor)
         new_instance.start
         stop
         new_instance
-      when 'term-start'
+      when "term-start"
         stop
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
@@ -270,7 +260,7 @@ module Procodile
     #
     # Check the status of this process and handle as appropriate.
     #
-    def check(options = {})
+    def check(options={})
       return if failed?
 
       if self.running?
@@ -346,16 +336,15 @@ module Procodile
       }
     end
 
-
     #
     # Find a port number for this instance to listen on. We just check that nothing is already listening on it.
     # The process is expected to take it straight away if it wants it.
     #
-    def allocate_port(max_attempts = 10)
+    def allocate_port(max_attempts=10)
       attempts = 0
       until @port
         attempts += 1
-        possible_port = rand(10000) + 20000
+        possible_port = rand(20000..29999)
         if self.port_available?(possible_port)
           Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
           return @port = possible_port
@@ -370,13 +359,13 @@ module Procodile
     #
     def port_available?(port)
       case @process.network_protocol
-      when 'tcp'
-        server = TCPServer.new('127.0.0.1', port)
+      when "tcp"
+        server = TCPServer.new("127.0.0.1", port)
         server.close
         true
-      when 'udp'
+      when "udp"
         server = UDPSocket.new
-        server.bind('127.0.0.1', port)
+        server.bind("127.0.0.1", port)
         server.close
         true
       else
@@ -385,6 +374,5 @@ module Procodile
     rescue Errno::EADDRINUSE => e
       false
     end
-
   end
 end

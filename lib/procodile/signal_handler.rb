@@ -1,6 +1,5 @@
 module Procodile
   class SignalHandler
-
     attr_reader :pipe
 
     def self.queue
@@ -12,7 +11,7 @@ module Procodile
       reader, writer = IO.pipe
       @pipe = {:reader => reader, :writer => writer}
       signals.each do |sig|
-        Signal.trap(sig, proc { SignalHandler.queue << sig ; notice })
+        Signal.trap(sig, proc { SignalHandler.queue << sig; notice })
       end
     end
 
@@ -31,17 +30,14 @@ module Procodile
     end
 
     def notice
-      @pipe[:writer].write_nonblock('.')
+      @pipe[:writer].write_nonblock(".")
     end
 
     def handle
       if signal = self.class.queue.shift
-        Procodile.log nil, 'system', "Supervisor received #{signal} signal"
-        if @handlers[signal]
-          @handlers[signal].each(&:call)
-        end
+        Procodile.log nil, "system", "Supervisor received #{signal} signal"
+        @handlers[signal]&.each(&:call)
       end
     end
-
   end
 end

@@ -1,12 +1,11 @@
-require 'json'
-require 'socket'
+require "json"
+require "socket"
 
 module Procodile
   class ControlClient
-
     def initialize(sock_path, &block)
       @socket = UNIXSocket.new(sock_path)
-      if block_given?
+      if block
         begin
           block.call(self)
         ensure
@@ -15,19 +14,19 @@ module Procodile
       end
     end
 
-    def self.run(sock_path, command, options = {})
+    def self.run(sock_path, command, options={})
       socket = self.new(sock_path)
       socket.run(command, options)
     ensure
       socket.disconnect rescue nil
     end
 
-    def run(command, options = {})
+    def run(command, options={})
       @socket.puts("#{command} #{options.to_json}")
       if data = @socket.gets
         code, reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
-          if reply && reply.length > 0
+          if reply && !reply.empty?
             JSON.parse(reply)
           else
             true
@@ -36,7 +35,7 @@ module Procodile
           raise Error, "Error from control server: #{code} (#{reply.inspect})"
         end
       else
-        raise Error ,"Control server disconnected."
+        raise Error, "Control server disconnected."
       end
     end
 
@@ -49,6 +48,5 @@ module Procodile
     def parse_response(data)
       code, message = data.split(/\s+/, 2)
     end
-
   end
 end

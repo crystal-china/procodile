@@ -1,15 +1,14 @@
-require 'fileutils'
-require 'procodile/version'
-require 'procodile/error'
-require 'procodile/message'
-require 'procodile/rbenv'
-require 'procodile/supervisor'
-require 'procodile/signal_handler'
-require 'procodile/control_client'
+require "fileutils"
+require "procodile/version"
+require "procodile/error"
+require "procodile/message"
+require "procodile/rbenv"
+require "procodile/supervisor"
+require "procodile/signal_handler"
+require "procodile/control_client"
 
 module Procodile
   class CLI
-
     def self.commands
       @commands ||= {}
     end
@@ -28,15 +27,14 @@ module Procodile
       @options = nil
     end
 
-    attr_accessor :options
-    attr_accessor :config
+    attr_accessor :options, :config
 
     def initialize
       @options = {}
     end
 
     def dispatch(command)
-      if self.class.commands.keys.include?(command.to_sym)
+      if self.class.commands.key?(command.to_sym)
         public_send(command)
       else
         raise Error, "Invalid command '#{command}'"
@@ -55,7 +53,7 @@ module Procodile
 
       puts "The following commands are supported:"
       puts
-      self.class.commands.sort_by { |k,v| k.to_s }.each do |method, options|
+      self.class.commands.sort_by { |k, v| k.to_s }.each do |method, options|
         if options[:description]
           puts "  \e[34m#{method.to_s.ljust(18, ' ')}\e[0m #{options[:description]}"
         end
@@ -108,8 +106,8 @@ module Procodile
       end
 
       opts.on("--ports PROCESSES", "Choose ports to allocate to processes") do |processes|
-        cli.options[:port_allocations] = processes.split(/\,/).each_with_object({}) do |line, hash|
-          process, port = line.split(':')
+        cli.options[:port_allocations] = processes.split(",").each_with_object({}) do |line, hash|
+          process, port = line.split(":")
           hash[process] = port.to_i
         end
       end
@@ -128,7 +126,7 @@ module Procodile
           raise Error, "Cannot be started in the foreground because supervisor already running"
         end
 
-        if @options.has_key?(:respawn)
+        if @options.key?(:respawn)
           raise Error, "Cannot disable respawning because supervisor is already running"
         end
 
@@ -140,7 +138,7 @@ module Procodile
           raise Error, "Cannot enable the proxy when the supervisor is running"
         end
 
-        instances = ControlClient.run(@config.sock_path, 'start_processes', :processes => process_names_from_cli_option, :tag => @options[:tag], :port_allocations => @options[:port_allocations])
+        instances = ControlClient.run(@config.sock_path, "start_processes", :processes => process_names_from_cli_option, :tag => @options[:tag], :port_allocations => @options[:port_allocations])
         if instances.empty?
           puts "No processes to start."
         else
@@ -148,7 +146,7 @@ module Procodile
             puts "Started".color(32) + " #{instance['description']} (PID: #{instance['pid']})"
           end
         end
-        return
+        nil
       else
         # The supervisor isn't actually running. We need to start it before processes can be
         # begin being processed
@@ -181,12 +179,11 @@ module Procodile
       opts.on("--wait", "Wait until supervisor has stopped before exiting") do
         cli.options[:wait_until_supervisor_stopped] = true
       end
-
     end
     command def stop
       if supervisor_running?
         options = {}
-        instances = ControlClient.run(@config.sock_path, 'stop', :processes => process_names_from_cli_option, :stop_supervisor => @options[:stop_supervisor])
+        instances = ControlClient.run(@config.sock_path, "stop", :processes => process_names_from_cli_option, :stop_supervisor => @options[:stop_supervisor])
         if instances.empty?
           puts "No processes were stopped."
         else
@@ -232,13 +229,13 @@ module Procodile
     end
     command def restart
       if supervisor_running?
-        instances = ControlClient.run(@config.sock_path, 'restart', :processes => process_names_from_cli_option, :tag => @options[:tag])
+        instances = ControlClient.run(@config.sock_path, "restart", :processes => process_names_from_cli_option, :tag => @options[:tag])
         if instances.empty?
           puts "There are no processes to restart."
         else
           instances.each do |old_instance, new_instance|
             if old_instance && new_instance
-              if old_instance['description'] == new_instance['description']
+              if old_instance["description"] == new_instance["description"]
                 puts "Restarted".color(35) + " #{old_instance['description']}"
               else
                 puts "Restarted".color(35) + " #{old_instance['description']} -> #{new_instance['description']}"
@@ -263,7 +260,7 @@ module Procodile
     desc "Reload Procodile configuration"
     command def reload
       if supervisor_running?
-        ControlClient.run(@config.sock_path, 'reload_config')
+        ControlClient.run(@config.sock_path, "reload_config")
         puts "Reloaded Procodile config"
       else
         raise Error, "Procodile supervisor isn't running"
@@ -282,15 +279,15 @@ module Procodile
     end
     command def check_concurrency
       if supervisor_running?
-        reply = ControlClient.run(@config.sock_path, 'check_concurrency', :reload => @options[:reload])
-        if reply['started'].empty? && reply['stopped'].empty?
+        reply = ControlClient.run(@config.sock_path, "check_concurrency", :reload => @options[:reload])
+        if reply["started"].empty? && reply["stopped"].empty?
           puts "Processes are running as configured"
         else
-          reply['started'].each do |instance|
+          reply["started"].each do |instance|
             puts "Started".color(32) + " #{instance['description']} (PID: #{instance['pid']})"
           end
 
-          reply['stopped'].each do |instance|
+          reply["stopped"].each do |instance|
             puts "Stopped".color(31) + " #{instance['description']} (PID: #{instance['pid']})"
           end
         end
@@ -319,21 +316,21 @@ module Procodile
     end
     command def status
       if supervisor_running?
-        status = ControlClient.run(@config.sock_path, 'status')
+        status = ControlClient.run(@config.sock_path, "status")
         if @options[:json]
           puts status.to_json
         elsif @options[:json_pretty]
           puts JSON.pretty_generate(status)
         elsif @options[:simple]
-          if status['messages'].empty?
-            message = status['instances'].map { |p,i| "#{p}[#{i.size}]" }
+          if status["messages"].empty?
+            message = status["instances"].map { |p, i| "#{p}[#{i.size}]" }
             puts "OK || #{message.join(', ')}"
           else
-            message = status['messages'].map { |p| Message.parse(p) }.join(', ')
+            message = status["messages"].map { |p| Message.parse(p) }.join(", ")
             puts "Issues || #{message}"
           end
         else
-          require 'procodile/status_cli_output'
+          require "procodile/status_cli_output"
           StatusCLIOutput.new(status).print_all
         end
       else
@@ -350,11 +347,11 @@ module Procodile
     #
     desc "Forcefully kill all known processes"
     command def kill
-      Dir[File.join(@config.pid_root, '*.pid')].each do |pid_path|
-        name = pid_path.split('/').last.gsub(/\.pid\z/, '')
+      Dir[File.join(@config.pid_root, "*.pid")].each do |pid_path|
+        name = pid_path.split("/").last.delete_suffix(".pid")
         pid = File.read(pid_path).to_i
         begin
-          ::Process.kill('KILL', pid)
+          ::Process.kill("KILL", pid)
           puts "Sent KILL to #{pid} (#{name})"
         rescue Errno::ESRCH
         end
@@ -366,21 +363,21 @@ module Procodile
     # Run a command with a procodile environment
     #
     desc "Execute a command within the environment"
-    command def exec(command = nil)
-      desired_command = command || ARGV.drop(1).join(' ')
+    command def exec(command=nil)
+      desired_command = command || ARGV.drop(1).join(" ")
 
       if prefix = @config.exec_prefix
         desired_command = "#{prefix} #{desired_command}"
       end
 
-      if desired_command.length == 0
+      if desired_command.empty?
         raise Error, "You need to specify a command to run (e.g. procodile run -- rake db:migrate)"
       else
         environment = @config.environment_variables
 
-        unless ENV['PROCODILE_EXEC_QUIET'].to_i == 1
+        unless ENV["PROCODILE_EXEC_QUIET"].to_i == 1
           puts "Running with #{desired_command.color(33)}"
-          for key, value in environment
+          environment.each do |key, value|
             puts "             #{key.color(34)} #{value}"
           end
         end
@@ -426,7 +423,6 @@ module Procodile
       opts.on("-p PROCESS", "--process PROCESS", "Show the log for a given process (rather than procodile)") do |process|
         cli.options[:process] = process
       end
-
     end
     command def log
       opts = []
@@ -449,7 +445,6 @@ module Procodile
       end
     end
 
-
     private
 
     def supervisor_running?
@@ -463,9 +458,7 @@ module Procodile
     def current_pid
       if File.exist?(@config.supervisor_pid_path)
         pid_file = File.read(@config.supervisor_pid_path).strip
-        pid_file.length > 0 ? pid_file.to_i : nil
-      else
-        nil
+        pid_file.empty? ? nil : pid_file.to_i
       end
     end
 
@@ -477,23 +470,22 @@ module Procodile
 
     def process_names_from_cli_option
       if @options[:processes]
-        processes = @options[:processes].split(',')
+        processes = @options[:processes].split(",")
         if processes.empty?
           raise Error, "No process names provided"
         end
-        #processes.each do |process|
+
+        # processes.each do |process|
         #  process_name, _ = process.split('.', 2)
         #  unless @config.process_list.keys.include?(process_name.to_s)
         #    raise Error, "Process '#{process_name}' is not configured. You may need to reload your config."
         #  end
-        #end
+        # end
         processes
-      else
-        nil
       end
     end
 
-    def self.start_supervisor(config, options = {}, &after_start)
+    def self.start_supervisor(config, options={}, &)
       run_options = {}
       run_options[:respawn] = options[:respawn]
       run_options[:stop_when_none] = options[:stop_when_none]
@@ -504,7 +496,7 @@ module Procodile
       tidy_pids(config)
 
       if options[:clean]
-        FileUtils.rm_rf(Dir[File.join(config.pid_root, '*')])
+        FileUtils.rm_rf(Dir[File.join(config.pid_root, "*")])
         puts "Emptied PID directory"
       end
 
@@ -514,19 +506,19 @@ module Procodile
 
       $0="[procodile] #{config.app_name} (#{config.root})"
       if options[:foreground]
-        File.open(config.supervisor_pid_path, 'w') { |f| f.write(::Process.pid) }
-        Supervisor.new(config, run_options).start(&after_start)
+        File.write(config.supervisor_pid_path, ::Process.pid)
+        Supervisor.new(config, run_options).start(&)
       else
         FileUtils.rm_f(File.join(config.pid_root, "*.pid"))
         pid = fork do
-          STDOUT.reopen(config.log_path, 'a')
+          STDOUT.reopen(config.log_path, "a")
           STDOUT.sync = true
-          STDERR.reopen(config.log_path, 'a')
+          STDERR.reopen(config.log_path, "a")
           STDERR.sync = true
-          Supervisor.new(config, run_options).start(&after_start)
+          Supervisor.new(config, run_options).start(&)
         end
         ::Process.detach(pid)
-        File.open(config.supervisor_pid_path, 'w') { |f| f.write(pid) }
+        File.write(config.supervisor_pid_path, pid)
         puts "Started Procodile supervisor with PID #{pid}"
       end
     end
@@ -534,9 +526,9 @@ module Procodile
     def self.tidy_pids(config)
       FileUtils.rm_f(config.supervisor_pid_path)
       FileUtils.rm_f(config.sock_path)
-      pid_files = Dir[File.join(config.pid_root, '*.pid')]
+      pid_files = Dir[File.join(config.pid_root, "*.pid")]
       pid_files.each do |pid_path|
-        file_name = pid_path.split('/').last
+        file_name = pid_path.split("/").last
         pid = File.read(pid_path).to_i
         if self.pid_active?(pid)
           puts "Could not remove #{file_name} because process (#{pid}) was active"
@@ -546,6 +538,5 @@ module Procodile
         end
       end
     end
-
   end
 end

@@ -1,9 +1,8 @@
-require 'json'
-require 'procodile/version'
+require "json"
+require "procodile/version"
 
 module Procodile
   class ControlSession
-
     def initialize(supervisor, client)
       @supervisor = supervisor
       @client = client
@@ -12,11 +11,11 @@ module Procodile
     def receive_data(data)
       command, options = data.split(/\s+/, 2)
       options = JSON.parse(options)
-      if self.class.instance_methods(false).include?(command.to_sym) && command != 'receive_data'
+      if self.class.instance_methods(false).include?(command.to_sym) && command != "receive_data"
         begin
           public_send(command, options)
         rescue Procodile::Error => e
-          Procodile.log nil, 'control', "Error: #{e.message}".color(31)
+          Procodile.log nil, "control", "Error: #{e.message}".color(31)
           "500 #{e.message}"
         end
       else
@@ -25,24 +24,24 @@ module Procodile
     end
 
     def start_processes(options)
-      if options['port_allocations']
+      if options["port_allocations"]
         if @supervisor.run_options[:port_allocations]
-          @supervisor.run_options[:port_allocations].merge!(options['port_allocations'])
+          @supervisor.run_options[:port_allocations].merge!(options["port_allocations"])
         else
-          @supervisor.run_options[:port_allocations] = options['port_allocations']
+          @supervisor.run_options[:port_allocations] = options["port_allocations"]
         end
       end
-      instances = @supervisor.start_processes(options['processes'], :tag => options['tag'])
-      "200 " + instances.map(&:to_hash).to_json
+      instances = @supervisor.start_processes(options["processes"], :tag => options["tag"])
+      "200 #{instances.map(&:to_hash).to_json}"
     end
 
     def stop(options)
-      instances = @supervisor.stop(:processes => options['processes'], :stop_supervisor => options['stop_supervisor'])
-      "200 " + instances.map(&:to_hash).to_json
+      instances = @supervisor.stop(:processes => options["processes"], :stop_supervisor => options["stop_supervisor"])
+      "200 #{instances.map(&:to_hash).to_json}"
     end
 
     def restart(options)
-      instances = @supervisor.restart(:processes => options['processes'], :tag => options['tag'])
+      instances = @supervisor.restart(:processes => options["processes"], :tag => options["tag"])
       "200 " + instances.map { |a| a.map { |i| i ? i.to_hash : nil } }.to_json
     end
 
@@ -52,8 +51,8 @@ module Procodile
     end
 
     def check_concurrency(options)
-      result = @supervisor.check_concurrency(:reload => options['reload'])
-      result = result.each_with_object({}) { |(type, instances), hash| hash[type] = instances.map(&:to_hash) }
+      result = @supervisor.check_concurrency(:reload => options["reload"])
+      result = result.transform_values { |instances| instances.map(&:to_hash) }
       "200 #{result.to_json}"
     end
 
@@ -61,7 +60,7 @@ module Procodile
       instances = {}
       @supervisor.processes.each do |process, process_instances|
         instances[process.name] = []
-        for instance in process_instances
+        process_instances.each do |instance|
           instances[process.name] << instance.to_hash
         end
       end
@@ -87,6 +86,5 @@ module Procodile
       }
       "200 #{result.to_json}"
     end
-
   end
 end

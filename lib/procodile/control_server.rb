@@ -1,9 +1,8 @@
-require 'socket'
-require 'procodile/control_session'
+require "socket"
+require "procodile/control_session"
 
 module Procodile
   class ControlServer
-
     def self.start(supervisor)
       Thread.new do
         socket = ControlServer.new(supervisor)
@@ -17,7 +16,7 @@ module Procodile
 
     def listen
       socket = UNIXServer.new(@supervisor.config.sock_path)
-      Procodile.log nil, 'control', "Listening at #{@supervisor.config.sock_path}"
+      Procodile.log nil, "control", "Listening at #{@supervisor.config.sock_path}"
       loop do
         client = socket.accept
         session = ControlSession.new(@supervisor, client)
@@ -31,6 +30,5 @@ module Procodile
     ensure
       FileUtils.rm_f(@supervisor.config.sock_path)
     end
-
   end
 end

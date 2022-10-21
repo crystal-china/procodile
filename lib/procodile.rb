@@ -1,13 +1,11 @@
 module Procodile
-
   def self.root
-    File.expand_path('../../', __FILE__)
+    File.expand_path("..", __dir__)
   end
 
   def self.bin_path
-    File.join(root, 'bin', 'procodile')
+    File.join(root, "bin", "procodile")
   end
-
 end
 
 class String
