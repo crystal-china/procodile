@@ -45,7 +45,7 @@ rescue OptionParser::InvalidOption, OptionParser::MissingArgument => e
 end
 
 # Get the global configuration file data
-global_config_path = ENV["PROCODILE_CONFIG"] || "/etc/procodile"
+global_config_path = ENV["PROCODILE_CONFIG"] || "Procfile.options.global"
 if File.file?(global_config_path)
   global_config = YAML.load_file(global_config_path)
 else
@@ -55,32 +55,32 @@ end
 # Create a determination to work out where we want to load our app from
 require "procodile/app_determination"
 ap = Procodile::AppDetermination.new(FileUtils.pwd, options[:root], options[:procfile], global_config)
-if ap.ambiguous?
-  if ENV["PROCODILE_APP_ID"]
-    ap.set_app(ENV["PROCODILE_APP_ID"].to_i)
-  elsif ap.app_options.empty?
-    warn "Error: Could not find Procfile in #{FileUtils.pwd}/Procfile".color(31)
-    exit 1
-  else
-    puts "There are multiple applications configured in #{global_config_path}"
-    puts "\e[45;37mChoose an application:\e[0m"
-    ap.app_options.each do |i, app|
-      col = i % 3
-      print "#{i+1}) #{app}"[0, 28].ljust(col == 2 ? 0 : 30, " ")
-      if col == 2 || i == ap.app_options.size - 1
-        puts
-      end
-    end
+# if ap.unambiguous?
+#   if ENV["PROCODILE_APP_ID"]
+#     ap.set_app(ENV["PROCODILE_APP_ID"].to_i)
+#   elsif ap.app_options.empty?
+#     warn "Error: Could not find Procfile in #{FileUtils.pwd}/Procfile".color(31)
+#     exit 1
+#   else
+#     puts "There are multiple applications configured in #{global_config_path}"
+#     puts "\e[45;37mChoose an application:\e[0m"
+#     ap.app_options.each do |i, app|
+#       col = i % 3
+#       print "#{i+1}) #{app}"[0, 28].ljust(col == 2 ? 0 : 30, " ")
+#       if col == 2 || i == ap.app_options.size - 1
+#         puts
+#       end
+#     end
 
-    app_id = STDIN.gets.strip.to_i - 1
-    if ap.app_options[app_id]
-      ap.set_app(app_id)
-    else
-      puts "Invalid app number: #{app_id + 1}"
-      exit 1
-    end
-  end
-end
+#     app_id = STDIN.gets.strip.to_i - 1
+#     if ap.app_options[app_id]
+#       ap.set_app(app_id)
+#     else
+#       puts "Invalid app number: #{app_id + 1}"
+#       exit 1
+#     end
+#   end
+# end
 
 begin
   if command != "help"
