@@ -3,7 +3,6 @@ module Procodile
     module StopCommand
       def self.included(base)
         base.class_eval do
-          desc "Stops processes and/or the supervisor"
           options do |opts, cli|
             opts.on("-p", "--processes a,b,c", "Only stop the listed processes or process types") do |processes|
               cli.options[:processes] = processes
@@ -18,7 +17,7 @@ module Procodile
             end
           end
 
-          command def stop
+          def stop
             if supervisor_running?
               options = {}
               instances = ControlClient.run(@config.sock_path, "stop", :processes => process_names_from_cli_option, :stop_supervisor => @options[:stop_supervisor])
@@ -50,6 +49,8 @@ module Procodile
               raise Error, "Procodile supervisor isn't running"
             end
           end
+
+          command :stop, "Stops processes and/or the supervisor"
         end
       end
     end

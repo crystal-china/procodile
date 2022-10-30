@@ -3,8 +3,7 @@ module Procodile
     module ReloadCommand
       def self.included(base)
         base.class_eval do
-          desc "Reload Procodile configuration"
-          command def reload
+          def reload
             if supervisor_running?
               ControlClient.run(@config.sock_path, "reload_config")
               puts "Reloaded Procodile config"
@@ -12,6 +11,8 @@ module Procodile
               raise Error, "Procodile supervisor isn't running"
             end
           end
+
+          command :reload, "Reload Procodile configuration"
         end
       end
     end

@@ -27,18 +27,14 @@ module Procodile
       @commands ||= {}
     end
 
-    def self.desc(description)
-      @description = description
-    end
-
     def self.options(&block)
       @options = block
     end
 
-    def self.command(name)
+    def self.command(name, description)
       commands[name] = {
         :name => name,
-        :description => @description,
+        :description => description,
         :options => @options
       }
 
@@ -70,6 +66,14 @@ module Procodile
         raise Error, "Invalid command '#{command}'"
       end
     end
+
+    # def dispatch1(command)
+    #   if self.class.commands.has_key?(command)
+    #     self.class.commands[command][:callable].as(Proc(Nil)).call
+    #   else
+    #     raise Error.new("Invalid command '#{command}'")
+    #   end
+    # end
 
     #
     # Help

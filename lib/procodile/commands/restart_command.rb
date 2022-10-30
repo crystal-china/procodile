@@ -3,7 +3,6 @@ module Procodile
     module RestartCommand
       def self.included(base)
         base.class_eval do
-          desc "Restart processes"
           options do |opts, cli|
             opts.on("-p", "--processes a,b,c", "Only restart the listed processes or process types") do |processes|
               cli.options[:processes] = processes
@@ -13,7 +12,8 @@ module Procodile
               cli.options[:tag] = tag
             end
           end
-          command def restart
+
+          def restart
             if supervisor_running?
               instances = ControlClient.run(@config.sock_path, "restart", :processes => process_names_from_cli_option, :tag => @options[:tag])
               if instances.empty?
@@ -38,6 +38,8 @@ module Procodile
               raise Error, "Procodile supervisor isn't running"
             end
           end
+
+          command :restart, "Restart processes"
         end
       end
     end

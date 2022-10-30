@@ -3,7 +3,6 @@ module Procodile
     module StartCommand
       def self.included(base)
         base.class_eval do
-          desc "Starts processes and/or the supervisor"
           options do |opts, cli|
             opts.on("-p", "--processes a,b,c", "Only start the listed processes or process types") do |processes|
               cli.options[:processes] = processes
@@ -57,7 +56,7 @@ module Procodile
             end
           end
 
-          command def start
+          def start
             if supervisor_running?
               if @options[:foreground]
                 raise Error, "Cannot be started in the foreground because supervisor already running"
@@ -98,6 +97,8 @@ module Procodile
               end
             end
           end
+
+          command :start, "Starts processes and/or the supervisor"
         end
       end
     end

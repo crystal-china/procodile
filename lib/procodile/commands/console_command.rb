@@ -3,14 +3,15 @@ module Procodile
     module ConsoleCommand
       def self.included(base)
         base.class_eval do
-          desc "Open a console within the environment"
-          command def console
+          def console
             if cmd = @config.console_command
               exec(cmd)
             else
               raise Error, "No console command has been configured in the Procfile"
             end
           end
+
+          command :console, "Open a console within the environment"
         end
       end
     end

@@ -3,7 +3,6 @@ module Procodile
     module StatusCommand
       def self.included(base)
         base.class_eval do
-          desc "Show the current status of processes"
           options do |opts, cli|
             opts.on("--json", "Return the status as a JSON hash") do
               cli.options[:json] = true
@@ -17,7 +16,8 @@ module Procodile
               cli.options[:simple] = true
             end
           end
-          command def status
+
+          def status
             if supervisor_running?
               status = ControlClient.run(@config.sock_path, "status")
               if @options[:json]
@@ -44,6 +44,8 @@ module Procodile
               end
             end
           end
+
+          command :status, "Show the current status of processes"
         end
       end
     end

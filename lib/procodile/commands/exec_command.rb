@@ -3,8 +3,7 @@ module Procodile
     module ExecCommand
       def self.included(base)
         base.class_eval do
-          desc "Execute a command within the environment"
-          command def exec(command=nil)
+          def exec(command=nil)
             desired_command = command || ARGV.drop(1).join(" ")
 
             if prefix = @config.exec_prefix
@@ -33,8 +32,11 @@ module Procodile
               end
             end
           end
+
           alias run exec
-          command :run
+
+          command :run, "Execute a command within the environment"
+          command :exec, "Execute a command within the environment"
         end
       end
     end

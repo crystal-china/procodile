@@ -3,7 +3,6 @@ module Procodile
     module LogCommand
       def self.included(base)
         base.class_eval do
-          desc "Open/stream a Procodile log file"
           options do |opts, cli|
             opts.on("-f", "Wait for additional data and display it straight away") do
               cli.options[:wait] = true
@@ -17,7 +16,8 @@ module Procodile
               cli.options[:process] = process
             end
           end
-          command def log
+
+          def log
             opts = []
             opts << "-f" if options[:wait]
             opts << "-n #{options[:lines]}" if options[:lines]
@@ -37,6 +37,8 @@ module Procodile
               raise Error, "No file found at #{log_path}"
             end
           end
+
+          command :log, "Open/stream a Procodile log file"
         end
       end
     end

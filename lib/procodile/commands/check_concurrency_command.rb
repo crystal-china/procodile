@@ -3,13 +3,13 @@ module Procodile
     module CheckConcurrencyCommand
       def self.included(base)
         base.class_eval do
-          desc "Check process concurrency"
           options do |opts, cli|
             opts.on("--no-reload", "Do not reload the configuration before checking") do |processes|
               cli.options[:reload] = false
             end
           end
-          command def check_concurrency
+
+          def check_concurrency
             if supervisor_running?
               reply = ControlClient.run(@config.sock_path, "check_concurrency", :reload => @options[:reload])
               if reply["started"].empty? && reply["stopped"].empty?
@@ -27,6 +27,8 @@ module Procodile
               raise Error, "Procodile supervisor isn't running"
             end
           end
+
+          command :check_concurrency, "Check process concurrency"
         end
       end
     end

@@ -3,8 +3,7 @@ module Procodile
     module KillCommand
       def self.included(base)
         base.class_eval do
-          desc "Forcefully kill all known processes"
-          command def kill
+          def kill
             Dir[File.join(@config.pid_root, "*.pid")].each do |pid_path|
               name = pid_path.split("/").last.delete_suffix(".pid")
               pid = File.read(pid_path).to_i
@@ -16,6 +15,8 @@ module Procodile
               FileUtils.rm(pid_path)
             end
           end
+
+          command :kill, "Forcefully kill all known processes"
         end
       end
     end

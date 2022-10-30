@@ -3,8 +3,7 @@ module Procodile
     module HelpCommand
       def self.included(base)
         base.class_eval do
-          desc "Shows this help output"
-          command def help
+          def help
             puts "\e[45;37mWelcome to Procodile v#{Procodile::VERSION}\e[0m"
             puts "For documentation see https://adam.ac/procodile."
             puts
@@ -20,6 +19,8 @@ module Procodile
             puts "For details for the options available for each command, use the --help option."
             puts "For example 'procodile start --help'."
           end
+
+          command :help, "Shows this help output"
         end
       end
     end
