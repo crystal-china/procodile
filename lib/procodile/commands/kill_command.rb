@@ -16,7 +16,7 @@ module Procodile
             end
           end
 
-          command :kill, "Forcefully kill all known processes"
+          command :kill, "Forcefully kill all known processes", self.instance_method(:kill)
         end
       end
     end

@@ -50,7 +50,7 @@ module Procodile
             end
           end
 
-          command :stop, "Stops processes and/or the supervisor"
+          command :stop, "Stops processes and/or the supervisor", self.instance_method(:stop)
         end
       end
     end

@@ -31,29 +31,16 @@ module Procodile
       @options = block
     end
 
-    def self.command(name, description)
+    def self.command(name, description, callable)
       commands[name] = {
         :name => name,
         :description => description,
-        :options => @options
+        :options => @options,
+        :callable => callable
       }
 
-      @description = nil
       @options = nil
     end
-
-    # def command(name, description, callable)
-    #   self.class.commands[name] = {
-    #     :name => name,
-    #     :description => description,
-    #     :options => self.class.options,
-    #     :callable => callable
-    #   }
-
-    #   @@description = nil
-    #   @@options = nil
-    # end
-
 
     def initialize
       @options = {}
@@ -61,19 +48,11 @@ module Procodile
 
     def dispatch(command)
       if self.class.commands.key?(command.to_sym)
-        public_send(command)
+        self.class.commands[command.to_sym][:callable].bind(self).call
       else
         raise Error, "Invalid command '#{command}'"
       end
     end
-
-    # def dispatch1(command)
-    #   if self.class.commands.has_key?(command)
-    #     self.class.commands[command][:callable].as(Proc(Nil)).call
-    #   else
-    #     raise Error.new("Invalid command '#{command}'")
-    #   end
-    # end
 
     #
     # Help

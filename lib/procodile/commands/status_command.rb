@@ -45,7 +45,7 @@ module Procodile
             end
           end
 
-          command :status, "Show the current status of processes"
+          command :status, "Show the current status of processes", self.instance_method(:status)
         end
       end
     end

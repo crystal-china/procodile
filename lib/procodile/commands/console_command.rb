@@ -11,7 +11,7 @@ module Procodile
             end
           end
 
-          command :console, "Open a console within the environment"
+          command :console, "Open a console within the environment", self.instance_method(:console)
         end
       end
     end

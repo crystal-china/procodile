@@ -35,8 +35,8 @@ module Procodile
 
           alias run exec
 
-          command :run, "Execute a command within the environment"
-          command :exec, "Execute a command within the environment"
+          command :run, "Execute a command within the environment", self.instance_method(:run)
+          command :exec, "Execute a command within the environment", self.instance_method(:exec)
         end
       end
     end

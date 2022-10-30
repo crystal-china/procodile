@@ -98,7 +98,7 @@ module Procodile
             end
           end
 
-          command :start, "Starts processes and/or the supervisor"
+          command :start, "Starts processes and/or the supervisor", self.instance_method(:start)
         end
       end
     end

@@ -38,7 +38,7 @@ module Procodile
             end
           end
 
-          command :log, "Open/stream a Procodile log file"
+          command :log, "Open/stream a Procodile log file", self.instance_method(:log)
         end
       end
     end

@@ -28,7 +28,7 @@ module Procodile
             end
           end
 
-          command :check_concurrency, "Check process concurrency"
+          command :check_concurrency, "Check process concurrency", self.instance_method(:check_concurrency)
         end
       end
     end

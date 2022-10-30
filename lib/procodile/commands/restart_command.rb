@@ -39,7 +39,7 @@ module Procodile
             end
           end
 
-          command :restart, "Restart processes"
+          command :restart, "Restart processes", self.instance_method(:restart)
         end
       end
     end

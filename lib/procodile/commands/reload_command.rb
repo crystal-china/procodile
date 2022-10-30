@@ -12,7 +12,7 @@ module Procodile
             end
           end
 
-          command :reload, "Reload Procodile configuration"
+          command :reload, "Reload Procodile configuration", self.instance_method(:reload)
         end
       end
     end
