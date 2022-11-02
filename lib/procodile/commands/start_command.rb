@@ -74,7 +74,16 @@ module Procodile
                 raise Error, "Cannot enable the proxy when the supervisor is running"
               end
 
-              instances = ControlClient.run(@config.sock_path, "start_processes", :processes => process_names_from_cli_option, :tag => @options[:tag], :port_allocations => @options[:port_allocations])
+              instances = ControlClient.run(
+                @config.sock_path,
+                "start_processes",
+                {
+                  :processes => process_names_from_cli_option,
+                  :tag => @options[:tag],
+                  :port_allocations => @options[:port_allocations]
+                }
+              )
+
               if instances.empty?
                 puts "No processes to start."
               else

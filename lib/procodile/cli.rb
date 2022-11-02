@@ -48,7 +48,7 @@ module Procodile
 
     def dispatch(command)
       if self.class.commands.key?(command.to_sym)
-        self.class.commands[command.to_sym][:callable].bind(self).call
+        self.class.commands[command.to_sym][:callable].bind_call(self)
       else
         raise Error, "Invalid command '#{command}'"
       end
@@ -65,7 +65,6 @@ module Procodile
     #
 
     include Procodile::CLI::StartCommand
-
 
     #
     # Stop
