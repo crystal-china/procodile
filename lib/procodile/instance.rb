@@ -349,7 +349,7 @@ module Procodile
           Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
           return @port = possible_port
         elsif attempts >= max_attempts
-          raise Procodile::Error, "Couldn't allocate port for #{instance.name}"
+          raise Procodile::Error, "Couldn't allocate port for #{@process.name}"
         end
       end
     end
