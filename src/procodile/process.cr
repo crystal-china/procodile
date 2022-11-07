@@ -4,8 +4,8 @@ module Procodile
   class Process
     MUTEX = Mutex.new
 
-    attr_reader :config, :name
-    attr_accessor :command, :options, :log_color, :removed
+    getter :config, :name
+    property :command, :options, :log_color, :removed
 
     def initialize(config, name, command, options={})
       @config = config
@@ -31,8 +31,8 @@ module Procodile
     #
     def environment_variables
       global_variables = @config.environment_variables
-      process_vars = @config.process_options[@name] ? @config.process_options[@name]["env"] || {} : {}
-      process_local_vars = @config.local_process_options[@name] ? @config.local_process_options[@name]["env"] || {} : {}
+      process_vars = @config.process_options[@name] ? @config.process_options[@name]["env"]? || {} : {}
+      process_local_vars = @config.local_process_options[@name] ? @config.local_process_options[@name]["env"]? || {} : {}
       global_variables.merge(process_vars.merge(process_local_vars)).each_with_object({}) do |(key, value), hash|
         hash[key.to_s] = value.to_s
       end
@@ -42,7 +42,7 @@ module Procodile
     # How many instances of this process should be started
     #
     def quantity
-      @options["quantity"] || 1
+      @options["quantity"]? || 1
     end
 
     #
@@ -71,7 +71,7 @@ module Procodile
     # Return the defualt log file name
     #
     def default_log_file_name
-      @options["log_file_name"] || "#{@name}.log"
+      @options["log_file_name"]? || "#{@name}.log"
     end
 
     #
@@ -88,7 +88,7 @@ module Procodile
     # Return the signal to send to terminate the process
     #
     def term_signal
-      @options["term_signal"] || "TERM"
+      @options["term_signal"]? || "TERM"
     end
 
     #
@@ -100,7 +100,7 @@ module Procodile
     # term-start = stop the old instances, when no longer running, start a new one
     #
     def restart_mode
-      @options["restart_mode"] || "term-start"
+      @options["restart_mode"]? || "term-start"
     end
 
     #
@@ -128,14 +128,14 @@ module Procodile
     # Return the port for the proxy to listen on for this process type
     #
     def proxy_address
-      proxy? ? @options["proxy_address"] || "127.0.0.1" : nil
+      proxy? ? @options["proxy_address"]? || "127.0.0.1" : nil
     end
 
     #
     # Return the network protocol for this process
     #
     def network_protocol
-      @options["network_protocol"] || "tcp"
+      @options["network_protocol"]? || "tcp"
     end
 
     #

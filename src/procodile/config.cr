@@ -1,11 +1,11 @@
 require "yaml"
-require "fileutils"
+require "file_utils"
 require "procodile/error"
 require "procodile/process"
 
 module Procodile
   class Config
-    attr_reader :root, :loaded_at
+    getter :root, :loaded_at
 
     # 35 紫，31 红，36 青，32 绿，33 橘，34 蓝
     COLORS = [35, 31, 36, 32, 33, 34].freeze
@@ -15,14 +15,14 @@ module Procodile
       @procfile_path = procfile
 
       unless File.file?(procfile_path)
-        raise Error, "Procfile not found at #{procfile_path}"
+        raise Error.new "Procfile not found at #{procfile_path}"
       end
 
       # We need to check to see if the local or options
       # configuration will override the root that we've been given.
       # If they do, we can throw away any reference to the one that the
       # configuration was initialized with and start using that immediately.
-      if new_root = (local_options["root"] || options["root"])
+      if new_root = (local_options["root"]? || options["root"])
         @root = new_root
       end
 
@@ -32,7 +32,7 @@ module Procodile
         hash[name] = create_process(name, command, COLORS[index.divmod(COLORS.size)[1]])
       end
 
-      @loaded_at = Time.now
+      @loaded_at = Time.local
     end
 
     def reload
@@ -69,23 +69,23 @@ module Procodile
           end
         end
       end
-      @loaded_at = Time.now
+      @loaded_at = Time.local
     end
 
     def user
-      local_options["user"] || options["user"]
+      local_options["user"]? || options["user"]
     end
 
     def app_name
-      @app_name ||= local_options["app_name"] || options["app_name"] || "Procodile"
+      @app_name ||= local_options["app_name"]? || options["app_name"]? || "Procodile"
     end
 
     def console_command
-      local_options["console_command"] || options["console_command"]
+      local_options["console_command"]? || options["console_command"]
     end
 
     def exec_prefix
-      local_options["exec_prefix"] || options["exec_prefix"]
+      local_options["exec_prefix"]? || options["exec_prefix"]
     end
 
     def processes
@@ -101,7 +101,7 @@ module Procodile
     end
 
     def process_options
-      @process_options ||= options["processes"] || {}
+      @process_options ||= options["processes"]? || {}
     end
 
     def local_options
@@ -109,21 +109,21 @@ module Procodile
     end
 
     def local_process_options
-      @local_process_options ||= local_options["processes"] || {}
+      @local_process_options ||= local_options["processes"]? || {}
     end
 
     def options_for_process(name)
-      (process_options[name] || {}).merge(local_process_options[name] || {})
+      (process_options[name]? || {}).merge(local_process_options[name]? || {})
     end
 
     def environment_variables
-      @environment_variables ||= (options["env"] || {}).merge(local_options["env"] || {}).each_with_object({}) do |(key, value), hash|
+      @environment_variables ||= (options["env"]? || {}).merge(local_options["env"]? || {}).each_with_object({}) do |(key, value), hash|
         hash[key.to_s] = value.to_s
       end
     end
 
     def pid_root
-      File.expand_path(local_options["pid_root"] || options["pid_root"] || "pids", self.root)
+      File.expand_path(local_options["pid_root"]? || options["pid_root"]? || "pids", self.root)
     end
 
     def supervisor_pid_path
@@ -131,7 +131,7 @@ module Procodile
     end
 
     def log_path
-      log_path = local_options["log_path"] || options["log_path"]
+      log_path = local_options["log_path"]? || options["log_path"]
       if log_path
         File.expand_path(log_path, self.root)
       elsif log_path.nil? && self.log_root
@@ -142,7 +142,7 @@ module Procodile
     end
 
     def log_root
-      if log_root = (local_options["log_root"] || options["log_root"])
+      if log_root = (local_options["log_root"]? || options["log_root"])
         File.expand_path(log_root, self.root)
       end
     end
@@ -176,11 +176,11 @@ module Procodile
     end
 
     def load_options_from_file
-      File.exist?(options_path) ? YAML.load_file(options_path) : {}
+      File.exists?(options_path) ? YAML.load_file(options_path) : {}
     end
 
     def load_local_options_from_file
-      File.exist?(local_options_path) ? YAML.load_file(local_options_path) : {}
+      File.exists?(local_options_path) ? YAML.load_file(local_options_path) : {}
     end
   end
 end

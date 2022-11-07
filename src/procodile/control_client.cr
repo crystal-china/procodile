@@ -32,10 +32,10 @@ module Procodile
             true
           end
         else
-          raise Error, "Error from control server: #{code} (#{reply.inspect})"
+          raise Error.new "Error from control server: #{code} (#{reply.inspect})"
         end
       else
-        raise Error, "Control server disconnected."
+        raise Error.new "Control server disconnected."
       end
     end
 

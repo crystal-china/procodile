@@ -1,11 +1,11 @@
-require "fileutils"
+require "file_utils"
 require "procodile/logger"
 require "procodile/rbenv"
 
 module Procodile
   class Instance
-    attr_accessor :pid, :process, :port
-    attr_reader :id, :tag
+    property :pid, :process, :port
+    getter :id, :tag
 
     def initialize(supervisor, process, id)
       @supervisor = supervisor
@@ -70,7 +70,7 @@ module Procodile
     # Return the PID that is in the instances process PID file
     #
     def pid_from_file
-      if File.exist?(pid_file_path)
+      if File.exists?(pid_file_path)
         pid = File.read(pid_file_path)
         pid.empty? ? nil : pid.strip.to_i
       end
@@ -81,7 +81,7 @@ module Procodile
     #
     def running?
       if @pid
-        ::Process.getpgid(@pid) ? true : false
+        ::Process.pgid(@pid) ? true : false
       else
         false
       end
@@ -103,7 +103,7 @@ module Procodile
         Procodile.log(@process.log_color, description, "Already running with PID #{@pid}")
         nil
       else
-        if @supervisor.run_options[:port_allocations] && chosen_port = @supervisor.run_options[:port_allocations][@process.name]
+        if @supervisor.run_options[:port_allocations]? && chosen_port = @supervisor.run_options[:port_allocations][@process.name]
           if chosen_port == 0
             allocate_port
           else
@@ -115,10 +115,10 @@ module Procodile
           allocate_port
         elsif @process.allocate_port_from && @process.restart_mode != "start-term"
           # Allocate ports to this process sequentially from the starting port
-          allocated_ports = (@supervisor.processes[@process] ? @supervisor.processes[@process].select(&:running?) : []).map(&:port)
+          allocated_ports = (@supervisor.processes[@process] ? @supervisor.processes[@process].select(&.running?) : []).map(&.port)
           proposed_port = @process.allocate_port_from
           until @port
-            unless allocated_ports.include?(proposed_port)
+            unless allocated_ports.includes?(proposed_port)
               @port = proposed_port
             end
             proposed_port += 1
@@ -135,9 +135,9 @@ module Procodile
           io = reader
         end
         @tag = @supervisor.tag.dup if @supervisor.tag
-        Dir.chdir(@process.config.root)
+        Dir.cd(@process.config.root)
         Rbenv.without do
-          @pid = ::Process.spawn(environment_variables, @process.command, :out => log_destination, :err => log_destination, :pgroup => true)
+          @pid = ::Process.new(environment_variables, @process.command, :out => log_destination, :err => log_destination, :pgroup => true)
         end
         log_destination.close
         File.write(pid_file_path, "#{@pid}\n")
@@ -147,7 +147,7 @@ module Procodile
         if self.process.log_path && io.nil?
           Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
         end
-        @started_at = Time.now
+        @started_at = Time.local
       end
     end
 
@@ -177,11 +177,11 @@ module Procodile
     # tells us that we want it to be stopped.
     #
     def stop
-      @stopping = Time.now
+      @stopping = Time.local
       update_pid
       if self.running?
         Procodile.log(@process.log_color, description, "Sending #{@process.term_signal} to #{@pid}")
-        ::Process.kill(@process.term_signal, pid)
+        ::Process.signal(@process.term_signal, pid)
       else
         Procodile.log(@process.log_color, description, "Process already stopped")
       end
@@ -214,7 +214,7 @@ module Procodile
       case @process.restart_mode
       when "usr1", "usr2"
         if running?
-          ::Process.kill(@process.restart_mode.upcase, @pid)
+          ::Process.signal(@process.restart_mode.upcase, @pid)
           @tag = @supervisor.tag if @supervisor.tag
           Procodile.log(@process.log_color, description, "Sent #{@process.restart_mode.upcase} signal to process #{@pid}")
         else
@@ -249,7 +249,7 @@ module Procodile
       pid_from_file = self.pid_from_file
       if pid_from_file && pid_from_file != @pid
         @pid = pid_from_file
-        @started_at = File.mtime(self.pid_file_path)
+        @started_at = File.info(self.pid_file_path).modification_time
         Procodile.log(@process.log_color, description, "PID file changed. Updated pid to #{@pid}")
         true
       else
@@ -279,12 +279,12 @@ module Procodile
           elsif respawns >= @process.max_respawns
             Procodile.log(@process.log_color, description, "\e[41;37mWarning:\e[0m\e[31m this process has been respawned #{respawns} times and keeps dying.\e[0m")
             Procodile.log(@process.log_color, description, "It will not be respawned automatically any longer and will no longer be managed.".color(31))
-            @failed = Time.now
+            @failed = Time.local
             tidy
           end
         else
           Procodile.log(@process.log_color, description, "Process has stopped. Respawning not available.")
-          @failed = Time.now
+          @failed = Time.local
           tidy
         end
       end
@@ -301,7 +301,7 @@ module Procodile
     # Return the number of times this process has been respawned in the last hour
     #
     def respawns
-      if @respawns.nil? || @last_respawn.nil? || @last_respawn < (Time.now - @process.respawn_window)
+      if @respawns.nil? || @last_respawn.nil? || @last_respawn < (Time.local - @process.respawn_window)
         0
       else
         @respawns
@@ -312,10 +312,10 @@ module Procodile
     # Increment the counter of respawns for this process
     #
     def add_respawn
-      if @last_respawn && @last_respawn < (Time.now - @process.respawn_window)
+      if @last_respawn && @last_respawn < (Time.local - @process.respawn_window)
         @respawns = 1
       else
-        @last_respawn = Time.now
+        @last_respawn = Time.local
         @respawns += 1
       end
     end
@@ -349,7 +349,7 @@ module Procodile
           Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
           return @port = possible_port
         elsif attempts >= max_attempts
-          raise Procodile::Error, "Couldn't allocate port for #{@process.name}"
+          raise Procodile::Error.new "Couldn't allocate port for #{@process.name}"
         end
       end
     end
@@ -369,9 +369,9 @@ module Procodile
         server.close
         true
       else
-        raise Procodile::Error, "Invalid network_protocol '#{@process.network_protocol}'"
+        raise Procodile::Error.new "Invalid network_protocol '#{@process.network_protocol}'"
       end
-    rescue Errno::EADDRINUSE => e
+    rescue Socket::BindError => e
       false
     end
   end

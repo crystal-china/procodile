@@ -3,7 +3,7 @@ require "procodile/tcp_proxy"
 
 module Procodile
   class Supervisor
-    attr_reader :config, :processes, :started_at, :tag, :tcp_proxy, :run_options
+    getter :config, :processes, :started_at, :tag, :tcp_proxy, :run_options
 
     def initialize(config, run_options={})
       @config = config
@@ -34,7 +34,7 @@ module Procodile
         @tcp_proxy = TCPProxy.start(self)
       end
       watch_for_output
-      @started_at = Time.now
+      @started_at = Time.local
       after_start&.call(self)
       supervise!
     rescue => e
@@ -53,10 +53,10 @@ module Procodile
       reload_config
       [].tap do |instances_started|
         @config.processes.each do |name, process|
-          next if types && !types.include?(name.to_s)                   # Not a process we want
-          next if @processes[process] && !@processes[process].empty?    # Process type already running
+          next if types && !types.includes?(name.to_s)                   # Not a process we want
+          next if @processes[process]? && !@processes[process].empty?    # Process type already running
 
-          instances = process.generate_instances(self).each(&:start)
+          instances = process.generate_instances(self).each(&.start)
           instances_started.push(*instances)
         end
       end
@@ -129,11 +129,11 @@ module Procodile
 
       # Check all instances that we manage and let them do their things.
       @processes.each do |_, instances|
-        instances.each(&:check)
+        instances.each(&.check)
       end
 
       # If the processes go away, we can stop the supervisor now
-      if @run_options[:stop_when_none] && @processes.all? { |_, instances| instances.reject(&:failed?).empty? }
+      if @run_options[:stop_when_none]? && @processes.all? { |_, instances| instances.reject(&.failed?).empty? }
         Procodile.log nil, "system", "All processes have stopped"
         stop_supervisor
       end
@@ -152,11 +152,11 @@ module Procodile
         Procodile.log nil, "system", "Process concurrency looks good"
       else
         unless result[:started].empty?
-          Procodile.log nil, "system", "Concurrency check started #{result[:started].map(&:description).join(', ')}"
+          Procodile.log nil, "system", "Concurrency check started #{result[:started].map(&.description).join(', ')}"
         end
 
         unless result[:stopped].empty?
-          Procodile.log nil, "system", "Concurrency check stopped #{result[:stopped].map(&:description).join(', ')}"
+          Procodile.log nil, "system", "Concurrency check stopped #{result[:stopped].map(&.description).join(', ')}"
         end
       end
       result
@@ -192,7 +192,7 @@ module Procodile
     def add_instance(instance, io=nil)
       add_reader(instance, io) if io
       @processes[instance.process] ||= []
-      unless @processes[instance.process].include?(instance)
+      unless @processes[instance.process].includes?(instance)
         @processes[instance.process] << instance
       end
     end
@@ -243,18 +243,18 @@ module Procodile
     def check_instance_quantities(type=:both, processes=nil)
       {:started => [], :stopped => []}.tap do |status|
         @processes.each do |process, instances|
-          next if processes && !processes.include?(process.name)
+          next if processes && !processes.includes?(process.name)
 
           if (type == :both || type == :stopped) && (instances.size > process.quantity)
             quantity_to_stop = instances.size - process.quantity
             Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
-            status[:stopped] = instances.first(quantity_to_stop).each(&:stop)
+            status[:stopped] = instances.first(quantity_to_stop).each(&.stop)
           end
 
           if (type == :both || type == :started) && (instances.size < process.quantity)
             quantity_needed = process.quantity - instances.size
             Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
-            status[:started] = process.generate_instances(self, quantity_needed).each(&:start)
+            status[:started] = process.generate_instances(self, quantity_needed).each(&.start)
           end
         end
       end

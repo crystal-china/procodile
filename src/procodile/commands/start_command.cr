@@ -59,19 +59,19 @@ module Procodile
           def start
             if supervisor_running?
               if @options[:foreground]
-                raise Error, "Cannot be started in the foreground because supervisor already running"
+                raise Error.new "Cannot be started in the foreground because supervisor already running"
               end
 
               if @options.key?(:respawn)
-                raise Error, "Cannot disable respawning because supervisor is already running"
+                raise Error.new "Cannot disable respawning because supervisor is already running"
               end
 
               if @options[:stop_when_none]
-                raise Error, "Cannot stop supervisor when none running because supervisor is already running"
+                raise Error.new "Cannot stop supervisor when none running because supervisor is already running"
               end
 
               if @options[:proxy]
-                raise Error, "Cannot enable the proxy when the supervisor is running"
+                raise Error.new "Cannot enable the proxy when the supervisor is running"
               end
 
               instances = ControlClient.run(
@@ -96,7 +96,7 @@ module Procodile
               # The supervisor isn't actually running. We need to start it before processes can be
               # begin being processed
               if @options[:start_supervisor] == false
-                raise Error, "Supervisor is not running and cannot be started because --no-supervisor is set"
+                raise Error.new "Supervisor is not running and cannot be started because --no-supervisor is set"
               else
                 self.class.start_supervisor(@config, @options) do |supervisor|
                   unless @options[:start_processes] == false

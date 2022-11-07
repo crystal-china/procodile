@@ -1,6 +1,6 @@
 module Procodile
   class SignalHandler
-    attr_reader :pipe
+    getter :pipe
 
     def self.queue
       Thread.main[:signal_queue] ||= []
@@ -36,7 +36,7 @@ module Procodile
     def handle
       if signal = self.class.queue.shift
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
-        @handlers[signal]&.each(&:call)
+        @handlers[signal]&.each(&.call)
       end
     end
   end

@@ -15,10 +15,10 @@ module Procodile
     end
 
     # Return the root directory
-    attr_reader :root
+    getter :root
 
     # Return the procfile
-    attr_reader :procfile
+    getter :procfile
 
     # Are we in an app's directory?
     def in_app_directory?
@@ -45,7 +45,7 @@ module Procodile
       if ambiguous?
         hash = {}
         @global_options.each_with_index do |option, i|
-          hash[i] = option["name"] || option["root"]
+          hash[i] = option["name"]? || option["root"]
         end
         hash
       else
@@ -106,7 +106,7 @@ module Procodile
     def expand_path(path, root=nil)
       # Remove trailing slashes for normalization
       path = path.delete_suffix("/")
-      if path.start_with?("/")
+      if path.starts_with?("/")
         # If the path starts with a /, it's absolute. Do nothing.
         path
       else

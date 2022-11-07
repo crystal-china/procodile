@@ -8,7 +8,7 @@ module Procodile
               name = pid_path.split("/").last.delete_suffix(".pid")
               pid = File.read(pid_path).to_i
               begin
-                ::Process.kill("KILL", pid)
+                ::Process.signal("KILL", pid)
                 puts "Sent KILL to #{pid} (#{name})"
               rescue Errno::ESRCH
               end

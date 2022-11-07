@@ -1,4 +1,4 @@
-require "fileutils"
+require "file_utils"
 require "procodile/version"
 require "procodile/error"
 require "procodile/message"
@@ -21,7 +21,7 @@ require "procodile/commands/kill_command"
 
 module Procodile
   class CLI
-    attr_accessor :options, :config
+    property :options, :config
 
     def self.commands
       @commands ||= {}
@@ -50,7 +50,7 @@ module Procodile
       if self.class.commands.key?(command.to_sym)
         self.class.commands[command.to_sym][:callable].bind_call(self)
       else
-        raise Error, "Invalid command '#{command}'"
+        raise Error.new "Invalid command '#{command}'"
       end
     end
 
@@ -133,14 +133,14 @@ module Procodile
     end
 
     def current_pid
-      if File.exist?(@config.supervisor_pid_path)
+      if File.exists?(@config.supervisor_pid_path)
         pid_file = File.read(@config.supervisor_pid_path).strip
         pid_file.empty? ? nil : pid_file.to_i
       end
     end
 
     def self.pid_active?(pid)
-      ::Process.getpgid(pid) ? true : false
+      ::Process.pgid(pid) ? true : false
     rescue Errno::ESRCH
       false
     end
@@ -149,13 +149,13 @@ module Procodile
       if @options[:processes]
         processes = @options[:processes].split(",")
         if processes.empty?
-          raise Error, "No process names provided"
+          raise Error.new "No process names provided"
         end
 
         # processes.each do |process|
         #  process_name, _ = process.split('.', 2)
-        #  unless @config.process_list.keys.include?(process_name.to_s)
-        #    raise Error, "Process '#{process_name}' is not configured. You may need to reload your config."
+        #  unless @config.process_list.keys.includes?(process_name.to_s)
+        #    raise Error.new "Process '#{process_name}' is not configured. You may need to reload your config."
         #  end
         # end
         processes
@@ -178,7 +178,7 @@ module Procodile
       end
 
       if !Dir[File.join(config.pid_root, "*")].empty?
-        raise Error, "The PID directory (#{config.pid_root}) is not empty. Cannot start unless things are clean."
+        raise Error.new "The PID directory (#{config.pid_root}) is not empty. Cannot start unless things are clean."
       end
 
       $0="[procodile] #{config.app_name} (#{config.root})"
@@ -187,7 +187,7 @@ module Procodile
         Supervisor.new(config, run_options).start(&)
       else
         FileUtils.rm_f(File.join(config.pid_root, "*.pid"))
-        pid = fork do
+        pid = ::Process.fork do
           STDOUT.reopen(config.log_path, "a")
           STDOUT.sync = true
           STDERR.reopen(config.log_path, "a")

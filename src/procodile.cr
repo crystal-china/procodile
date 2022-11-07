@@ -1,6 +1,6 @@
 module Procodile
   def self.root
-    File.expand_path("..", __dir__)
+    File.expand_path("..", __DIR__)
   end
 
   def self.bin_path
