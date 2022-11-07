@@ -5,3 +5,4 @@ test-app/procodile.log
 global.yml
 bin/procodile
 /procodile
+Procfile.*
