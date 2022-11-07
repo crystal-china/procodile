@@ -11,4 +11,9 @@ env:
 processes:
   proc1:
     quantity: 2
-    restart_mode: term-start
+    restart_mode: USR2
+    term_signal: TERM
+    allocate_port_from: 3005
+    proxy_address: 127.0.0.1
+    proxy_port: 2018
+    network_protocol: tcp

@@ -1,0 +1,16 @@
+app_name: BananaApp
+env:
+  SMTP_HOSTNAME: smtp.deliverhq.com
+  SMTP_USERNAME: test123123
+processes:
+  web:
+    quantity: 1
+    max_respawns: 2
+  worker:
+    quantity: 1
+    restart_mode: start-term
+    env:
+      PORT: 5123
+  cron:
+    quantity: 0
+    restart_mode: usr1

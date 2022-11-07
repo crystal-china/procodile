@@ -9,15 +9,15 @@ require "procodile/control_client"
 
 require "procodile/commands/help_command"
 require "procodile/commands/start_command"
-require "procodile/commands/stop_command"
-require "procodile/commands/restart_command"
-require "procodile/commands/reload_command"
-require "procodile/commands/check_concurrency_command"
-require "procodile/commands/status_command"
+# require "procodile/commands/stop_command"
+# require "procodile/commands/restart_command"
+# require "procodile/commands/reload_command"
+# require "procodile/commands/check_concurrency_command"
+# require "procodile/commands/status_command"
 require "procodile/commands/kill_command"
-require "procodile/commands/exec_command"
-require "procodile/commands/console_command"
-require "procodile/commands/log_command"
+# require "procodile/commands/exec_command"
+# require "procodile/commands/console_command"
+# require "procodile/commands/log_command"
 
 module Procodile
   class CLI
@@ -70,31 +70,31 @@ module Procodile
     # Stop
     #
 
-    include Procodile::CLI::StopCommand
+    # include Procodile::CLI::StopCommand
 
-    #
-    # Restart
-    #
+    # #
+    # # Restart
+    # #
 
-    include Procodile::CLI::RestartCommand
+    # include Procodile::CLI::RestartCommand
 
-    #
-    # Reload Config
-    #
+    # #
+    # # Reload Config
+    # #
 
-    include Procodile::CLI::ReloadCommand
+    # include Procodile::CLI::ReloadCommand
 
-    #
-    # Check process concurrency
-    #
+    # #
+    # # Check process concurrency
+    # #
 
-    include Procodile::CLI::CheckConcurrencyCommand
+    # include Procodile::CLI::CheckConcurrencyCommand
 
-    #
-    # Status
-    #
+    # #
+    # # Status
+    # #
 
-    include Procodile::CLI::StatusCommand
+    # include Procodile::CLI::StatusCommand
 
     #
     # Kill
@@ -106,19 +106,19 @@ module Procodile
     # Run a command with a procodile environment
     #
 
-    include Procodile::CLI::ExecCommand
+    # include Procodile::CLI::ExecCommand
 
-    #
-    # Run the configured console command
-    #
+    # #
+    # # Run the configured console command
+    # #
 
-    include Procodile::CLI::ConsoleCommand
+    # include Procodile::CLI::ConsoleCommand
 
-    #
-    # Open up the procodile log if it exists
-    #
+    # #
+    # # Open up the procodile log if it exists
+    # #
 
-    include Procodile::CLI::LogCommand
+    # include Procodile::CLI::LogCommand
 
     # ============================== private ==============================
 

@@ -1,0 +1,14 @@
+name: procodile
+version: 0.1.0
+
+authors:
+  - Adam Cooke <me@adamcooke.io>
+  - Billy.Zheng <vil963@gmail.com>
+
+targets:
+  procodile:
+    main: src/procodile.cr
+
+crystal: 1.5.1
+
+license: MIT
