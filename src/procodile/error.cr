@@ -1,4 +1,4 @@
 module Procodile
-  class Error < StandardError
+  class Error < Exception
   end
 end

@@ -1,5 +1,5 @@
 require "socket"
-require "procodile/control_session"
+require "./control_session"
 
 module Procodile
   class ControlServer
@@ -10,8 +10,7 @@ module Procodile
       end
     end
 
-    def initialize(supervisor)
-      @supervisor = supervisor
+    def initialize(@supervisor : Procodile::Supervisor)
     end
 
     def listen
@@ -28,7 +27,7 @@ module Procodile
         client.close
       end
     ensure
-      FileUtils.rm_f(@supervisor.config.sock_path)
+      FileUtils.rm_rf(@supervisor.config.sock_path)
     end
   end
 end

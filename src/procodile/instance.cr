@@ -1,18 +1,25 @@
 require "file_utils"
-require "procodile/logger"
-require "procodile/rbenv"
+require "./logger"
+require "./supervisor"
 
 module Procodile
   class Instance
+    @started_at : Time?
+    @supervisor : Procodile::Supervisor
+    @process : Procodile::Process
+    @id : Int32
+    @stopping : Time?
+    @pid : Int64
+    @port : Int32?
+    @tag : String?
+
     property :pid, :process, :port
     getter :id, :tag
 
-    def initialize(supervisor, process, id)
-      @supervisor = supervisor
-      @process = process
-      @id = id
+    def initialize(@supervisor, @process, @id)
       @respawns = 0
       @started_at = nil
+      @pid = uninitialized Int32
     end
 
     #
@@ -51,10 +58,10 @@ module Procodile
     #
     def environment_variables
       vars = @process.environment_variables.merge({
-                                                    "PROC_NAME" => self.description,
-                                                    "PID_FILE" => self.pid_file_path,
-                                                    "APP_ROOT" => @process.config.root
-                                                  })
+        "PROC_NAME" => self.description,
+        "PID_FILE"  => self.pid_file_path,
+        "APP_ROOT"  => @process.config.root,
+      })
       vars["PORT"] = @port.to_s if @port
       vars
     end
@@ -72,7 +79,7 @@ module Procodile
     def pid_from_file
       if File.exists?(pid_file_path)
         pid = File.read(pid_file_path)
-        pid.empty? ? nil : pid.strip.to_i
+        pid.empty? ? nil : pid.strip.to_i64
       end
     end
 
@@ -80,12 +87,12 @@ module Procodile
     # Is this process running? Pass an option to check the given PID instead of the instance
     #
     def running?
-      if @pid
-        ::Process.pgid(@pid) ? true : false
+      if (pid = @pid)
+        ::Process.pgid(pid) ? true : false
       else
         false
       end
-    rescue Errno::ESRCH
+    rescue RuntimeError
       false
     end
 
@@ -99,11 +106,22 @@ module Procodile
       end
 
       update_pid
+
       if running?
         Procodile.log(@process.log_color, description, "Already running with PID #{@pid}")
         nil
       else
-        if @supervisor.run_options[:port_allocations]? && chosen_port = @supervisor.run_options[:port_allocations][@process.name]
+        port_allocations = @supervisor.run_options.port_allocations
+
+        #         {
+        #              :respawn => nil,
+        #       :stop_when_none => nil,
+        #                :proxy => nil,
+        #     :force_single_log => nil,
+        #     :port_allocations => nil
+        # }
+
+        if port_allocations && (chosen_port = port_allocations[@process.name]?)
           if chosen_port == 0
             allocate_port
           else
@@ -113,10 +131,14 @@ module Procodile
         elsif @process.proxy? && @supervisor.tcp_proxy
           # Allocate a port randomly if a proxy is needed
           allocate_port
-        elsif @process.allocate_port_from && @process.restart_mode != "start-term"
+        elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
           # Allocate ports to this process sequentially from the starting port
-          allocated_ports = (@supervisor.processes[@process] ? @supervisor.processes[@process].select(&.running?) : []).map(&.port)
-          proposed_port = @process.allocate_port_from
+          process = @supervisor.processes[@process]
+
+          # @supervisor.processes 是一个只有一个元素的哈希
+          # key 是一个 Procodile::Process, value 是一个 Array of Procodile::Instance
+
+          allocated_ports = (process ? process.select(&.running?) : [] of Procodile::Instance).map(&.port)
           until @port
             unless allocated_ports.includes?(proposed_port)
               @port = proposed_port
@@ -125,7 +147,7 @@ module Procodile
           end
         end
 
-        if self.process.log_path && @supervisor.run_options[:force_single_log] != true
+        if self.process.log_path && @supervisor.run_options.force_single_log != true
           FileUtils.mkdir_p(File.dirname(self.process.log_path))
           log_destination = File.open(self.process.log_path, "a")
           io = nil
@@ -136,13 +158,25 @@ module Procodile
         end
         @tag = @supervisor.tag.dup if @supervisor.tag
         Dir.cd(@process.config.root)
-        Rbenv.without do
-          @pid = ::Process.new(environment_variables, @process.command, :out => log_destination, :err => log_destination, :pgroup => true)
-        end
+        # def self.new(command : String, args = nil, env : Env = nil, clear_env : Bool = false, shell : Bool = false, input : Stdio = Redirect::Close, output : Stdio = Redirect::Close, error : Stdio = Redirect::Close, chdir : Path | String? = nil)
+
+        # def self.run(command : String, args = nil, env : Env = nil, clear_env : Bool = false, shell : Bool = false, input : Stdio = Redirect::Close, output : Stdio = Redirect::Close, error : Stdio = Redirect::Close, chdir : Path | String? = nil) : Process::Status
+        process = ::Process.new(
+          command: @process.command,
+          env: environment_variables,
+          output: log_destination,
+          error: log_destination,
+          shell: true
+        )
+
+        @pid = process.pid
+
         log_destination.close
         File.write(pid_file_path, "#{@pid}\n")
         @supervisor.add_instance(self, io)
-        ::Process.detach(@pid)
+
+        spawn { process.wait }
+
         Procodile.log(@process.log_color, description, "Started with PID #{@pid}" + (@tag ? " (tagged with #{@tag})" : ""))
         if self.process.log_path && io.nil?
           Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
@@ -181,7 +215,7 @@ module Procodile
       update_pid
       if self.running?
         Procodile.log(@process.log_color, description, "Sending #{@process.term_signal} to #{@pid}")
-        ::Process.signal(@process.term_signal, pid)
+        ::Process.signal(@process.term_signal, pid.not_nil!)
       else
         Procodile.log(@process.log_color, description, "Process already stopped")
       end
@@ -201,7 +235,7 @@ module Procodile
     # Tidy up when this process isn't needed any more
     #
     def tidy
-      FileUtils.rm_f(self.pid_file_path)
+      FileUtils.rm_rf(self.pid_file_path)
       Procodile.log(@process.log_color, description, "Removed PID file")
     end
 
@@ -209,14 +243,17 @@ module Procodile
     # Retarts the process using the appropriate method from the process configuraiton
     #
     def restart
-      Procodile.log(@process.log_color, description, "Restarting using #{@process.restart_mode} mode")
+      restart_mode = @process.restart_mode
+
+      Procodile.log(@process.log_color, description, "Restarting using #{restart_mode} mode")
+
       update_pid
-      case @process.restart_mode
-      when "usr1", "usr2"
+      case restart_mode
+      when Signal::USR1, Signal::USR2
         if running?
-          ::Process.signal(@process.restart_mode.upcase, @pid)
+          ::Process.signal(restart_mode.as(Signal), @pid)
           @tag = @supervisor.tag if @supervisor.tag
-          Procodile.log(@process.log_color, description, "Sent #{@process.restart_mode.upcase} signal to process #{@pid}")
+          Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} signal to process #{@pid}")
         else
           Procodile.log(@process.log_color, description, "Process not running already. Starting it.")
           on_stop
@@ -235,7 +272,9 @@ module Procodile
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
         Thread.new do
-          sleep 0.5 while running?
+          while running?
+            sleep 0.5
+          end
           new_instance.start
         end
         new_instance
@@ -260,7 +299,7 @@ module Procodile
     #
     # Check the status of this process and handle as appropriate.
     #
-    def check(options={})
+    def check(options = {} of String => String)
       return if failed?
 
       if self.running?
@@ -301,7 +340,9 @@ module Procodile
     # Return the number of times this process has been respawned in the last hour
     #
     def respawns
-      if @respawns.nil? || @last_respawn.nil? || @last_respawn < (Time.local - @process.respawn_window)
+      last_respawn = @last_respawn
+
+      if @respawns.nil? || last_respawn.nil? || last_respawn < (Time.local - @process.respawn_window.seconds)
         0
       else
         @respawns
@@ -312,7 +353,9 @@ module Procodile
     # Increment the counter of respawns for this process
     #
     def add_respawn
-      if @last_respawn && @last_respawn < (Time.local - @process.respawn_window)
+      last_respawn = @last_respawn
+
+      if last_respawn && last_respawn < (Time.local - @process.respawn_window.seconds)
         @respawns = 1
       else
         @last_respawn = Time.local
@@ -326,13 +369,13 @@ module Procodile
     def to_hash
       {
         :description => self.description,
-        :pid => self.pid,
-        :respawns => self.respawns,
-        :status => self.status,
-        :running => self.running?,
-        :started_at => @started_at ? @started_at.to_i : nil,
-        :tag => self.tag,
-        :port => @port
+        :pid         => self.pid,
+        :respawns    => self.respawns,
+        :status      => self.status,
+        :running     => self.running?,
+        :started_at  => @started_at ? @started_at.to_i : nil,
+        :tag         => self.tag,
+        :port        => @port,
       }
     end
 
@@ -340,7 +383,7 @@ module Procodile
     # Find a port number for this instance to listen on. We just check that nothing is already listening on it.
     # The process is expected to take it straight away if it wants it.
     #
-    def allocate_port(max_attempts=10)
+    def allocate_port(max_attempts = 10)
       attempts = 0
       until @port
         attempts += 1
@@ -349,7 +392,7 @@ module Procodile
           Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
           return @port = possible_port
         elsif attempts >= max_attempts
-          raise Procodile::Error.new "Couldn't allocate port for #{@process.name}"
+          raise Procodile::Error.new "Couldn't allocate port for #{process.name}"
         end
       end
     end
@@ -371,7 +414,7 @@ module Procodile
       else
         raise Procodile::Error.new "Invalid network_protocol '#{@process.network_protocol}'"
       end
-    rescue Socket::BindError => e
+    rescue Socket::BindError
       false
     end
   end

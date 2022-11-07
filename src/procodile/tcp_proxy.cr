@@ -6,11 +6,9 @@ module Procodile
       proxy
     end
 
-    def initialize(supervisor)
-      @supervisor = supervisor
-      @thread = nil
-      @listeners = {}
-      @stopped_processes = []
+    def initialize(@supervisor : Procodile::Supervisor)
+      @listeners = {} of TCPServer => Procodile::Process
+      @stopped_processes = [] of Procodile::Process
       @sp_reader, @sp_writer = IO.pipe
     end
 
@@ -24,53 +22,71 @@ module Procodile
 
     def add_process(process)
       if process.proxy?
-        @listeners[TCPServer.new(process.proxy_address, process.proxy_port)] = process
+        @listeners[TCPServer.new(process.proxy_address.not_nil!, process.proxy_port.not_nil!)] = process
         Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".color(32)
-        @sp_writer.write_nonblock(".")
+        @sp_writer.write(".".to_slice)
       end
-    rescue => e
+    rescue e
       Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
       Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
     def remove_process(process)
       @stopped_processes << process
-      @sp_writer.write_nonblock(".")
+      @sp_writer.write(".".to_slice)
     end
 
     def listen
-      loop do
-        io = IO.select([@sp_reader] + @listeners.keys, nil, nil, 30)
-        if io&.first
-          io.first.each do |io|
-            if io == @sp_reader
-              io.read_nonblock(999)
-              next
-            end
+      sleep_chan = Channel(Nil).new
+      sp_reader_chan = Channel(Nil).new
+      listener_chan = Channel(Nil).new
 
-            Thread.new(io.accept, io) do |client, server|
-              handle_client(client, server)
-            end
+      spawn do
+        loop do
+          sleep 30
+          sleep_chan.send nil
+        end
+      end
+
+      spawn do
+        loop do
+          @sp_reader.read(Bytes.new(999))
+          sp_reader_chan.send nil
+        end
+      end
+
+      @listeners.keys.each do |io|
+        spawn do
+          loop do
+            handle_client(client: io.accept, server: io)
+            listener_chan.send nil
           end
+        end
+      end
+
+      loop do
+        select
+        when sp_reader_chan.receive
+        when listener_chan.receive
+        when sleep_chan.receive
         end
 
         @stopped_processes.reject do |process|
-          if io = @listeners.key(process)
+          if io = @listeners.key_for(process)
             Procodile.log nil, "proxy", "Stopped proxy listener for #{process.name}"
             io.close
             @listeners.delete(io)
           end
+
           true
         end
       end
-    rescue => e
-      Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
-      Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
-    def handle_client(client, server)
+    def handle_client(client, server) : Nil
       process = @listeners[server]
-      instances = @supervisor.processes[process]? || []
+      instances = @supervisor.processes[process]? || [] of Procodile::Instance
+
       if instances.empty?
         Procodile.log nil, "proxy", "There are no processes running for #{process.name}"
       else
@@ -80,32 +96,49 @@ module Procodile
           Procodile.log nil, "proxy", "Could not connect to #{instance.description}:#{instance.port}"
           return
         end
-        readers = {:backend => backend_socket, :client => client}
-        loop do
-          io = IO.select(readers.values, nil, nil, 0.5)
-          if io&.first
-            io.first.each do |io|
-              readers.each_key do |key|
-                next unless readers[key] == io
 
-                opposite_side = key == :client ? :backend : :client
-                if io.eof?
-                  readers[opposite_side].shutdown(Socket::SHUT_WR) rescue nil
-                  readers.delete(opposite_side)
-                else
-                  readers[opposite_side].write(io.readpartial(1024)) rescue nil
-                end
+        readers = {:backend => backend_socket, :client => client}
+        sleep_chan = Channel(Nil).new
+        readers_chan = Channel(Nil).new
+
+        spawn do
+          loop do
+            sleep 0.5
+            sleep_chan.send nil
+          end
+        end
+
+        readers.values.each do |socket|
+          spawn do
+            loop do
+              key = readers.key_for(socket)
+              opposite_side = key == :client ? :backend : :client
+
+              if socket.read_byte
+                # readers[opposite_side].shutdown(Socket::SHUT_WR) rescue nil
+                readers.delete(opposite_side)
+              else
+                readers[opposite_side].write(Bytes.new(socket.read(Bytes.new(1024)))) rescue nil
               end
+
+              readers_chan.send nil
             end
           end
         end
+
+        loop do
+          select
+          when readers_chan.receive
+          when sleep_chan.receive
+          end
+        end
       end
-    rescue => e
+    rescue e
       Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
       Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     ensure
-      backend_socket.close rescue nil
-      client.close rescue nil
+      backend_socket.close if backend_socket
+      client.close if client
     end
   end
 end

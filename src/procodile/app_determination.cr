@@ -1,82 +1,60 @@
+require "yaml"
+require "./procfile_option"
+
 module Procodile
   #
-  # This class is responsible for determining which application should be
-  # sued
+  # This class is responsible for determining which application should be used
   #
   class AppDetermination
+    getter root, procfile
+
+    @root : String?
+    @procfile : String? = nil
+    @in_app_directory : Bool = false
+    @app_id : Int32?
+
+    @given_root : String?
+    @global_options : ProcfileOption
+
     # Start by creating an determination ased on the root and procfile that has been provided
     # to us by the user (from --root and/or --procfile)
-    def initialize(pwd, given_root, given_procfile, global_options={})
-      @pwd = pwd
+    def initialize(
+      @pwd : String,
+      given_root : String?,
+      @given_procfile : String?,
+      global_options = nil
+    )
       @given_root = given_root ? expand_path(given_root, pwd) : nil
-      @given_procfile = given_procfile
-      @global_options = global_options
+      @global_options = global_options || ProcfileOption.new
+
       calculate
     end
 
-    # Return the root directory
-    getter :root
-
-    # Return the procfile
-    getter :procfile
-
-    # Are we in an app's directory?
-    def in_app_directory?
-      @in_app_directory == true
-    end
-
-    # If we have a root, we're all good
-    def unambiguous?
-      !!@root
-    end
-
-    def ambiguous?
-      !unambiguous?
-    end
-
-    # Choose which of the ambiguous options we want to choose
-    def set_app(id)
-      @app_id = id
-      find_root_and_procfile_from_options(@global_options)
-    end
-
-    # Return an hash of possible options to settle the ambiguity
-    def app_options
-      if ambiguous?
-        hash = {}
-        @global_options.each_with_index do |option, i|
-          hash[i] = option["name"]? || option["root"]
-        end
-        hash
-      else
-        {}
-      end
-    end
-
-    private
-
-    def calculate
+    private def calculate : Nil
       # Try and find something using the information that has been given to us by the user
-      find_root_and_procfile(@pwd, @given_root, @given_procfile)
-      if ambiguous?
-        # Otherwise, try and use the global config we have been given
-        find_root_and_procfile_from_options(@global_options)
-      end
+      root = find_root_and_procfile(
+        @pwd,
+        @given_root,
+        @given_procfile
+      )
+
+      # Otherwise, try and use the global config we have been given
+      find_root_and_procfile_from_options(@global_options) if !root
     end
 
-    def find_root_and_procfile(pwd, root, procfile)
-      if root && procfile
+    private def find_root_and_procfile(pwd, given_root, given_procfile) : String?
+      if given_root && given_procfile
         # The user has provided both the root and procfile, we can use these
-        @root = expand_path(root)
-        @procfile = expand_path(procfile, @root)
-      elsif root && procfile.nil?
+        @root = expand_path(given_root)
+        @procfile = expand_path(given_procfile, @root)
+      elsif given_root && given_procfile.nil?
         # The user has given us a root, we'll use that as the root
-        @root = expand_path(root)
-      elsif root.nil? && procfile
+        @root = expand_path(given_root)
+      elsif given_root.nil? && given_procfile
         # The user has given us a procfile but no root. We will assume the procfile
         # is in the root of the directory
-        @procfile = expand_path(procfile)
-        @root = File.dirname(@procfile)
+        @procfile = expand_path(given_procfile)
+        @root = File.dirname(@procfile.not_nil!)
       else
         # The user has given us nothing. We will check to see if there's a Procfile
         # in the root of our current pwd
@@ -84,35 +62,37 @@ module Procodile
           # If there's a procfile in our current pwd, we'll use our current
           # directory as the root.
           @root = pwd
-          @in_app_directory = true
+          @procfile = "Procfile"
         end
       end
+
+      @root
     end
 
-    def find_root_and_procfile_from_options(options)
-      case options
-      when Hash
-        # Use the current hash
-        find_root_and_procfile(@pwd, options["root"], options["procfile"])
-      when Array
-        # Global options is provides a list of apps. We need to know which one of
-        # these we should be looking at.
-        if @app_id
-          find_root_and_procfile_from_options(options[@app_id])
-        end
-      end
-    end
-
-    def expand_path(path, root=nil)
+    private def expand_path(path, root = nil) : String
       # Remove trailing slashes for normalization
-      path = path.delete_suffix("/")
-      if path.starts_with?("/")
+      path = path.rstrip('/')
+
+      if path.starts_with?('/')
         # If the path starts with a /, it's absolute. Do nothing.
         path
       else
         # Otherwise, if there's a root provided, it should be from the root
         # of that otherwise from the root of the current directory.
         root ? File.join(root, path) : File.join(@pwd, path)
+      end
+    end
+
+    private def find_root_and_procfile_from_options(options)
+      case options
+      when ProcfileOption
+        # Use the current hash
+        find_root_and_procfile(
+          @pwd,
+          @global_options.root,
+          @global_options.procfile
+        )
+      when Array(ProcfileOption)
       end
     end
   end

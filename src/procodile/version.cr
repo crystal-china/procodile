@@ -1,3 +1,3 @@
 module Procodile
-  VERSION = "1.0.27".freeze
+  VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify }}
 end

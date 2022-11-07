@@ -3,7 +3,7 @@ require "socket"
 
 module Procodile
   class ControlClient
-    def initialize(sock_path, &block)
+    def initialize(sock_path, block : Proc(ControlClient, Nil)? = nil)
       @socket = UNIXSocket.new(sock_path)
       if block
         begin
@@ -14,14 +14,14 @@ module Procodile
       end
     end
 
-    def self.run(sock_path, command, options={})
+    def self.run(sock_path, command, options = {} of Symbol => String)
       socket = self.new(sock_path)
       socket.run(command, options)
     ensure
-      socket.disconnect rescue nil
+      socket.try &.disconnect
     end
 
-    def run(command, options={})
+    def run(command, options = {} of String => String)
       @socket.puts("#{command} #{options.to_json}")
       if data = @socket.gets
         code, reply = data.strip.split(/\s+/, 2)
@@ -43,9 +43,7 @@ module Procodile
       @socket.close rescue nil
     end
 
-    private
-
-    def parse_response(data)
+    private def parse_response(data)
       code, message = data.split(/\s+/, 2)
     end
   end
