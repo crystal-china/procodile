@@ -1,9 +1,6 @@
 require "./config"
 require "./control_client"
-require "./commands/help_command"
-require "./commands/kill_command"
-require "./commands/start_command"
-require "./commands/stop_command"
+require "./commands/*"
 require "./version"
 
 module Procodile
@@ -14,15 +11,16 @@ module Procodile
       {:start, "Starts processes and/or the supervisor"},
       {:stop, "Stops processes and/or the supervisor"},
     ]
-
     property options, config
 
     def self.commands : Hash(String, CliCommand)
       @@commands ||= {} of String => CliCommand
     end
 
-    def self.options(&block : Proc(OptionParser, Procodile::CLI, Nil)) : Nil
-      @@options = block
+    @@options = {} of Symbol => Proc(OptionParser, Procodile::CLI, Nil)
+
+    def self.options(name, &block : Proc(OptionParser, Procodile::CLI, Nil)) : Nil
+      @@options[name] = block
     end
 
     {% begin %}
@@ -42,7 +40,7 @@ module Procodile
             self.class.commands[{{ name.id.stringify }}] = CliCommand.new(
               name: {{ name.id.stringify }},
               description: {{ description.id.stringify }},
-              options: @@options,
+              options: @@options[{{ name }}],
               callable: ->{{ name.id }}
             )
           {% end %}

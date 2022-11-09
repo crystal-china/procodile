@@ -8,7 +8,7 @@ module Procodile
   class CLI
     module StartCommand
       macro included
-        options do |opts, cli|
+        options :start do |opts, cli|
           opts.on("-p", "--processes a,b,c", "Only start the listed processes or process types") do |processes|
             cli.options.processes = processes
           end

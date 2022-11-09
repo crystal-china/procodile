@@ -1,6 +1,11 @@
 module Procodile
   class CLI
     module HelpCommand
+      macro included
+        options :help do |opts, cli|
+        end
+      end
+
       def help
         puts "\e[45;37mWelcome to Procodile v#{Procodile::VERSION}\e[0m"
         puts "For documentation see https://adam.ac/procodile."

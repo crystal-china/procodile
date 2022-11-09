@@ -2,7 +2,7 @@ module Procodile
   class CLI
     module StopCommand
       macro included
-        options do |opts, cli|
+        options :stop do |opts, cli|
           opts.on("-p", "--processes a,b,c", "Only stop the listed processes or process types") do |processes|
             cli.options.processes = processes
           end
