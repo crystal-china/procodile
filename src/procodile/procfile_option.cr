@@ -85,6 +85,9 @@ module Procodile
     property processes : String?
     property clean : Bool?
     property development : Bool?
+    property wait : Bool?
+    property lines : Int32?
+    property process : String?
   end
 
   struct RunOptions
