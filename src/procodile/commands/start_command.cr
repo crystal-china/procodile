@@ -90,7 +90,7 @@ module Procodile
             }
           )
 
-          if instances.is_a? Bool
+          if instances.is_a? Bool || !instances.as_a.empty?
             puts "No processes to start."
           else
             # [

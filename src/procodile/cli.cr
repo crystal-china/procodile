@@ -3,6 +3,7 @@ require "./control_client"
 require "./commands/help_command"
 require "./commands/kill_command"
 require "./commands/start_command"
+require "./commands/stop_command"
 require "./version"
 
 module Procodile
@@ -11,6 +12,7 @@ module Procodile
       {:help, "Shows this help output"},
       {:kill, "Forcefully kill all known processes"},
       {:start, "Starts processes and/or the supervisor"},
+      {:stop, "Stops processes and/or the supervisor"},
     ]
 
     property options, config
