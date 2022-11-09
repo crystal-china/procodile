@@ -12,6 +12,7 @@ module Procodile
       {:stop, "Stops processes and/or the supervisor"},
       {:exec, "Execute a command within the environment"},
       {:reload, "Reload Procodile configuration"},
+      {:check_concurrency, "Check process concurrency"},
     ]
     property options, config
 
