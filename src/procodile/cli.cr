@@ -14,6 +14,8 @@ module Procodile
       {:reload, "Reload Procodile configuration"},
       {:check_concurrency, "Check process concurrency"},
       {:log, "Open/stream a Procodile log file"},
+      {:restart, "Restart processes"},
+      {:status, "Show the current status of processes"},
     ]
     property options, config
 
