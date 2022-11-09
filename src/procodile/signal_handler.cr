@@ -4,7 +4,7 @@ module Procodile
 
     getter pipe : Hash(Symbol, IO::FileDescriptor)
 
-    def self.queue
+    def self.queue : Array(String)
       # Thread.main[:signal_queue] ||= [] of String
       QUEUE
     end
@@ -18,7 +18,7 @@ module Procodile
       end
     end
 
-    def start
+    def start : Nil
       Thread.new do
         loop do
           handle
@@ -27,16 +27,16 @@ module Procodile
       end
     end
 
-    def register(name, &block)
+    def register(name, &block) : Array(Proc(Nil))
       @handlers[name] ||= [] of Proc(Nil)
       @handlers[name] << block
     end
 
-    def notice
+    def notice : Nil
       @pipe[:writer].write(".".to_slice)
     end
 
-    def handle
+    def handle : Nil
       if signal = self.class.queue.shift?
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
         @handlers[signal].try &.each(&.call)

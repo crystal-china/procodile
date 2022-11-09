@@ -6,8 +6,6 @@ describe Procodile::CLI do
     config = Procodile::Config.new(root: File.join(APPS_ROOT, "full"))
     cli = Procodile::CLI.new
     cli.config = config
-    # it "check cli config" do
-    # end
 
     it "should run help command" do
       help_command = cli.class.commands["help"]

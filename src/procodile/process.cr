@@ -21,7 +21,7 @@ module Procodile
     #
     # Increase the instance index and return
     #
-    def get_instance_id
+    def get_instance_id : Int32
       MUTEX.synchronize do
         @instance_index = 0 if @instance_index == 10000
         @instance_index += 1
@@ -156,14 +156,14 @@ module Procodile
     #
     # Generate an array of new instances for this process (based on its quantity)
     #
-    def generate_instances(supervisor, quantity = self.quantity)
+    def generate_instances(supervisor, quantity = self.quantity) : Array(Procodile::Instance)
       Array.new(quantity) { create_instance(supervisor) }
     end
 
     #
     # Create a new instance
     #
-    def create_instance(supervisor)
+    def create_instance(supervisor) : Instance
       # supervisor is A Procodile::Supervisor object like this:
       # {
       #   :started_at => 1667297292,

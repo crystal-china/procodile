@@ -21,7 +21,7 @@ module Procodile
       socket.try &.disconnect
     end
 
-    def run(command, options = {} of String => String)
+    def run(command, options = {} of String => String) : JSON::Any | Bool
       @socket.puts("#{command} #{options.to_json}")
       if data = @socket.gets
         code, reply = data.strip.split(/\s+/, 2)
@@ -39,12 +39,14 @@ module Procodile
       end
     end
 
-    def disconnect
+    def disconnect : Nil
       @socket.try &.close
     end
 
     private def parse_response(data)
       code, message = data.split(/\s+/, 2)
+
+      {code, message}
     end
   end
 end

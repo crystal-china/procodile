@@ -113,27 +113,27 @@ module Procodile
       local_options.exec_prefix || options.exec_prefix
     end
 
-    def processes
+    def processes : Hash(String, Procodile::Process)
       @processes ||= {} of String => Procodile::Process
     end
 
-    def process_list
+    def process_list : Hash(String, String)
       @process_list ||= load_process_list_from_file
     end
 
-    def options
+    def options : ProcfileOption
       @options ||= load_options_from_file
     end
 
-    def local_options
+    def local_options : ProcfileOption
       @local_options ||= load_local_options_from_file
     end
 
-    def process_options
+    def process_options : Hash(String, ProcessOption)
       @process_options ||= options.processes || {} of String => ProcessOption
     end
 
-    def local_process_options
+    def local_process_options : Hash(String, ProcessOption)
       @local_process_options ||= local_options.processes || {} of String => ProcessOption
     end
 
@@ -150,11 +150,11 @@ module Procodile
       option_env.merge(local_option_env)
     end
 
-    def pid_root
+    def pid_root : String?
       File.expand_path(local_options.pid_root || options.pid_root || "pids", self.root)
     end
 
-    def supervisor_pid_path
+    def supervisor_pid_path : String
       File.join(pid_root, "procodile.pid")
     end
 
@@ -176,19 +176,19 @@ module Procodile
       File.expand_path(log_root, self.root) if log_root
     end
 
-    def sock_path
+    def sock_path : String
       File.join(pid_root, "procodile.sock")
     end
 
-    def procfile_path
+    def procfile_path : String
       @procfile_path || File.join(self.root, "Procfile")
     end
 
-    def options_path
+    def options_path : String
       "#{procfile_path}.options"
     end
 
-    def local_options_path
+    def local_options_path : String
       "#{procfile_path}.local"
     end
 

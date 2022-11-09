@@ -29,13 +29,14 @@ module Procodile
       @signal_handler.register("HUP") { reload_config }
     end
 
-    def allow_respawning?
+    def allow_respawning? : Bool
       @run_options.respawn != false
     end
 
     def start(after_start : Proc(Procodile::Supervisor, Nil)?)
       Procodile.log nil, "system", "Procodile supervisor started with PID #{::Process.pid}"
       Procodile.log nil, "system", "Application root is #{@config.root}"
+
       if @run_options.respawn == false
         Procodile.log nil, "system", "Automatic respawning is disabled"
       end
@@ -59,7 +60,7 @@ module Procodile
       loop { supervise; sleep 3 }
     end
 
-    def start_processes(types = nil, options = {} of String => String)
+    def start_processes(types = nil, options = {} of String => String) : Nil
       @tag = options[:tag]
       reload_config
       ([] of Procodile::Instance).tap do |instances_started|
@@ -74,7 +75,7 @@ module Procodile
       end
     end
 
-    def stop(options = SupervisorOptions.new)
+    def stop(options = SupervisorOptions.new) : Nil
       # {
       #           :processes => [
       #         [0] "test1"
@@ -108,7 +109,7 @@ module Procodile
       end
     end
 
-    def restart(options = SupervisorOptions.new)
+    def restart(options = SupervisorOptions.new) : Nil
       @tag = options.tag
       reload_config
       ([] of Array(Procodile::Instance | Nil)).tap do |instances_restarted|
@@ -139,13 +140,13 @@ module Procodile
       end
     end
 
-    def stop_supervisor
+    def stop_supervisor : Nil
       Procodile.log nil, "system", "Stopping Procodile supervisor"
       FileUtils.rm_rf(File.join(@config.pid_root, "procodile.pid"))
       ::Process.exit 0
     end
 
-    def supervise
+    def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
       remove_stopped_instances
 
@@ -164,15 +165,17 @@ module Procodile
       end
     end
 
-    def reload_config
+    def reload_config : Nil
       Procodile.log nil, "system", "Reloading configuration"
       @config.reload
     end
 
-    def check_concurrency(options = {} of String => String)
+    def check_concurrency(options = {} of String => String) : Hash(Symbol, Array(Procodile::Instance))
       Procodile.log nil, "system", "Checking process concurrency"
       reload_config unless options[:reload] == false
+
       result = check_instance_quantities
+
       if result[:started].empty? && result[:stopped].empty?
         Procodile.log nil, "system", "Process concurrency looks good"
       else
@@ -184,6 +187,7 @@ module Procodile
           Procodile.log nil, "system", "Concurrency check stopped #{result[:stopped].map(&.description).join(", ")}"
         end
       end
+
       result
     end
 
@@ -194,7 +198,7 @@ module Procodile
       }
     end
 
-    def messages
+    def messages : Array(String)
       messages = [] of String
       processes.each do |process, process_instances|
         unless process.correct_quantity?(process_instances.size)
@@ -289,7 +293,7 @@ module Procodile
       # end
     end
 
-    private def check_instance_quantities(type = :both, processes = nil)
+    private def check_instance_quantities(type = :both, processes = nil) : Hash(Symbol, Array(Procodile::Instance))
       {:started => [] of Procodile::Instance, :stopped => [] of Procodile::Instance}.tap do |status|
         @processes.each do |process, instances|
           next if processes && !processes.includes?(process.name)

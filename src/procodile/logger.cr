@@ -1,11 +1,11 @@
 require "./color"
 
 module Procodile
-  def self.mutex
+  def self.mutex : Mutex
     @@mutex ||= Mutex.new
   end
 
-  def self.log(color, name, text)
+  def self.log(color, name, text) : Nil
     mutex.synchronize do
       text.to_s.lines.map(&.chomp).each do |message|
         output = ""

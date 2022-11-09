@@ -22,7 +22,7 @@ module Procodile
       # end
     end
 
-    def start_processes(options)
+    def start_processes(options) : String
       if options["port_allocations"]
         if @supervisor.run_options[:port_allocations]
           @supervisor.run_options[:port_allocations].merge!(options["port_allocations"])
@@ -31,32 +31,34 @@ module Procodile
         end
       end
       instances = @supervisor.start_processes(options["processes"], tag: options["tag"])
+
       "200 #{instances.map(&.to_hash).to_json}"
     end
 
-    def stop(options)
+    def stop(options) : String
       instances = @supervisor.stop(processes: options["processes"], stop_supervisor: options["stop_supervisor"])
       "200 #{instances.map(&.to_hash).to_json}"
     end
 
-    def restart(options)
+    def restart(options) : String
       instances = @supervisor.restart(processes: options["processes"], tag: options["tag"])
       "200 " + instances.map { |a| a.map { |i| i ? i.to_hash : nil } }.to_json
     end
 
-    def reload_config(options)
+    def reload_config(options) : String
       @supervisor.reload_config
       "200"
     end
 
-    def check_concurrency(options)
+    def check_concurrency(options) : String
       result = @supervisor.check_concurrency(reload: options["reload"])
       result = result.transform_values { |instances| instances.map(&.to_hash) }
       "200 #{result.to_json}"
     end
 
-    def status(options)
+    def status(options) : String
       instances = {} of String => String
+
       @supervisor.processes.each do |process, process_instances|
         instances[process.name] = [] of String
         process_instances.each do |instance|
@@ -65,6 +67,7 @@ module Procodile
       end
 
       processes = @supervisor.processes.keys.map(&.to_hash)
+
       result = {
         :version               => Procodile::VERSION,
         :messages              => @supervisor.messages,
@@ -83,6 +86,7 @@ module Procodile
         :pid_root              => @supervisor.config.pid_root,
         :loaded_at             => @supervisor.config.loaded_at.to_i,
       }
+
       "200 #{result.to_json}"
     end
   end

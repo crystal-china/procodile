@@ -32,7 +32,7 @@ module Procodile
     #
     # Return the status of this instance
     #
-    def status
+    def status : String
       if stopped?
         "Stopped"
       elsif stopping?
@@ -49,34 +49,35 @@ module Procodile
     #
     # Should this process be running?
     #
-    def should_be_running?
+    def should_be_running? : Bool
       !(stopped? || stopping?)
     end
 
     #
     # Return an array of environment variables that should be set
     #
-    def environment_variables
+    def environment_variables : Hash(String, String)
       vars = @process.environment_variables.merge({
         "PROC_NAME" => self.description,
         "PID_FILE"  => self.pid_file_path,
         "APP_ROOT"  => @process.config.root,
       })
       vars["PORT"] = @port.to_s if @port
+
       vars
     end
 
     #
     # Return the path to this instance's PID file
     #
-    def pid_file_path
+    def pid_file_path : String
       File.join(@process.config.pid_root, "#{description}.pid")
     end
 
     #
     # Return the PID that is in the instances process PID file
     #
-    def pid_from_file
+    def pid_from_file : Int64?
       if File.exists?(pid_file_path)
         pid = File.read(pid_file_path)
         pid.empty? ? nil : pid.strip.to_i64
@@ -86,7 +87,7 @@ module Procodile
     #
     # Is this process running? Pass an option to check the given PID instead of the instance
     #
-    def running?
+    def running? : Bool
       if (pid = @pid)
         ::Process.pgid(pid) ? true : false
       else
@@ -99,7 +100,7 @@ module Procodile
     #
     # Start a new instance of this process
     #
-    def start
+    def start : Nil
       if stopping?
         Procodile.log(@process.log_color, description, "Process is stopped/stopping therefore cannot be started again.")
         return false
@@ -186,21 +187,21 @@ module Procodile
     #
     # Is this instance supposed to be stopping/be stopped?
     #
-    def stopping?
+    def stopping? : Bool
       @stopping ? true : false
     end
 
     #
     # Is this stopped?
     #
-    def stopped?
+    def stopped? : Bool
       @stopped || false
     end
 
     #
     # Has this failed?
     #
-    def failed?
+    def failed? : Bool
       @failed ? true : false
     end
 
@@ -208,9 +209,10 @@ module Procodile
     # Send this signal the signal to stop and mark the instance in a state that
     # tells us that we want it to be stopped.
     #
-    def stop
+    def stop : Nil
       @stopping = Time.local
       update_pid
+
       if self.running?
         Procodile.log(@process.log_color, description, "Sending #{@process.term_signal} to #{@pid}")
         ::Process.signal(@process.term_signal, pid.not_nil!)
@@ -223,7 +225,7 @@ module Procodile
     # A method that will be called when this instance has been stopped and it isn't going to be
     # started again
     #
-    def on_stop
+    def on_stop : Nil
       @started_at = nil
       @stopped = true
       tidy
@@ -232,7 +234,7 @@ module Procodile
     #
     # Tidy up when this process isn't needed any more
     #
-    def tidy
+    def tidy : Nil
       FileUtils.rm_rf(self.pid_file_path)
       Procodile.log(@process.log_color, description, "Removed PID file")
     end
@@ -240,7 +242,7 @@ module Procodile
     #
     # Retarts the process using the appropriate method from the process configuraiton
     #
-    def restart
+    def restart : Nil
       restart_mode = @process.restart_mode
 
       Procodile.log(@process.log_color, description, "Restarting using #{restart_mode} mode")
@@ -282,7 +284,7 @@ module Procodile
     #
     # Update the locally cached PID from that stored on the file system.
     #
-    def update_pid
+    def update_pid : Bool
       pid_from_file = self.pid_from_file
       if pid_from_file && pid_from_file != @pid
         @pid = pid_from_file
@@ -297,7 +299,7 @@ module Procodile
     #
     # Check the status of this process and handle as appropriate.
     #
-    def check(options = {} of String => String)
+    def check(options = {} of String => String) : Nil
       return if failed?
 
       if self.running?
@@ -330,14 +332,14 @@ module Procodile
     #
     # Can this process be respawned if needed?
     #
-    def can_respawn?
+    def can_respawn? : Bool
       !stopping? && (respawns + 1) <= @process.max_respawns
     end
 
     #
     # Return the number of times this process has been respawned in the last hour
     #
-    def respawns
+    def respawns : Int32
       last_respawn = @last_respawn
 
       if @respawns.nil? || last_respawn.nil? || last_respawn < (Time.local - @process.respawn_window.seconds)
@@ -350,7 +352,7 @@ module Procodile
     #
     # Increment the counter of respawns for this process
     #
-    def add_respawn
+    def add_respawn : Int32
       last_respawn = @last_respawn
 
       if last_respawn && last_respawn < (Time.local - @process.respawn_window.seconds)
@@ -381,14 +383,16 @@ module Procodile
     # Find a port number for this instance to listen on. We just check that nothing is already listening on it.
     # The process is expected to take it straight away if it wants it.
     #
-    def allocate_port(max_attempts = 10)
+    def allocate_port(max_attempts = 10) : Nil
       attempts = 0
+
       until @port
         attempts += 1
         possible_port = rand(20000..29999)
+
         if self.port_available?(possible_port)
           Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
-          return @port = possible_port
+          @port = possible_port
         elsif attempts >= max_attempts
           raise Procodile::Error.new "Couldn't allocate port for #{process.name}"
         end
@@ -398,7 +402,7 @@ module Procodile
     #
     # Is the given port available?
     #
-    def port_available?(port)
+    def port_available?(port) : Bool
       case @process.network_protocol
       when "tcp"
         server = TCPServer.new("127.0.0.1", port)

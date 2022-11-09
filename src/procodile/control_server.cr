@@ -3,7 +3,7 @@ require "./control_session"
 
 module Procodile
   class ControlServer
-    def self.start(supervisor)
+    def self.start(supervisor) : Nil
       Thread.new do
         socket = ControlServer.new(supervisor)
         socket.listen
@@ -13,7 +13,7 @@ module Procodile
     def initialize(@supervisor : Procodile::Supervisor)
     end
 
-    def listen
+    def listen : Nil
       socket = UNIXServer.new(@supervisor.config.sock_path)
       Procodile.log nil, "control", "Listening at #{@supervisor.config.sock_path}"
       loop do

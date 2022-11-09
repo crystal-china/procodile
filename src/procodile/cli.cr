@@ -47,7 +47,7 @@ module Procodile
         end
     {% end %}
 
-    def dispatch(command)
+    def dispatch(command) : Nil
       if self.class.commands.has_key?(command)
         self.class.commands[command].callable.as(Proc(Nil)).call
       else
@@ -55,13 +55,13 @@ module Procodile
       end
     end
 
-    def self.pid_active?(pid)
+    def self.pid_active?(pid) : Bool
       ::Process.pgid(pid) ? true : false
     rescue RuntimeError
       false
     end
 
-    def self.start_supervisor(config : Procodile::Config, options = Procodile::CliOptions.new, &block : Proc(Procodile::Supervisor, Nil))
+    def self.start_supervisor(config : Procodile::Config, options = Procodile::CliOptions.new, &block : Proc(Procodile::Supervisor, Nil)) : Nil
       run_options = Procodile::RunOptions.new
       run_options.respawn = options.respawn
       run_options.stop_when_none = options.stop_when_none
@@ -99,9 +99,10 @@ module Procodile
       end
     end
 
-    def self.tidy_pids(config : Procodile::Config)
+    def self.tidy_pids(config : Procodile::Config) : Nil
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(config.sock_path)
+
       pid_files = Dir[File.join(config.pid_root, "*.pid")]
       pid_files.each do |pid_path|
         file_name = pid_path.split("/").last
@@ -115,7 +116,7 @@ module Procodile
       end
     end
 
-    private def supervisor_running?
+    private def supervisor_running? : Bool
       if pid = current_pid
         self.class.pid_active?(pid)
       else
@@ -123,19 +124,20 @@ module Procodile
       end
     end
 
-    private def current_pid
+    private def current_pid : Int64?
       if File.exists?(@config.supervisor_pid_path)
         pid_file = File.read(@config.supervisor_pid_path).strip
-        pid_file.empty? ? nil : pid_file.to_i
+        pid_file.empty? ? nil : pid_file.to_i64
       end
     end
 
-    private def process_names_from_cli_option
-      if @options.processes
-        processes = @options.processes.not_nil!.split(",")
-        if processes.empty?
-          raise Error.new "No process names provided"
-        end
+    private def process_names_from_cli_option : Array(String)?
+      _processes = @options.processes
+
+      if _processes
+        processes = _processes.split(",")
+
+        raise Error.new "No process names provided" if processes.empty?
 
         # processes.each do |process|
         #  process_name, _ = process.split('.', 2)
@@ -143,6 +145,7 @@ module Procodile
         #    raise Error.new "Process '#{process_name}' is not configured. You may need to reload your config."
         #  end
         # end
+
         processes
       end
     end
