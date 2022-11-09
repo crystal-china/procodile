@@ -10,6 +10,7 @@ module Procodile
       {:kill, "Forcefully kill all known processes"},
       {:start, "Starts processes and/or the supervisor"},
       {:stop, "Stops processes and/or the supervisor"},
+      {:exec, "Execute a command within the environment"},
     ]
     property options, config
 
