@@ -40,7 +40,7 @@ module Procodile
     end
 
     def disconnect
-      @socket.close rescue nil
+      @socket.try &.close
     end
 
     private def parse_response(data)

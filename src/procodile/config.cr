@@ -101,7 +101,7 @@ module Procodile
       local_options.user || options.user
     end
 
-    def app_name
+    def app_name : String
       @app_name ||= local_options.app_name || options.app_name || "Procodile"
     end
 

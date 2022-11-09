@@ -88,6 +88,7 @@ module Procodile
       reload_config
       ([] of Procodile::Instance).tap do |instances_stopped|
         processes = options.processes
+
         if processes.nil?
           Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
           @processes.each do |_, instances|
@@ -112,6 +113,7 @@ module Procodile
       reload_config
       ([] of Array(Procodile::Instance | Nil)).tap do |instances_restarted|
         processes = options.processes
+
         if processes.nil?
           Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
           instances = @processes.values.flatten
@@ -276,6 +278,15 @@ module Procodile
           end
         end
       end
+
+      # 这个开启之后会出错，那里还是不对
+      # loop do
+      #   select
+      #   when sleep_chan.receive
+      #   when signal_handler_chan.receive
+      #   when listener_chan.receive
+      #   end
+      # end
     end
 
     private def check_instance_quantities(type = :both, processes = nil)

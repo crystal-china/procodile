@@ -83,7 +83,7 @@ module Procodile
       end
     end
 
-    private def find_root_and_procfile_from_options(options)
+    private def find_root_and_procfile_from_options(options) : String?
       case options
       when ProcfileOption
         # Use the current hash
@@ -92,7 +92,7 @@ module Procodile
           @global_options.root,
           @global_options.procfile
         )
-      when Array(ProcfileOption)
+        # when Array(ProcfileOption)
       end
     end
   end

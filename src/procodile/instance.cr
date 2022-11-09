@@ -158,9 +158,7 @@ module Procodile
         end
         @tag = @supervisor.tag.dup if @supervisor.tag
         Dir.cd(@process.config.root)
-        # def self.new(command : String, args = nil, env : Env = nil, clear_env : Bool = false, shell : Bool = false, input : Stdio = Redirect::Close, output : Stdio = Redirect::Close, error : Stdio = Redirect::Close, chdir : Path | String? = nil)
 
-        # def self.run(command : String, args = nil, env : Env = nil, clear_env : Bool = false, shell : Bool = false, input : Stdio = Redirect::Close, output : Stdio = Redirect::Close, error : Stdio = Redirect::Close, chdir : Path | String? = nil) : Process::Status
         process = ::Process.new(
           command: @process.command,
           env: environment_variables,
