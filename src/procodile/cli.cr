@@ -11,6 +11,7 @@ module Procodile
       {:start, "Starts processes and/or the supervisor"},
       {:stop, "Stops processes and/or the supervisor"},
       {:exec, "Execute a command within the environment"},
+      {:reload, "Reload Procodile configuration"},
     ]
     property options, config
 
