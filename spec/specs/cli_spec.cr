@@ -8,33 +8,103 @@ describe Procodile::CLI do
     cli.config = config
 
     it "should run help command" do
-      help_command = cli.class.commands["help"]
-      help_command.should be_a Procodile::CliCommand
-      help_command.name.should eq "help"
-      help_command.description.should eq "Shows this help output"
-      help_command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      help_command.callable.should be_a Proc(Nil)
-      help_command.callable.call
+      command = cli.class.commands["help"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "help"
+      command.description.should eq "Shows this help output"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      command.callable.call
     end
 
     it "should run kill command" do
-      kill_command = cli.class.commands["kill"]
-      kill_command.should be_a Procodile::CliCommand
-      kill_command.name.should eq "kill"
-      kill_command.description.should eq "Forcefully kill all known processes"
-      kill_command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      kill_command.callable.should be_a Proc(Nil)
-      kill_command.callable.call
+      command = cli.class.commands["kill"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "kill"
+      command.description.should eq "Forcefully kill all known processes"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      command.callable.call
     end
 
     it "should run start command" do
-      start_command = cli.class.commands["start"]
-      start_command.should be_a Procodile::CliCommand
-      start_command.name.should eq "start"
-      start_command.description.should eq "Starts processes and/or the supervisor"
-      start_command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      start_command.callable.should be_a Proc(Nil)
-      # start_command.callable.call
+      command = cli.class.commands["start"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "start"
+      command.description.should eq "Starts processes and/or the supervisor"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run stop command" do
+      command = cli.class.commands["stop"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "stop"
+      command.description.should eq "Stops processes and/or the supervisor"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run status command" do
+      command = cli.class.commands["status"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "status"
+      command.description.should eq "Show the current status of processes"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run exec command" do
+      command = cli.class.commands["exec"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "exec"
+      command.description.should eq "Execute a command within the environment"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run reload command" do
+      command = cli.class.commands["reload"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "reload"
+      command.description.should eq "Reload Procodile configuration"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run check_concurrency command" do
+      command = cli.class.commands["check_concurrency"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "check_concurrency"
+      command.description.should eq "Check process concurrency"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run log command" do
+      command = cli.class.commands["log"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "log"
+      command.description.should eq "Open/stream a Procodile log file"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
+    end
+
+    it "should run restart command" do
+      command = cli.class.commands["restart"]
+      command.should be_a Procodile::CliCommand
+      command.name.should eq "restart"
+      command.description.should eq "Restart processes"
+      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
+      command.callable.should be_a Proc(Nil)
+      # command.callable.call
     end
   end
 end
