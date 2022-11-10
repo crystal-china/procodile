@@ -21,13 +21,22 @@ module Procodile
       socket.try &.disconnect
     end
 
-    def run(command, options = {} of String => String) : JSON::Any | Bool
+    def run(command, options = {} of Symbol => String)
       @socket.puts("#{command} #{options.to_json}")
       if data = @socket.gets
         code, reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
           if reply && !reply.empty?
-            JSON.parse(reply)
+            case command
+            when "start", "stop"
+              Array(ControlClientReply).from_json(reply)
+            when "restart"
+              Array(Tuple(ControlClientReply, ControlClientReply)).from_json(reply)
+            when "check_concurrency"
+              NamedTuple(started: Array(ControlClientReply), stopped: Array(ControlClientReply)).from_json(reply)
+            when "status"
+              ControlClientReplyForStatusCommand.from_json(reply)
+            end
           else
             true
           end

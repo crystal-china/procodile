@@ -88,9 +88,9 @@ module Procodile
               tag:              @options.tag,
               port_allocations: @options.port_allocations,
             }
-          )
+          ).as(Array(ControlClientReply))
 
-          if instances.is_a? Bool || !instances.as_a.empty?
+          if !instances.empty?
             puts "No processes to start."
           else
             # [
@@ -106,8 +106,8 @@ module Procodile
             #     }
             # ]
 
-            instances.as_a.each do |instance|
-              puts "Started".color(32) + " #{instance["description"]} (PID: #{instance["pid"]})"
+            instances.each do |instance|
+              puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
             end
           end
           nil

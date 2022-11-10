@@ -19,7 +19,6 @@ module Procodile
 
       def stop
         if supervisor_running?
-          options = {} of BlackHole => BlackHole
           instances = ControlClient.run(
             @config.sock_path,
             "stop",
@@ -27,13 +26,13 @@ module Procodile
               processes:       process_names_from_cli_option,
               stop_supervisor: @options.stop_supervisor,
             }
-          )
+          ).as(Array(ControlClientReply))
 
-          if instances.is_a? Bool || !instances.as_a.empty?
+          if !instances.empty?
             puts "No processes were stopped."
           else
-            instances.as_a.each do |instance|
-              puts "Stopped".color(31) + " #{instance["description"]} (PID: #{instance["pid"]})"
+            instances.each do |instance|
+              puts "Stopped".color(31) + " #{instance.description} (PID: #{instance.pid})"
             end
           end
 

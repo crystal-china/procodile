@@ -15,17 +15,17 @@ module Procodile
             @config.sock_path,
             "check_concurrency",
             {:reload => @options.reload}
-          ).as(JSON::Any)
+          ).as NamedTuple(started: Array(ControlClientReply), stopped: Array(ControlClientReply))
 
-          if reply["started"].as_a.empty? && reply["stopped"].as_a.empty?
+          if reply["started"].empty? && reply["stopped"].empty?
             puts "Processes are running as configured"
           else
-            reply["started"].as_a.each do |instance|
-              puts "Started".color(32) + " #{instance["description"]} (PID: #{instance["pid"]})"
+            reply["started"].each do |instance|
+              puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
             end
 
-            reply["stopped"].as_a.each do |instance|
-              puts "Stopped".color(31) + " #{instance["description"]} (PID: #{instance["pid"]})"
+            reply["stopped"].each do |instance|
+              puts "Stopped".color(31) + " #{instance.description} (PID: #{instance.pid})"
             end
           end
         else

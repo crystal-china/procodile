@@ -1,4 +1,4 @@
-# require "procodile/status_cli_output"
+require "../status_cli_output"
 require "../message"
 
 module Procodile
@@ -22,7 +22,7 @@ module Procodile
 
       def status
         if supervisor_running?
-          status = ControlClient.run(@config.sock_path, "status")
+          status = ControlClient.run(@config.sock_path, "status").as ControlClientReplyForStatusCommand
 
           if @options.json
             puts status.to_json
@@ -30,17 +30,15 @@ module Procodile
             # puts JSON.pretty_generate(status)
             pp! status
           elsif @options.simple
-            _status = status.as(JSON::Any).as_h
-
-            if _status["messages"].as_a.empty?
-              message = _status["instances"].as_h.map { |p, i| "#{p}[#{i.size}]" }
+            if status.messages.empty?
+              message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
               puts "OK || #{message.join(", ")}"
             else
-              message = _status["messages"].as_a.map { |p| Message.parse(p) }.join(", ")
+              message = status.messages.map { |p| Message.parse(p) }.join(", ")
               puts "Issues || #{message}"
             end
           else
-            # StatusCLIOutput.new(status).print_all
+            StatusCLIOutput.new(status).print_all
           end
         else
           if @options.simple

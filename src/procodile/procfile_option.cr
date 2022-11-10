@@ -1,4 +1,5 @@
 require "yaml"
+require "json"
 require "../../src/procodile/cli"
 
 module Procodile
@@ -96,6 +97,56 @@ module Procodile
     property proxy : Bool?
     property force_single_log : Bool?
     property port_allocations : Hash(String, Int32)?
+  end
+
+  struct ControlClientReply
+    include JSON::Serializable
+
+    property description : String
+    property pid : Int64
+    property respawns : Int32
+    property status : String
+    property running : Bool
+    property started_at : Int64
+    property tag : String?
+    property port : Int32?
+  end
+
+  struct ControlClientProcessStatus
+    include JSON::Serializable
+
+    property name : String
+    property log_color : Int32
+    property quantity : Int32
+    property max_respawns : Int32
+    property respawn_window : Int32
+    property command : String
+    property restart_mode : String
+    property log_path : String?
+    property removed : Bool
+    property proxy_port : Int32?
+    property proxy_address : String?
+  end
+
+  struct ControlClientReplyForStatusCommand
+    include JSON::Serializable
+
+    property version : String
+    property messages : Array(String)
+    property root : String
+    property app_name : String
+    property supervisor : NamedTuple(started_at: Int64, pid: Int64)
+    property instances : Hash(String, Array(ControlClientReply))
+    property processes : Array(ControlClientProcessStatus)
+    property environment_variables : Hash(String, String)
+    property procfile_path : String
+    property option_path : String
+    property local_option_path : String
+    property sock_path : String
+    property log_root : String?
+    property supervisor_pid_path : String
+    property pid_root : String
+    property loaded_at : Int64
   end
 
   record SupervisorOptions,

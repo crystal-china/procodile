@@ -22,22 +22,23 @@ module Procodile
               :processes => process_names_from_cli_option,
               :tag       => @options.tag,
             }
-          )
-          if instances.is_a? Bool || instances.as_h.empty?
+          ).as Array(Tuple(ControlClientReply, ControlClientReply))
+
+          if instances.empty?
             puts "There are no processes to restart."
           else
             # FIXME: 这里应该是数组？
-            instances.as_h.each do |old_instance, new_instance|
+            instances.each do |old_instance, new_instance|
               if old_instance && new_instance
-                if old_instance["description"] == new_instance["description"]
-                  puts "Restarted".color(35) + " #{old_instance["description"]}"
+                if old_instance.description == new_instance.description
+                  puts "Restarted".color(35) + " #{old_instance.description}"
                 else
-                  puts "Restarted".color(35) + " #{old_instance["description"]} -> #{new_instance["description"]}"
+                  puts "Restarted".color(35) + " #{old_instance.description} -> #{new_instance.description}"
                 end
               elsif old_instance
-                puts "Stopped".color(31) + " #{old_instance["description"]}"
+                puts "Stopped".color(31) + " #{old_instance.description}"
               elsif new_instance
-                puts "Started".color(32) + " #{new_instance["description"]}"
+                puts "Started".color(32) + " #{new_instance.description}"
               end
               STDOUT.flush
             end
