@@ -5,6 +5,7 @@ module Procodile
   class ControlClient
     def initialize(sock_path, block : Proc(ControlClient, Nil)? = nil)
       @socket = UNIXSocket.new(sock_path)
+
       if block
         begin
           block.call(self)
@@ -14,16 +15,26 @@ module Procodile
       end
     end
 
-    def self.run(sock_path, command, options = {} of Symbol => String)
+    def self.run(sock_path : String, command : String, **options)
       socket = self.new(sock_path)
-      socket.run(command, options)
+      socket.run(command, **options)
     ensure
       socket.try &.disconnect
     end
 
-    def run(command, options = {} of Symbol => String)
+    def run(command, **options)
+      # {
+      #           :processes => nil,
+      #     :stop_supervisor => nil
+      # }
       @socket.puts("#{command} #{options.to_json}")
+
+      pp! "#{command} #{options.to_json}"
+
       if data = @socket.gets
+        puts data
+        # 应该是这个样子。
+        # "200 [{\"description\":\"test1.1\",\"pid\":791113,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test2.1\",\"pid\":791117,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test3.1\",\"pid\":791119,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test4.1\",\"pid\":791121,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test5.1\",\"pid\":791124,\"respawns\":0,\"status\":\"Stopping\",\"running\":true,\"started_at\":1668104019,\"tag\":null,\"port\":null}]\n"
         code, reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
           if reply && !reply.empty?

@@ -4,7 +4,7 @@ require "./control_session"
 module Procodile
   class ControlServer
     def self.start(supervisor) : Nil
-      Thread.new do
+      spawn do
         socket = ControlServer.new(supervisor)
         socket.listen
       end

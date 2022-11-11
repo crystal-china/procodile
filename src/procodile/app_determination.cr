@@ -6,15 +6,14 @@ module Procodile
   # This class is responsible for determining which application should be used
   #
   class AppDetermination
-    getter root, procfile
-
     @root : String?
     @procfile : String? = nil
     @in_app_directory : Bool = false
     @app_id : Int32?
-
     @given_root : String?
     @global_options : ProcfileOption
+
+    getter root, procfile
 
     # Start by creating an determination ased on the root and procfile that has been provided
     # to us by the user (from --root and/or --procfile)

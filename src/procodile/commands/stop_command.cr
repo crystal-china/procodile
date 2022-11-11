@@ -22,10 +22,8 @@ module Procodile
           instances = ControlClient.run(
             @config.sock_path,
             "stop",
-            {
-              processes:       process_names_from_cli_option,
-              stop_supervisor: @options.stop_supervisor,
-            }
+            processes: process_names_from_cli_option,
+            stop_supervisor: @options.stop_supervisor,
           ).as(Array(ControlClientReply))
 
           if !instances.empty?

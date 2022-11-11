@@ -1,9 +1,3 @@
-class BlackHole
-  macro method_missing(call)
-    raise "BUG: must implement {{call.name}}"
-  end
-end
-
 module Procodile
   class CLI
     module StartCommand
@@ -83,12 +77,10 @@ module Procodile
           instances = ControlClient.run(
             @config.sock_path,
             "start_processes",
-            {
-              processes:        process_names_from_cli_option,
-              tag:              @options.tag,
-              port_allocations: @options.port_allocations,
-            }
-          ).as(Array(ControlClientReply))
+            processes: process_names_from_cli_option,
+            tag: @options.tag,
+            port_allocations: @options.port_allocations,
+          ).as Array(ControlClientReply)
 
           if !instances.empty?
             puts "No processes to start."

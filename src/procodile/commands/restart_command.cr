@@ -18,16 +18,13 @@ module Procodile
           instances = ControlClient.run(
             @config.sock_path,
             "restart",
-            {
-              :processes => process_names_from_cli_option,
-              :tag       => @options.tag,
-            }
+            processes: process_names_from_cli_option,
+            tag: @options.tag,
           ).as Array(Tuple(ControlClientReply, ControlClientReply))
 
           if instances.empty?
             puts "There are no processes to restart."
           else
-            # FIXME: 这里应该是数组？
             instances.each do |old_instance, new_instance|
               if old_instance && new_instance
                 if old_instance.description == new_instance.description

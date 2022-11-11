@@ -13,13 +13,10 @@ module Procodile
     @process_list : Hash(String, String)?
     @processes : Hash(String, Procodile::Process)?
     @procfile_path : String?
-
     @options : ProcfileOption?
     @local_options : ProcfileOption?
-
     @process_options : Hash(String, ProcessOption)?
     @local_process_options : Hash(String, ProcessOption)?
-
     @loaded_at : Time?
     @environment_variables : Hash(String, String)?
 

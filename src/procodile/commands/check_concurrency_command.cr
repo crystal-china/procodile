@@ -14,7 +14,7 @@ module Procodile
           reply = ControlClient.run(
             @config.sock_path,
             "check_concurrency",
-            {:reload => @options.reload}
+            reload: @options.reload
           ).as NamedTuple(started: Array(ControlClientReply), stopped: Array(ControlClientReply))
 
           if reply["started"].empty? && reply["stopped"].empty?

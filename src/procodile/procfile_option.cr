@@ -83,7 +83,7 @@ module Procodile
     property json : Bool?
     property json_pretty : Bool?
     property simple : Bool?
-    property processes : String?
+    property processes : String? # 一个用都好分隔的字符串
     property clean : Bool?
     property development : Bool?
     property wait : Bool?

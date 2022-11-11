@@ -22,7 +22,7 @@ module Procodile
       # end
     end
 
-    def start_processes(options) : String
+    def start_processes(**options) : String
       if options["port_allocations"]
         if @supervisor.run_options[:port_allocations]
           @supervisor.run_options[:port_allocations].merge!(options["port_allocations"])
