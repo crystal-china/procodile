@@ -29,10 +29,7 @@ module Procodile
       # }
       @socket.puts("#{command} #{options.to_json}")
 
-      pp! "#{command} #{options.to_json}"
-
       if data = @socket.gets
-        puts data
         # 应该是这个样子。
         # "200 [{\"description\":\"test1.1\",\"pid\":791113,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test2.1\",\"pid\":791117,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test3.1\",\"pid\":791119,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test4.1\",\"pid\":791121,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test5.1\",\"pid\":791124,\"respawns\":0,\"status\":\"Stopping\",\"running\":true,\"started_at\":1668104019,\"tag\":null,\"port\":null}]\n"
         code, reply = data.strip.split(/\s+/, 2)

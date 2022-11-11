@@ -367,13 +367,14 @@ module Procodile
     # Return this instance as a hash
     #
     def to_hash
+      started_at = @started_at
       {
         :description => self.description,
         :pid         => self.pid,
         :respawns    => self.respawns,
         :status      => self.status,
         :running     => self.running?,
-        :started_at  => @started_at ? @started_at.to_i : nil,
+        :started_at  => started_at ? started_at.to_unix : nil,
         :tag         => self.tag,
         :port        => @port,
       }

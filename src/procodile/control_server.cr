@@ -4,30 +4,28 @@ require "./control_session"
 module Procodile
   class ControlServer
     def self.start(supervisor) : Nil
+      sock_path = supervisor.config.sock_path
+
       spawn do
-        socket = ControlServer.new(supervisor)
-        socket.listen
-      end
-    end
+        socket = UNIXServer.new(sock_path)
 
-    def initialize(@supervisor : Procodile::Supervisor)
-    end
+        Procodile.log nil, "control", "Listening at #{sock_path}"
 
-    def listen : Nil
-      socket = UNIXServer.new(@supervisor.config.sock_path)
-      Procodile.log nil, "control", "Listening at #{@supervisor.config.sock_path}"
-      loop do
-        client = socket.accept
-        session = ControlSession.new(@supervisor, client)
-        while line = client.gets
-          if response = session.receive_data(line.strip)
-            client.puts response
+        loop do
+          client = socket.accept
+          session = ControlSession.new(supervisor, client)
+          line = client.gets
+
+          while line
+            if response = session.receive_data(line.strip)
+              client.puts response
+            end
           end
+          client.close
         end
-        client.close
       end
     ensure
-      FileUtils.rm_rf(@supervisor.config.sock_path)
+      FileUtils.rm_rf(sock_path.not_nil!)
     end
   end
 end

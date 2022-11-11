@@ -13,12 +13,11 @@ module Procodile
     }
 
     @tag : String?
-    @config : Procodile::Config
     @tcp_proxy : Procodile::TCPProxy?
 
     getter config, processes, started_at, tag, tcp_proxy, run_options
 
-    def initialize(@config, @run_options = Procodile::RunOptions.new)
+    def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
       @readers = {} of IO::FileDescriptor => Procodile::Instance
       @signal_handler = SignalHandler.new(*SIGNALS)
