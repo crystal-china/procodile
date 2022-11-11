@@ -177,19 +177,19 @@ module Procodile
     # Return a hash
     #
     def to_hash
-      {
-        :name           => self.name,
-        :log_color      => self.log_color,
-        :quantity       => self.quantity,
-        :max_respawns   => self.max_respawns,
-        :respawn_window => self.respawn_window,
-        :command        => self.command,
-        :restart_mode   => self.restart_mode,
-        :log_path       => self.log_path,
-        :removed        => self.removed ? true : false,
-        :proxy_port     => proxy_port,
-        :proxy_address  => proxy_address,
-      }
+      ControlClientProcessStatus.new(
+        name: self.name,
+        log_color: self.log_color,
+        quantity: self.quantity,
+        max_respawns: self.max_respawns,
+        respawn_window: self.respawn_window,
+        command: self.command,
+        restart_mode: self.restart_mode,
+        log_path: self.log_path,
+        removed: self.removed ? true : false,
+        proxy_port: proxy_port,
+        proxy_address: proxy_address,
+      )
     end
 
     #

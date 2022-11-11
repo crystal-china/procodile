@@ -37,11 +37,11 @@ module Procodile
           if reply && !reply.empty?
             case command
             when "start", "stop"
-              Array(ControlClientReply).from_json(reply)
+              Array(InstanceConfig).from_json(reply)
             when "restart"
-              Array(Tuple(ControlClientReply, ControlClientReply)).from_json(reply)
+              Array(Tuple(InstanceConfig, InstanceConfig)).from_json(reply)
             when "check_concurrency"
-              NamedTuple(started: Array(ControlClientReply), stopped: Array(ControlClientReply)).from_json(reply)
+              NamedTuple(started: Array(InstanceConfig), stopped: Array(InstanceConfig)).from_json(reply)
             when "status"
               ControlClientReplyForStatusCommand.from_json(reply)
             end

@@ -14,9 +14,8 @@ module Procodile
         loop do
           client = socket.accept
           session = ControlSession.new(supervisor, client)
-          line = client.gets
 
-          while line
+          while client.gets
             if response = session.receive_data(line.strip)
               client.puts response
             end

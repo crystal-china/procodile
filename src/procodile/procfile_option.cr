@@ -83,12 +83,24 @@ module Procodile
     property json : Bool?
     property json_pretty : Bool?
     property simple : Bool?
-    property processes : String? # 一个用都好分隔的字符串
+    property processes : String? # 一个用逗号分隔的字符串
     property clean : Bool?
     property development : Bool?
     property wait : Bool?
     property lines : Int32?
     property process : String?
+
+    def initialize
+    end
+  end
+
+  record ControlSessionData,
+    processes : Array(String)? = [] of String,
+    tag : String? = nil,
+    port_allocations : Hash(String, Int32)? = nil,
+    reload : Bool? = nil,
+    stop_supervisor : Bool? = nil do
+    include JSON::Serializable
   end
 
   struct RunOptions
@@ -99,58 +111,66 @@ module Procodile
     property port_allocations : Hash(String, Int32)?
   end
 
-  struct ControlClientReply
+  record InstanceConfig,
+    description : String,
+    pid : Int64,
+    respawns : Int32,
+    status : String,
+    running : Bool,
+    started_at : Int64?,
+    tag : String?,
+    port : Int32? do
     include JSON::Serializable
-
-    property description : String
-    property pid : Int64
-    property respawns : Int32
-    property status : String
-    property running : Bool
-    property started_at : Int64
-    property tag : String?
-    property port : Int32?
   end
 
-  struct ControlClientProcessStatus
+  record ControlClientProcessStatus,
+    name : String,
+    log_color : Int32,
+    quantity : Int32,
+    max_respawns : Int32,
+    respawn_window : Int32,
+    command : String,
+    restart_mode : Signal | String | Nil,
+    log_path : String?,
+    removed : Bool,
+    proxy_port : Int32?,
+    proxy_address : String? do
     include JSON::Serializable
-
-    property name : String
-    property log_color : Int32
-    property quantity : Int32
-    property max_respawns : Int32
-    property respawn_window : Int32
-    property command : String
-    property restart_mode : String
-    property log_path : String?
-    property removed : Bool
-    property proxy_port : Int32?
-    property proxy_address : String?
   end
 
-  struct ControlClientReplyForStatusCommand
+  record SupervisorMessages,
+    type : String,
+    process : String? = nil,
+    current : Int32? = nil,
+    desired : Int32? = nil,
+    instance : String? = nil,
+    status : String? = nil do
     include JSON::Serializable
+  end
 
-    property version : String
-    property messages : Array(String)
-    property root : String
-    property app_name : String
-    property supervisor : NamedTuple(started_at: Int64, pid: Int64)
-    property instances : Hash(String, Array(ControlClientReply))
-    property processes : Array(ControlClientProcessStatus)
-    property environment_variables : Hash(String, String)
-    property procfile_path : String
-    property option_path : String
-    property local_option_path : String
-    property sock_path : String
-    property log_root : String?
-    property supervisor_pid_path : String
-    property pid_root : String
-    property loaded_at : Int64
+  record ControlClientReplyForStatusCommand,
+    version : String,
+    messages : Array(SupervisorMessages),
+    root : String,
+    app_name : String,
+    supervisor : NamedTuple(started_at: Int64, pid: Int64),
+    instances : Hash(String, Array(InstanceConfig)),
+    processes : Array(ControlClientProcessStatus),
+    environment_variables : Hash(String, String),
+    procfile_path : String,
+    options_path : String,
+    local_options_path : String,
+    sock_path : String,
+    log_root : String?,
+    supervisor_pid_path : String,
+    pid_root : String,
+    loaded_at : Int64 do
+    include JSON::Serializable
   end
 
   record SupervisorOptions,
     processes : Array(String)? = nil,
     stop_supervisor : Bool? = nil,
-    tag : String? = nil
+    tag : String? = nil,
+    reload : Bool? = nil
 end

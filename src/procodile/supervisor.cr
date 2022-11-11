@@ -39,11 +39,14 @@ module Procodile
       if @run_options.respawn == false
         Procodile.log nil, "system", "Automatic respawning is disabled"
       end
+
       ControlServer.start(self)
+
       if @run_options.proxy
         Procodile.log nil, "system", "Proxy is enabled"
         @tcp_proxy = TCPProxy.start(self)
       end
+
       watch_for_output
       @started_at = Time.local
       after_start.try &.call(self)
@@ -59,22 +62,25 @@ module Procodile
       loop { supervise; sleep 3 }
     end
 
-    def start_processes(types = nil, options = {} of String => String) : Nil
-      @tag = options[:tag]
+    def start_processes(types = nil, options = SupervisorOptions.new) : Array(Procodile::Instance)
+      @tag = options.tag
       reload_config
-      ([] of Procodile::Instance).tap do |instances_started|
-        @config.processes.each do |name, process|
-          next if types && !types.includes?(name.to_s)                # Not a process we want
-          next if @processes[process]? && !@processes[process].empty? # Process type already running
 
-          instances = process.generate_instances(self)
-          instances.each &.start
-          instances_started.concat instances
-        end
+      instances_started = [] of Procodile::Instance
+
+      @config.processes.each do |name, process|
+        next if types && !types.includes?(name.to_s)                # Not a process we want
+        next if @processes[process]? && !@processes[process].empty? # Process type already running
+
+        instances = process.generate_instances(self)
+        instances.each &.start
+        instances_started.concat instances
       end
+
+      instances_started
     end
 
-    def stop(options = SupervisorOptions.new) : Nil
+    def stop(options = SupervisorOptions.new) : Array(Procodile::Instance)
       # {
       #           :processes => [
       #         [0] "test1"
@@ -85,7 +91,9 @@ module Procodile
       if options.stop_supervisor
         @run_options.stop_when_none = true
       end
+
       reload_config
+
       ([] of Procodile::Instance).tap do |instances_stopped|
         processes = options.processes
 
@@ -108,7 +116,7 @@ module Procodile
       end
     end
 
-    def restart(options = SupervisorOptions.new) : Nil
+    def restart(options = SupervisorOptions.new)
       @tag = options.tag
       reload_config
       ([] of Array(Procodile::Instance | Nil)).tap do |instances_restarted|
@@ -171,7 +179,7 @@ module Procodile
 
     def check_concurrency(options = {} of String => String) : Hash(Symbol, Array(Procodile::Instance))
       Procodile.log nil, "system", "Checking process concurrency"
-      reload_config unless options[:reload] == false
+      reload_config unless options.reload == false
 
       result = check_instance_quantities
 
@@ -191,24 +199,37 @@ module Procodile
     end
 
     def to_hash
+      started_at = @started_at.not_nil!
+
       {
-        :started_at => @started_at ? @started_at.to_i : nil,
-        :pid        => ::Process.pid,
+        started_at: started_at.to_unix,
+        pid:        ::Process.pid,
       }
     end
 
-    def messages : Array(String)
-      messages = [] of String
+    def messages : Array(SupervisorMessages)
+      messages = [] of SupervisorMessages
+
       processes.each do |process, process_instances|
         unless process.correct_quantity?(process_instances.size)
-          messages << {:type => :incorrect_quantity, :process => process.name, :current => process_instances.size, :desired => process.quantity}
+          messages << SupervisorMessages.new(
+            type: "incorrect_quantity",
+            process: process.name,
+            current: process_instances.size,
+            desired: process.quantity,
+          )
         end
         process_instances.each do |instance|
           if instance.should_be_running? && instance.status != "Running"
-            messages << {:type => :not_running, :instance => instance.description, :status => instance.status}
+            messages << SupervisorMessages.new(
+              type: "not_running",
+              instance: instance.description,
+              status: instance.status,
+            )
           end
         end
       end
+
       messages
     end
 
