@@ -86,7 +86,9 @@ module Procodile
         raise Error.new "The PID directory (#{config.pid_root}) is not empty. Cannot start unless things are clean."
       end
 
-      # PROGRAM_NAME = "[procodile] #{config.app_name} (#{config.root})"
+      # Set $PROGRAM_NAME
+      File.write("/proc/self/comm", "[procodile] #{config.app_name} (#{config.root})")
+
       if options.foreground
         File.write(config.supervisor_pid_path, ::Process.pid)
         Supervisor.new(config, run_options).start(block)
