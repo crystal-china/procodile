@@ -16,6 +16,7 @@ module Procodile
       {:log, "Open/stream a Procodile log file"},
       {:restart, "Restart processes"},
       {:status, "Show the current status of processes"},
+      {:console, "Open a console within the environment"},
     ]
     property options, config
 
