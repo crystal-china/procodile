@@ -62,12 +62,6 @@ module Procodile
       end
     end
 
-    def self.pid_active?(pid) : Bool
-      ::Process.pgid(pid) ? true : false
-    rescue RuntimeError
-      false
-    end
-
     def self.start_supervisor(config : Procodile::Config, options = Procodile::CliOptions.new, &block : Proc(Procodile::Supervisor, Nil)) : Nil
       run_options = Procodile::RunOptions.new
       run_options.respawn = options.respawn
@@ -87,11 +81,12 @@ module Procodile
         raise Error.new "The PID directory (#{config.pid_root}) is not empty. Cannot start unless things are clean."
       end
 
-      # Set $PROGRAM_NAME
+      # Set $PROGRAM_NAME for linux
       File.write("/proc/self/comm", "[procodile] #{config.app_name} (#{config.root})")
 
       if options.foreground
         File.write(config.supervisor_pid_path, ::Process.pid)
+
         Supervisor.new(config, run_options).start(block)
       else
         FileUtils.rm_rf(File.join(config.pid_root, "*.pid"))
@@ -108,15 +103,18 @@ module Procodile
       end
     end
 
+    # Clean up procodile.pid and procodile.sock with all unused pid files
     def self.tidy_pids(config : Procodile::Config) : Nil
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(config.sock_path)
 
       pid_files = Dir[File.join(config.pid_root, "*.pid")]
+
       pid_files.each do |pid_path|
         file_name = pid_path.split("/").last
         pid = File.read(pid_path).to_i
-        if self.pid_active?(pid)
+
+        if ::Process.exists?(pid)
           puts "Could not remove #{file_name} because process (#{pid}) was active"
         else
           FileUtils.rm_rf(pid_path)
@@ -126,17 +124,11 @@ module Procodile
     end
 
     private def supervisor_running? : Bool
-      if pid = current_pid
-        self.class.pid_active?(pid)
+      if File.exists?(@config.supervisor_pid_path)
+        file_pid = File.read(@config.supervisor_pid_path).strip
+        file_pid.empty? ? false : ::Process.exists?(file_pid.to_i64)
       else
         false
-      end
-    end
-
-    private def current_pid : Int64?
-      if File.exists?(@config.supervisor_pid_path)
-        pid_file = File.read(@config.supervisor_pid_path).strip
-        pid_file.empty? ? nil : pid_file.to_i64
       end
     end
 
