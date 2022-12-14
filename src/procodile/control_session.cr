@@ -31,6 +31,7 @@ module Procodile
           stop_supervisor: options.stop_supervisor
         )
       )
+
       "200 #{instances.map(&.to_hash).to_json}"
     end
 
@@ -41,11 +42,13 @@ module Procodile
           tag: options.tag
         )
       )
+
       "200 " + instances.map { |a| a.map { |i| i ? i.to_hash : nil } }.to_json
     end
 
     def reload_config(options) : String
       @supervisor.reload_config
+
       "200"
     end
 
@@ -56,6 +59,7 @@ module Procodile
         )
       )
       result = result.transform_values { |instances| instances.map(&.to_hash) }
+
       "200 #{result.to_json}"
     end
 

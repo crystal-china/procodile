@@ -7,12 +7,12 @@ module Procodile
       sock_path = supervisor.config.sock_path
 
       spawn do
-        socket = UNIXServer.new(sock_path)
+        server = UNIXServer.new(sock_path)
 
         Procodile.log nil, "control", "Listening at #{sock_path}"
 
         loop do
-          client = socket.accept
+          client = server.accept
           session = ControlSession.new(supervisor, client)
 
           while (line = client.gets)
@@ -20,6 +20,7 @@ module Procodile
               client.puts response
             end
           end
+
           client.close
         end
       end

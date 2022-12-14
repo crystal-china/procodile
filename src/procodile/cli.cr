@@ -62,7 +62,11 @@ module Procodile
       end
     end
 
-    def self.start_supervisor(config : Procodile::Config, options = Procodile::CliOptions.new, &block : Proc(Procodile::Supervisor, Nil)) : Nil
+    def self.start_supervisor(
+      config : Procodile::Config,
+      options = Procodile::CliOptions.new,
+      &block : Proc(Procodile::Supervisor, Nil)
+    ) : Nil
       run_options = Procodile::RunOptions.new
       run_options.respawn = options.respawn
       run_options.stop_when_none = options.stop_when_none

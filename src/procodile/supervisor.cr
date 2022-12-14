@@ -4,14 +4,6 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    SIGNALS = {
-      Signal::TERM,
-      Signal::USR1,
-      Signal::USR2,
-      Signal::INT,
-      Signal::HUP,
-    }
-
     @tag : String?
     @tcp_proxy : Procodile::TCPProxy?
 
@@ -20,19 +12,20 @@ module Procodile
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
       @readers = {} of IO::FileDescriptor => Procodile::Instance
-      @signal_handler = SignalHandler.new(*SIGNALS)
-      @signal_handler.register("TERM") { stop_supervisor }
-      @signal_handler.register("INT") { stop(SupervisorOptions.new(stop_supervisor: true)) }
-      @signal_handler.register("USR1") { restart }
-      @signal_handler.register("USR2") { }
-      @signal_handler.register("HUP") { reload_config }
+
+      @signal_handler = SignalHandler.new
+      @signal_handler.register(Signal::TERM) { stop_supervisor }
+      @signal_handler.register(Signal::INT) { stop(SupervisorOptions.new(stop_supervisor: true)) }
+      @signal_handler.register(Signal::USR1) { restart }
+      @signal_handler.register(Signal::USR2) { }
+      @signal_handler.register(Signal::HUP) { reload_config }
     end
 
     def allow_respawning? : Bool
       @run_options.respawn != false
     end
 
-    def start(after_start : Proc(Procodile::Supervisor, Nil)?)
+    def start(after_start : Proc(Procodile::Supervisor, Nil))
       Procodile.log nil, "system", "Procodile supervisor started with PID #{::Process.pid}"
       Procodile.log nil, "system", "Application root is #{@config.root}"
 
@@ -48,13 +41,15 @@ module Procodile
       end
 
       watch_for_output
+
       @started_at = Time.local
-      after_start.try &.call(self)
-      supervise!
+
+      after_start.call(self)
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
       stop(SupervisorOptions.new(stop_supervisor: true))
+    ensure
       supervise!
     end
 
@@ -62,15 +57,16 @@ module Procodile
       loop { supervise; sleep 3 }
     end
 
-    def start_processes(types = nil, options = SupervisorOptions.new) : Array(Procodile::Instance)
+    def start_processes(process_names : Array(String)?, options = SupervisorOptions.new) : Array(Procodile::Instance)
       @tag = options.tag
+
       reload_config
 
       instances_started = [] of Procodile::Instance
 
       @config.processes.each do |name, process|
-        next if types && !types.includes?(name.to_s)                # Not a process we want
-        next if @processes[process]? && !@processes[process].empty? # Process type already running
+        next if process_names && !process_names.includes?(name.to_s) # Not a process we want
+        next if @processes[process]? && !@processes[process].empty?  # Process type already running
 
         instances = process.generate_instances(self)
         instances.each &.start
@@ -288,12 +284,13 @@ module Procodile
             else
               buffer[reader] ||= ""
               buffer[reader] += reader.read_string(4096)
+
               while buffer[reader].index("\n")
                 line, buffer[reader] = buffer[reader].split("\n", 2)
                 if instance = @readers[reader]
                   Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
-                  # else
-                  #   Procodile.log nil, "unknown", data
+                else
+                  Procodile.log nil, "unknown", buffer[reader]
                 end
               end
             end
@@ -303,14 +300,15 @@ module Procodile
         end
       end
 
-      # 这个开启之后会出错，那里还是不对
-      # loop do
-      #   select
-      #   when sleep_chan.receive
-      #   when signal_handler_chan.receive
-      #   when listener_chan.receive
-      #   end
-      # end
+      spawn do
+        loop do
+          select
+          when sleep_chan.receive
+          when signal_handler_chan.receive
+          when listener_chan.receive
+          end
+        end
+      end
     end
 
     private def check_instance_quantities(type = :both, processes = nil) : Hash(Symbol, Array(Procodile::Instance))

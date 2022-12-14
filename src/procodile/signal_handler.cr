@@ -1,20 +1,26 @@
 module Procodile
   class SignalHandler
-    QUEUE = [] of String
+    QUEUE   = [] of Signal
+    SIGNALS = {
+      Signal::TERM,
+      Signal::USR1,
+      Signal::USR2,
+      Signal::INT,
+      Signal::HUP,
+    }
 
     getter pipe : Hash(Symbol, IO::FileDescriptor)
 
-    def self.queue : Array(String)
-      # Thread.main[:signal_queue] ||= [] of String
-      QUEUE
-    end
-
-    def initialize(*signals)
-      @handlers = {} of String => Array(Proc(Nil))
+    def initialize
+      @handlers = {} of Signal => Array(Proc(Nil))
       reader, writer = IO.pipe
       @pipe = {:reader => reader, :writer => writer}
-      signals.each do |sig|
-        sig.trap { SignalHandler.queue << sig.to_s; notice }
+
+      SIGNALS.each do |sig|
+        sig.trap do
+          QUEUE << sig
+          notice
+        end
       end
     end
 
@@ -27,9 +33,9 @@ module Procodile
       end
     end
 
-    def register(name, &block) : Array(Proc(Nil))
-      @handlers[name] ||= [] of Proc(Nil)
-      @handlers[name] << block
+    def register(signal : Signal, &block) : Array(Proc(Nil))
+      @handlers[signal] ||= [] of Proc(Nil)
+      @handlers[signal] << block
     end
 
     def notice : Nil
@@ -37,7 +43,7 @@ module Procodile
     end
 
     def handle : Nil
-      if signal = self.class.queue.shift?
+      if signal = QUEUE.shift?
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
         @handlers[signal].try &.each(&.call)
       end
