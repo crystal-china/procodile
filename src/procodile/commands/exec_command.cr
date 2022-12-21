@@ -7,7 +7,7 @@ module Procodile
       end
 
       def exec(command = nil)
-        desired_command = command || ARGV.shift(1).join(" ")
+        desired_command = command || ARGV[1..].join(" ")
 
         if prefix = @config.exec_prefix
           desired_command = "#{prefix} #{desired_command}"
@@ -18,7 +18,7 @@ module Procodile
         else
           environment = @config.environment_variables
 
-          unless ENV["PROCODILE_EXEC_QUIET"].to_i == 1
+          unless ENV["PROCODILE_EXEC_QUIET"]?.try &.to_i == 1
             puts "Running with #{desired_command.color(33)}"
             environment.each do |key, value|
               puts "             #{key.color(34)} #{value}"
@@ -27,9 +27,7 @@ module Procodile
 
           begin
             Dir.cd(@config.root)
-            # Rbenv.without do
             ::Process.exec(desired_command, env: environment, shell: true)
-            # end
           rescue e : RuntimeError
             raise Error.new e.message
           end
