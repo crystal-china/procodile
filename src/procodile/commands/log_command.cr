@@ -35,7 +35,7 @@ module Procodile
         end
 
         if File.exists?(log_path)
-          ::Process.exec("tail #{opts.join(' ')} #{log_path}")
+          ::Process.exec("tail #{opts.join(' ')} #{log_path}", shell: true)
         else
           raise Error.new "No file found at #{log_path}"
         end
