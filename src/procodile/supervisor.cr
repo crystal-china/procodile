@@ -73,39 +73,33 @@ module Procodile
     end
 
     def stop(options = SupervisorOptions.new) : Array(Procodile::Instance)
-      # {
-      #           :processes => [
-      #         [0] "test1"
-      #     ],
-      #     :stop_supervisor => nil
-      # }
-
       if options.stop_supervisor
         @run_options.stop_when_none = true
       end
 
       reload_config
 
-      ([] of Procodile::Instance).tap do |instances_stopped|
-        processes = options.processes
+      processes = options.processes
+      instances_stopped = [] of Procodile::Instance
 
-        if processes.nil?
-          Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
-          @processes.each do |_, instances|
-            instances.each do |instance|
-              instance.stop
-              instances_stopped << instance
-            end
-          end
-        else
-          instances = process_names_to_instances(processes)
-          Procodile.log nil, "system", "Stopping #{instances.size} process(es)"
+      if processes.nil?
+        Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
+        @processes.each do |_, instances|
           instances.each do |instance|
             instance.stop
             instances_stopped << instance
           end
         end
+      else
+        instances = process_names_to_instances(processes)
+        Procodile.log nil, "system", "Stopping #{instances.size} process(es)"
+        instances.each do |instance|
+          instance.stop
+          instances_stopped << instance
+        end
       end
+
+      instances_stopped
     end
 
     def restart(options = SupervisorOptions.new)
@@ -312,27 +306,29 @@ module Procodile
     end
 
     private def check_instance_quantities(type = :both, processes = nil) : Hash(Symbol, Array(Procodile::Instance))
-      {:started => [] of Procodile::Instance, :stopped => [] of Procodile::Instance}.tap do |status|
-        @processes.each do |process, instances|
-          next if processes && !processes.includes?(process.name)
+      status = {:started => [] of Procodile::Instance, :stopped => [] of Procodile::Instance}
 
-          if (type == :both || type == :stopped) && (instances.size > process.quantity)
-            quantity_to_stop = instances.size - process.quantity
-            Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
-            stopped_instances = instances.first(quantity_to_stop)
-            stopped_instances.each(&.stop)
-            status[:stopped] = stopped_instances
-          end
+      @processes.each do |process, instances|
+        next if processes && !processes.includes?(process.name)
 
-          if (type == :both || type == :started) && (instances.size < process.quantity)
-            quantity_needed = process.quantity - instances.size
-            Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
-            started_instances = process.generate_instances(self, quantity_needed)
-            started_instances.each(&.start)
-            status[:started] = started_instances
-          end
+        if (type == :both || type == :stopped) && (instances.size > process.quantity)
+          quantity_to_stop = instances.size - process.quantity
+          Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
+          stopped_instances = instances.first(quantity_to_stop)
+          stopped_instances.each(&.stop)
+          status[:stopped] = stopped_instances
+        end
+
+        if (type == :both || type == :started) && (instances.size < process.quantity)
+          quantity_needed = process.quantity - instances.size
+          Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
+          started_instances = process.generate_instances(self, quantity_needed)
+          started_instances.each(&.start)
+          status[:started] = started_instances
         end
       end
+
+      status
     end
 
     private def remove_stopped_instances
