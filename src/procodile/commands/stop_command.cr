@@ -26,7 +26,7 @@ module Procodile
             stop_supervisor: @options.stop_supervisor,
           ).as(Array(InstanceConfig))
 
-          if !instances.empty?
+          if instances.empty?
             puts "No processes were stopped."
           else
             instances.each do |instance|

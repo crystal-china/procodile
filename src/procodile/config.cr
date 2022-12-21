@@ -75,7 +75,7 @@ module Procodile
 
             process.options = options_for_process(name)
           else
-            Procodile.log nil, "system", "#{name} has been added to the Procfile. Adding it."
+            Procodile.log nil, "system", "#{name} has been added to the Procfile."
             processes[name] = create_process(name, command, COLORS[processes.size.divmod(COLORS.size)[1]])
           end
         end
@@ -86,7 +86,7 @@ module Procodile
           if p = (processes[process_name])
             p.removed = true
             processes.delete(process_name)
-            Procodile.log nil, "system", "#{process_name} has been removed to the Procfile. It will be removed when it is stopped."
+            Procodile.log nil, "system", "#{process_name} has been removed in the Procfile. It will be removed when it is stopped."
           end
         end
       end
