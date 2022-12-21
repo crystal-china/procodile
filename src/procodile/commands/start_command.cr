@@ -82,7 +82,7 @@ module Procodile
             port_allocations: @options.port_allocations,
           ).as Array(InstanceConfig)
 
-          if !instances.empty?
+          if instances.empty?
             puts "No processes to start."
           else
             # [

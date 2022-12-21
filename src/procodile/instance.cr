@@ -100,7 +100,7 @@ module Procodile
     #
     # Start a new instance of this process
     #
-    def start : Nil
+    def start
       if stopping?
         Procodile.log(@process.log_color, description, "Process is stopped/stopping therefore cannot be started again.")
         return false
@@ -209,7 +209,7 @@ module Procodile
     # Send this signal the signal to stop and mark the instance in a state that
     # tells us that we want it to be stopped.
     #
-    def stop : Nil
+    def stop
       @stopping = Time.local
       update_pid
 
@@ -225,7 +225,7 @@ module Procodile
     # A method that will be called when this instance has been stopped and it isn't going to be
     # started again
     #
-    def on_stop : Nil
+    def on_stop
       @started_at = nil
       @stopped = true
       tidy
@@ -234,20 +234,21 @@ module Procodile
     #
     # Tidy up when this process isn't needed any more
     #
-    def tidy : Nil
+    def tidy
       FileUtils.rm_rf(self.pid_file_path)
       Procodile.log(@process.log_color, description, "Removed PID file")
     end
 
     #
-    # Retarts the process using the appropriate method from the process configuraiton
+    # Retarts the process using the appropriate method from the process configuration
     #
-    def restart : Nil
+    def restart : self?
       restart_mode = @process.restart_mode
 
       Procodile.log(@process.log_color, description, "Restarting using #{restart_mode} mode")
 
       update_pid
+
       case restart_mode
       when Signal::USR1, Signal::USR2
         if running?
@@ -299,7 +300,7 @@ module Procodile
     #
     # Check the status of this process and handle as appropriate.
     #
-    def check(options = {} of String => String) : Nil
+    def check(options = {} of String => String)
       return if failed?
 
       if self.running?
@@ -385,7 +386,7 @@ module Procodile
     # Find a port number for this instance to listen on. We just check that nothing is already listening on it.
     # The process is expected to take it straight away if it wants it.
     #
-    def allocate_port(max_attempts = 10) : Nil
+    def allocate_port(max_attempts = 10)
       attempts = 0
 
       until @port

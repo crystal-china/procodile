@@ -26,7 +26,6 @@ module Procodile
       @socket.puts("#{command} #{options.to_json}")
 
       if data = @socket.gets
-        pp! data
         code, *reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
           if !reply.empty?
@@ -42,10 +41,7 @@ module Procodile
             when "check_concurrency"
               NamedTuple(started: Array(InstanceConfig), stopped: Array(InstanceConfig)).from_json(reply)
             when "status"
-              pp! reply
-              x = ControlClientReplyForStatusCommand.from_json(reply)
-              pp! x
-              x
+              ControlClientReplyForStatusCommand.from_json(reply)
             end
           else
             true

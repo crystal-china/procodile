@@ -50,10 +50,6 @@ module Procodile
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
       stop(SupervisorOptions.new(stop_supervisor: true))
     ensure
-      supervise!
-    end
-
-    def supervise!
       loop { supervise; sleep 3 }
     end
 
@@ -114,33 +110,37 @@ module Procodile
 
     def restart(options = SupervisorOptions.new)
       @tag = options.tag
+
       reload_config
-      ([] of Array(Procodile::Instance | Nil)).tap do |instances_restarted|
-        processes = options.processes
 
-        if processes.nil?
-          Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
-          instances = @processes.values.flatten
-        else
-          instances = process_names_to_instances(processes)
-          Procodile.log nil, "system", "Restarting #{instances.size} process(es)"
-        end
+      instances_restarted = [] of Array(Procodile::Instance?)
 
-        # Stop any processes that are no longer wanted at this point
-        stopped = check_instance_quantities(:stopped, processes)[:stopped].map { |i| [i, nil] }
-        instances_restarted.concat stopped
+      processes = options.processes
 
-        instances.each do |instance|
-          next if instance.stopping?
-
-          new_instance = instance.restart
-          instances_restarted << [instance, new_instance]
-        end
-
-        # Start any processes that are needed at this point
-        checked = check_instance_quantities(:started, processes)[:started].map { |i| [nil, i] }
-        instances_restarted.concat checked
+      if processes.nil?
+        Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
+        instances = @processes.values.flatten
+      else
+        instances = process_names_to_instances(processes)
+        Procodile.log nil, "system", "Restarting #{instances.size} process(es)"
       end
+
+      # Stop any processes that are no longer wanted at this point
+      stopped = check_instance_quantities(:stopped, processes)[:stopped].map { |i| [i, nil] }
+      instances_restarted.concat stopped
+
+      instances.each do |instance|
+        next if instance.stopping?
+
+        new_instance = instance.restart
+        instances_restarted << [instance, new_instance]
+      end
+
+      # Start any processes that are needed at this point
+      checked = check_instance_quantities(:started, processes)[:started].map { |i| [nil, i] }
+      instances_restarted.concat checked
+
+      instances_restarted
     end
 
     def stop_supervisor : Nil
