@@ -23,27 +23,29 @@ module Procodile
     end
 
     def run(command, **options)
-      # {
-      #           :processes => nil,
-      #     :stop_supervisor => nil
-      # }
       @socket.puts("#{command} #{options.to_json}")
 
       if data = @socket.gets
-        # 应该是这个样子。
-        # "200 [{\"description\":\"test1.1\",\"pid\":791113,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test2.1\",\"pid\":791117,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test3.1\",\"pid\":791119,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test4.1\",\"pid\":791121,\"respawns\":0,\"status\":\"Stopping\",\"running\":false,\"started_at\":1668104019,\"tag\":null,\"port\":null},{\"description\":\"test5.1\",\"pid\":791124,\"respawns\":0,\"status\":\"Stopping\",\"running\":true,\"started_at\":1668104019,\"tag\":null,\"port\":null}]\n"
-        code, reply = data.strip.split(/\s+/, 2)
+        pp! data
+        code, *reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
-          if reply && !reply.empty?
+          if !reply.empty?
+            reply = reply.first
+            pp! reply
+            pp! command
+
             case command
-            when "start", "stop"
+            when "start_processes", "stop"
               Array(InstanceConfig).from_json(reply)
             when "restart"
-              Array(Tuple(InstanceConfig, InstanceConfig)).from_json(reply)
+              Array(Tuple(InstanceConfig?, InstanceConfig?)).from_json(reply)
             when "check_concurrency"
               NamedTuple(started: Array(InstanceConfig), stopped: Array(InstanceConfig)).from_json(reply)
             when "status"
-              ControlClientReplyForStatusCommand.from_json(reply)
+              pp! reply
+              x = ControlClientReplyForStatusCommand.from_json(reply)
+              pp! x
+              x
             end
           else
             true
@@ -58,12 +60,6 @@ module Procodile
 
     def disconnect : Nil
       @socket.try &.close
-    end
-
-    private def parse_response(data)
-      code, message = data.split(/\s+/, 2)
-
-      {code, message}
     end
   end
 end

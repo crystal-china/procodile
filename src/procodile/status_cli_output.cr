@@ -2,10 +2,7 @@ require "./message"
 
 module Procodile
   class StatusCLIOutput
-    @status : Procodile::ControlClientReplyForStatusCommand
-
-    def initialize(status)
-      @status = status
+    def initialize(@status : Procodile::ControlClientReplyForStatusCommand)
     end
 
     def print_all

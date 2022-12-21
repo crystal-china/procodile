@@ -20,7 +20,7 @@ module Procodile
         end
       end
 
-      def status
+      def status : Nil # 返回值 Nil 如果去掉，会报空指针错误（没有任何线索）
         if supervisor_running?
           status = ControlClient.run(@config.sock_path, "status").as ControlClientReplyForStatusCommand
 

@@ -113,7 +113,7 @@ module Procodile
 
   record InstanceConfig,
     description : String,
-    pid : Int64,
+    pid : Int64?,
     respawns : Int32,
     status : String,
     running : Bool,
@@ -161,10 +161,10 @@ module Procodile
     options_path : String,
     local_options_path : String,
     sock_path : String,
-    log_root : String?,
     supervisor_pid_path : String,
     pid_root : String,
-    loaded_at : Int64 do
+    loaded_at : Int64,
+    log_root : String? do
     include JSON::Serializable
   end
 
