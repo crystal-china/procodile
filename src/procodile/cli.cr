@@ -55,7 +55,7 @@ module Procodile
         end
     {% end %}
 
-    def dispatch(command) : Nil
+    def dispatch(command)
       if self.class.commands.has_key?(command)
         self.class.commands[command].callable.as(Proc(Nil)).call
       else
@@ -67,7 +67,7 @@ module Procodile
       config : Procodile::Config,
       options = Procodile::CliOptions.new,
       &block : Proc(Procodile::Supervisor, Nil)
-    ) : Nil
+    )
       run_options = Procodile::RunOptions.new
       run_options.respawn = options.respawn
       run_options.stop_when_none = options.stop_when_none
@@ -95,6 +95,7 @@ module Procodile
         Supervisor.new(config, run_options).start(block)
       else
         FileUtils.rm_rf(File.join(config.pid_root, "*.pid"))
+
         process = ::Process.fork do
           log_path = File.open(config.log_path, "a")
           STDOUT.reopen(log_path); STDOUT.sync = true

@@ -136,10 +136,8 @@ module Procodile
           # Allocate ports to this process sequentially from the starting port
           process = @supervisor.processes[@process]
 
-          # @supervisor.processes 是一个只有一个元素的哈希
-          # key 是一个 Procodile::Process, value 是一个 Array of Procodile::Instance
+          allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
 
-          allocated_ports = (process ? process.select(&.running?) : [] of Procodile::Instance).map(&.port)
           until @port
             unless allocated_ports.includes?(proposed_port)
               @port = proposed_port
