@@ -26,13 +26,9 @@ module Procodile
       @socket.puts("#{command} #{options.to_json}")
 
       if data = @socket.gets
-        code, *reply = data.strip.split(/\s+/, 2)
+        code, reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
-          if !reply.empty?
-            reply = reply.first
-            pp! reply
-            pp! command
-
+          if reply && !reply.empty?
             case command
             when "start_processes", "stop"
               Array(InstanceConfig).from_json(reply)

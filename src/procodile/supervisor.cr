@@ -44,6 +44,7 @@ module Procodile
 
       @started_at = Time.local
 
+      # 这里调用的是 supervisor.start_processes
       after_start.call(self)
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
@@ -189,10 +190,8 @@ module Procodile
     end
 
     def to_hash
-      started_at = @started_at.not_nil!
-
       {
-        started_at: started_at.to_unix,
+        started_at: @started_at.not_nil!.to_unix,
         pid:        ::Process.pid,
       }
     end

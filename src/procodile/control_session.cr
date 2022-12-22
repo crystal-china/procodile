@@ -49,7 +49,7 @@ module Procodile
     def reload_config(options) : String
       @supervisor.reload_config
 
-      "200"
+      "200 []"
     end
 
     def check_concurrency(options) : String

@@ -102,7 +102,6 @@ module Procodile
               puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
             end
           end
-          nil
         else
           # The supervisor isn't actually running. We need to start it before processes can be
           # begin being processed

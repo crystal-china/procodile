@@ -25,7 +25,7 @@ module Procodile
     end
 
     def start : Nil
-      Thread.new do
+      spawn do
         loop do
           handle
           sleep 1

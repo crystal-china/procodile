@@ -14,7 +14,7 @@ module Procodile
 
     def start
       @supervisor.config.processes.each { |_, p| add_process(p) }
-      Thread.new do
+      spawn do
         listen
         Procodile.log nil, "proxy", "Stopped listening on all ports"
       end

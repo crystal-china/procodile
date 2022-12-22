@@ -272,12 +272,14 @@ module Procodile
         stop
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
-        Thread.new do
+
+        spawn do
           while running?
             sleep 0.5
           end
           new_instance.start
         end
+
         new_instance
       end
     end
