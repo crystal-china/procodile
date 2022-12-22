@@ -52,7 +52,7 @@ OptionParser.parse do |parser|
 end
 
 # Get the global configuration file data
-global_config_path = ENV["PROCODILE_CONFIG"]? || "Procfile.options.global"
+global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
 
 if File.file?(global_config_path)
   global_config = Procodile::ProcfileOption.from_yaml(File.read(global_config_path))
