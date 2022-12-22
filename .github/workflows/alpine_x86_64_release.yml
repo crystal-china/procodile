@@ -21,8 +21,8 @@ jobs:
         run: shards check || shards install
       - name: Check formatting
         run: crystal tool format --check
-      # - name: Run tests
-      #   run: crystal spec --order=random --error-on-warnings
+      - name: Run tests
+        run: crystal spec --order=random --error-on-warnings
       - name: package information
         run: |
           echo "BINARY_NAME=procodile" >> $GITHUB_ENV
@@ -31,7 +31,7 @@ jobs:
       - name: release binary
         id: release
         run: |
-          shards build --production --release --progress --static -Dstrict_multi_assign -Dno_number_autocast --link-flags="-Wl,-z,relro,-z,now,-L/app"
+          shards build --production --release --progress --static -Dstrict_multi_assign -Dno_number_autocast --link-flags="-s -Wl,-z,relro,-z,now,-L/app"
           ASSERT_NAME=${BINARY_NAME}-${RELEASE_VERSION}-${PKG_ARCH}-unknown-linux-musl.tar.gz
           tar zcf ${ASSERT_NAME} bin/${BINARY_NAME} MIT-LICENCE
           echo ::set-output name=ASSERT_NAME::${ASSERT_NAME}
