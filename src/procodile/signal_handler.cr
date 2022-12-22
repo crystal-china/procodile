@@ -24,7 +24,7 @@ module Procodile
       end
     end
 
-    def start : Nil
+    def start
       spawn do
         loop do
           handle
@@ -38,11 +38,11 @@ module Procodile
       @handlers[signal] << block
     end
 
-    def notice : Nil
+    def notice
       @pipe[:writer].write(".".to_slice)
     end
 
-    def handle : Nil
+    def handle
       if signal = QUEUE.shift?
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
         @handlers[signal].try &.each(&.call)

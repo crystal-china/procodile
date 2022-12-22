@@ -50,7 +50,7 @@ module Procodile
       end
     end
 
-    def disconnect : Nil
+    def disconnect
       @socket.try &.close
     end
   end

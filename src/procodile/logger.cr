@@ -5,7 +5,7 @@ module Procodile
     @@mutex ||= Mutex.new
   end
 
-  def self.log(color, name, text) : Nil
+  def self.log(color, name, text)
     mutex.synchronize do
       text.to_s.lines.map(&.chomp).each do |message|
         output = ""

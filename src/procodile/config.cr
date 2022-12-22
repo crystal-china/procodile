@@ -50,7 +50,7 @@ module Procodile
       @loaded_at = Time.local
     end
 
-    def reload : Nil
+    def reload
       @process_list = nil
 
       @options = nil

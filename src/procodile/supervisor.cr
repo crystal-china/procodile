@@ -138,13 +138,13 @@ module Procodile
       instances_restarted
     end
 
-    def stop_supervisor : Nil
+    def stop_supervisor
       Procodile.log nil, "system", "Stopping Procodile supervisor"
       FileUtils.rm_rf(File.join(@config.pid_root, "procodile.pid"))
       ::Process.exit 0
     end
 
-    def supervise : Nil
+    def supervise
       # Tell instances that have been stopped that they have been stopped
       remove_stopped_instances
 
@@ -163,7 +163,7 @@ module Procodile
       end
     end
 
-    def reload_config : Nil
+    def reload_config
       Procodile.log nil, "system", "Reloading configuration"
       @config.reload
     end

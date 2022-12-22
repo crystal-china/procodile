@@ -83,7 +83,7 @@ module Procodile
       end
     end
 
-    def handle_client(client, server) : Nil
+    def handle_client(client, server)
       process = @listeners[server]
       instances = @supervisor.processes[process]? || [] of Procodile::Instance
 

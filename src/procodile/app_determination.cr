@@ -29,7 +29,7 @@ module Procodile
       calculate
     end
 
-    private def calculate : Nil
+    private def calculate
       # Try and find something using the information that has been given to us by the user
       root = find_root_and_procfile(
         @pwd,

@@ -3,7 +3,7 @@ require "./control_session"
 
 module Procodile
   class ControlServer
-    def self.start(supervisor) : Nil
+    def self.start(supervisor)
       sock_path = supervisor.config.sock_path
 
       spawn do

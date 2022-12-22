@@ -27,7 +27,7 @@ module Procodile
 
     @@options = {} of Symbol => Proc(OptionParser, Procodile::CLI, Nil)
 
-    def self.options(name, &block : Proc(OptionParser, Procodile::CLI, Nil)) : Nil
+    def self.options(name, &block : Proc(OptionParser, Procodile::CLI, Nil))
       @@options[name] = block
     end
 
@@ -110,7 +110,7 @@ module Procodile
     end
 
     # Clean up procodile.pid and procodile.sock with all unused pid files
-    def self.tidy_pids(config : Procodile::Config) : Nil
+    def self.tidy_pids(config : Procodile::Config)
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(config.sock_path)
 
