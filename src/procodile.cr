@@ -62,7 +62,10 @@ end
 ap = Procodile::AppDetermination.new(FileUtils.pwd, options[:root]?, options[:procfile]?, global_config)
 
 begin
-  cli.config = Procodile::Config.new(ap.root.not_nil!, ap.procfile)
+  if command != "help"
+    cli.config = Procodile::Config.new(ap.root || "", ap.procfile)
+  end
+
   cli.dispatch(command)
 rescue ex : Procodile::Error
   STDERR.puts "Error: #{ex.message}".color(31)

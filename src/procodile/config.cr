@@ -22,8 +22,7 @@ module Procodile
 
     getter root, loaded_at
 
-    def initialize(root : String, procfile : String? = nil)
-      @root = root
+    def initialize(@root : String, procfile : String? = nil)
       @procfile_path = procfile
 
       unless File.file?(procfile_path)
