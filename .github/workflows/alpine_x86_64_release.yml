@@ -33,7 +33,7 @@ jobs:
         run: |
           shards build --production --release --progress --static --link-flags="-s -Wl,-z,relro,-z,now"
           ASSERT_NAME=${BINARY_NAME}-${RELEASE_VERSION}-${PKG_ARCH}-unknown-linux-musl.tar.gz
-          tar zcf ${ASSERT_NAME} bin/${BINARY_NAME} MIT-LICENSE
+          tar zcf ${ASSERT_NAME} bin/${BINARY_NAME} MIT-LICENCE
           echo ::set-output name=ASSERT_NAME::${ASSERT_NAME}
       - name: Release
         uses: softprops/action-gh-release@v1
