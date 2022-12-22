@@ -44,8 +44,8 @@ module Procodile
 
       @started_at = Time.local
 
-      # 这里调用的是 supervisor.start_processes
-      after_start.call(self)
+      after_start.call(self) # invoke supervisor.start_processes
+
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }

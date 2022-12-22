@@ -3,7 +3,6 @@ require "json"
 require "../../src/procodile/cli"
 
 module Procodile
-  # TODO: 使用 class 重构，并且根据业务逻辑，指定 property 的默认值
   struct ProcessOption
     include YAML::Serializable
 
@@ -83,7 +82,7 @@ module Procodile
     property json : Bool?
     property json_pretty : Bool?
     property simple : Bool?
-    property processes : String? # 一个用逗号分隔的字符串
+    property processes : String? # A String split by comma.
     property clean : Bool?
     property development : Bool?
     property wait : Bool?
