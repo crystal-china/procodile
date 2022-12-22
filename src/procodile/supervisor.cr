@@ -46,6 +46,7 @@ module Procodile
 
       after_start.call(self) # invoke supervisor.start_processes
 
+
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
