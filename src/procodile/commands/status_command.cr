@@ -27,8 +27,8 @@ module Procodile
           if @options.json
             puts status.to_json
           elsif @options.json_pretty
-            # puts JSON.pretty_generate(status)
             pp! status
+            nil
           elsif @options.simple
             if status.messages.empty?
               message = status.instances.map { |p, i| "#{p}[#{i.size}]" }

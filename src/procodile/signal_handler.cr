@@ -33,7 +33,7 @@ module Procodile
       end
     end
 
-    def register(signal : Signal, &block) : Array(Proc(Nil))
+    def register(signal : Signal, &block)
       @handlers[signal] ||= [] of Proc(Nil)
       @handlers[signal] << block
     end
