@@ -1,12 +1,7 @@
 require "option_parser"
 require "file_utils"
-require "yaml"
-require "./procodile/cli"
-require "./procodile/version"
-require "./procodile/config"
 require "./procodile/app_determination"
-require "./procodile/error"
-require "./procodile/color"
+require "./procodile/cli"
 
 module Procodile
   def self.root

@@ -1,4 +1,3 @@
-require "yaml"
 require "./procfile_option"
 
 module Procodile

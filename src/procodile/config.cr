@@ -1,8 +1,3 @@
-require "yaml"
-require "file_utils"
-require "./error"
-require "./logger"
-require "./procfile_option"
 require "./process"
 
 module Procodile

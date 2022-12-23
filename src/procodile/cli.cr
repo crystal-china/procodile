@@ -57,7 +57,7 @@ module Procodile
 
     def dispatch(command)
       if self.class.commands.has_key?(command)
-        self.class.commands[command].callable.as(Proc(Nil)).call
+        self.class.commands[command].callable.call
       else
         raise Error.new("Invalid command '#{command}'")
       end

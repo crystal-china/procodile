@@ -1,3 +1,6 @@
+require "file_utils"
+require "./logger"
+require "./error"
 require "./control_server"
 require "./tcp_proxy"
 require "./signal_handler"

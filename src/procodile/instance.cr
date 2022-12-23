@@ -1,5 +1,3 @@
-require "file_utils"
-require "./logger"
 require "./supervisor"
 
 module Procodile
