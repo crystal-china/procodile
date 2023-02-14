@@ -6,8 +6,12 @@ on:
       - master
 
 jobs:
+  # call-ci:
+  #   uses: ./.github/workflows/ci.yml
+  #   secrets: inherit
   build:
-    runs-on: macos-latest
+    # needs: call-ci
+    runs-on: ubuntu-latest
     steps:
       - name: Cache shards
         uses: actions/cache@v2
@@ -21,16 +25,12 @@ jobs:
         uses: crystal-lang/install-crystal@v1
       - name: Install shards
         run: shards check || shards install --without-development
-      - name: Check formatting
-        run: crystal tool format --check
-      - name: Run tests
-        run: crystal spec --order=random --error-on-warnings
       - name: package information
         run: |
-          echo "BINARY_NAME=procodile" >> $GITHUB_ENV
+          echo "BINARY_NAME=myip" >> $GITHUB_ENV
           echo "PKG_ARCH=x86_64" >> $GITHUB_ENV
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-          echo "PLATFORM=apple-darwin.tar.gz" >> $GITHUB_ENV
+          echo "PLATFORM=unknown-linux-gnu.tar.gz" >> $GITHUB_ENV
           echo "STATIC=" >> $GITHUB_ENV
       - name: set asset name
         run: |
