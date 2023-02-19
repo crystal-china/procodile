@@ -2,6 +2,8 @@ on:
   push:
     tags:
       - "v*.*.*"
+    # branches:
+    #   - master
 
 jobs:
   build:
@@ -25,11 +27,11 @@ jobs:
         run: crystal spec --order=random --error-on-warnings
       - name: package information
         run: |
-          echo "BINARY_NAME=procodile" >> $GITHUB_ENV
+          echo "BINARY_NAME=bin/procodile" >> $GITHUB_ENV
           echo "PKG_ARCH=x86_64" >> $GITHUB_ENV
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           echo "PLATFORM=unknown-linux-musl.tar.gz" >> $GITHUB_ENV
-          echo "STATIC=--static" >> $GITHUB_ENV
+          echo "BUILD_ARGS=--static --link-flags=\"-s -Wl,-z,relro,-z,now\"" >> $GITHUB_ENV
       - name: set asset name
         run: |
           echo "ASSERT_NAME=${{env.BINARY_NAME}}-${{env.RELEASE_VERSION}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
@@ -37,8 +39,8 @@ jobs:
         id: release
         run: |
           echo "ASSERT_NAME=${{env.ASSERT_NAME}}" >> $GITHUB_OUTPUT
-          shards build --production --release --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast --link-flags="-s -Wl,-z,relro,-z,now" ${{env.STATIC}}
-          tar zcvf ${{env.ASSERT_NAME}} bin/${{env.BINARY_NAME}} LICENSE
+          shards build --production --release --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast ${{env.BUILD_ARGS}}
+          tar zcvf ${{env.ASSERT_NAME}} ${{env.BINARY_NAME}} LICENSE
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
