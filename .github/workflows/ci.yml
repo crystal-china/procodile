@@ -20,7 +20,7 @@ jobs:
       - name: Check formatting
         run: crystal tool format --check
       - name: Run Ameba
-        run: bin/ameba --except Metrics/CyclomaticComplexity
+        run: bin/ameba
       - name: Run tests
         run: crystal spec --order=random --error-on-warnings
       - name: Build docs
