@@ -72,7 +72,7 @@ module Procodile
         end
 
         @stopped_processes.reject do |process|
-          if io = @listeners.key_for(process)
+          if (io = @listeners.key_for(process))
             Procodile.log nil, "proxy", "Stopped proxy listener for #{process.name}"
             io.close
             @listeners.delete(io)

@@ -9,7 +9,7 @@ module Procodile
       def exec(command = nil)
         desired_command = command || ARGV[1..].join(" ")
 
-        if prefix = @config.exec_prefix
+        if (prefix = @config.exec_prefix)
           desired_command = "#{prefix} #{desired_command}"
         end
 

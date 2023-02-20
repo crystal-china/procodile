@@ -25,7 +25,7 @@ module Procodile
         process = options.process
 
         if process
-          if process = @config.processes[process]
+          if (process = @config.processes[process])
             log_path = process.log_path
           else
             raise Error.new "Invalid process name '#{process}'"

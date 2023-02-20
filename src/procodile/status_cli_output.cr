@@ -14,7 +14,7 @@ module Procodile
       puts "Procodile Version   #{@status.version.to_s.color(34)}"
       puts "Application Root    #{(@status.root).to_s.color(34)}"
       puts "Supervisor PID      #{(@status.supervisor["pid"]).to_s.color(34)}"
-      if time = @status.supervisor["started_at"]
+      if (time = @status.supervisor["started_at"])
         time = Time.unix(time)
         puts "Started             #{time.to_s.color(34)}"
       end

@@ -25,7 +25,7 @@ module Procodile
     def run(command, **options)
       @socket.puts("#{command} #{options.to_json}")
 
-      if data = @socket.gets
+      if (data = @socket.gets)
         code, reply = data.strip.split(/\s+/, 2)
         if code.to_i == 200
           if reply && !reply.empty?

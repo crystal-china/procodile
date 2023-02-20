@@ -43,7 +43,7 @@ module Procodile
     end
 
     def handle
-      if signal = QUEUE.shift?
+      if (signal = QUEUE.shift?)
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
         @handlers[signal].try &.each(&.call)
       end

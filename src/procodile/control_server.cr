@@ -16,7 +16,7 @@ module Procodile
           session = ControlSession.new(supervisor, client)
 
           while (line = client.gets)
-            if response = session.receive_data(line.strip)
+            if (response = session.receive_data(line.strip))
               client.puts response
             end
           end

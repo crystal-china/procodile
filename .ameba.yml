@@ -15,8 +15,8 @@ Lint/NotNil:
 Style/ParenthesesAroundCondition:
   Description: Disallows redundant parentheses around control expressions
   ExcludeTernary: false
-  AllowSafeAssignment: false
-  Enabled: false
+  AllowSafeAssignment: true
+  Enabled: true
   Severity: Convention
 
 # Problems found: 3

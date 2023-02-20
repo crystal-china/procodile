@@ -28,7 +28,7 @@ module Procodile
       # configuration will override the root that we've been given.
       # If they do, we can throw away any reference to the one that the
       # configuration was initialized with and start using that immediately.
-      if new_root = local_options.root || options.root
+      if (new_root = local_options.root || options.root)
         @root = new_root
       end
 
@@ -77,7 +77,7 @@ module Procodile
         removed_processes = processes.keys - process_list.keys
 
         removed_processes.each do |process_name|
-          if p = (processes[process_name])
+          if (p = (processes[process_name]))
             p.removed = true
             processes.delete(process_name)
             Procodile.log nil, "system", "#{process_name} has been removed in the Procfile. It will be removed when it is stopped."
