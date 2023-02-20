@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 1.6.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="procodile">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="procodile">
+  <title>Procodile::ControlClientReplyForStatusCommand - procodile master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          procodile
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="procodile/toplevel" data-name="top level namespace">
+      <a href="../toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="procodile/Procodile" data-name="procodile">
+      <a href="../Procodile.html">Procodile</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/AppDetermination" data-name="procodile::appdetermination">
+      <a href="../Procodile/AppDetermination.html">AppDetermination</a>
+      
+    </li>
+  
+  <li class="parent " data-id="procodile/Procodile/CLI" data-name="procodile::cli">
+      <a href="../Procodile/CLI.html">CLI</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
+      <a href="../Procodile/CLI/CheckConcurrencyCommand.html">CheckConcurrencyCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/ConsoleCommand" data-name="procodile::cli::consolecommand">
+      <a href="../Procodile/CLI/ConsoleCommand.html">ConsoleCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/ExecCommand" data-name="procodile::cli::execcommand">
+      <a href="../Procodile/CLI/ExecCommand.html">ExecCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/HelpCommand" data-name="procodile::cli::helpcommand">
+      <a href="../Procodile/CLI/HelpCommand.html">HelpCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/KillCommand" data-name="procodile::cli::killcommand">
+      <a href="../Procodile/CLI/KillCommand.html">KillCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/LogCommand" data-name="procodile::cli::logcommand">
+      <a href="../Procodile/CLI/LogCommand.html">LogCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/ReloadCommand" data-name="procodile::cli::reloadcommand">
+      <a href="../Procodile/CLI/ReloadCommand.html">ReloadCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/RestartCommand" data-name="procodile::cli::restartcommand">
+      <a href="../Procodile/CLI/RestartCommand.html">RestartCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/RunCommand" data-name="procodile::cli::runcommand">
+      <a href="../Procodile/CLI/RunCommand.html">RunCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/StartCommand" data-name="procodile::cli::startcommand">
+      <a href="../Procodile/CLI/StartCommand.html">StartCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/StatusCommand" data-name="procodile::cli::statuscommand">
+      <a href="../Procodile/CLI/StatusCommand.html">StatusCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/StopCommand" data-name="procodile::cli::stopcommand">
+      <a href="../Procodile/CLI/StopCommand.html">StopCommand</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CliCommand" data-name="procodile::clicommand">
+      <a href="../Procodile/CliCommand.html">CliCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CliOptions" data-name="procodile::clioptions">
+      <a href="../Procodile/CliOptions.html">CliOptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Config" data-name="procodile::config">
+      <a href="../Procodile/Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClient" data-name="procodile::controlclient">
+      <a href="../Procodile/ControlClient.html">ControlClient</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClientProcessStatus" data-name="procodile::controlclientprocessstatus">
+      <a href="../Procodile/ControlClientProcessStatus.html">ControlClientProcessStatus</a>
+      
+    </li>
+  
+  <li class=" current" data-id="procodile/Procodile/ControlClientReplyForStatusCommand" data-name="procodile::controlclientreplyforstatuscommand">
+      <a href="../Procodile/ControlClientReplyForStatusCommand.html">ControlClientReplyForStatusCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlServer" data-name="procodile::controlserver">
+      <a href="../Procodile/ControlServer.html">ControlServer</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
+      <a href="../Procodile/ControlSession.html">ControlSession</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlSessionData" data-name="procodile::controlsessiondata">
+      <a href="../Procodile/ControlSessionData.html">ControlSessionData</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Error" data-name="procodile::error">
+      <a href="../Procodile/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
+      <a href="../Procodile/Instance.html">Instance</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/InstanceConfig" data-name="procodile::instanceconfig">
+      <a href="../Procodile/InstanceConfig.html">InstanceConfig</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Message" data-name="procodile::message">
+      <a href="../Procodile/Message.html">Message</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Process" data-name="procodile::process">
+      <a href="../Procodile/Process.html">Process</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ProcessOption" data-name="procodile::processoption">
+      <a href="../Procodile/ProcessOption.html">ProcessOption</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ProcfileOption" data-name="procodile::procfileoption">
+      <a href="../Procodile/ProcfileOption.html">ProcfileOption</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/RunOptions" data-name="procodile::runoptions">
+      <a href="../Procodile/RunOptions.html">RunOptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/SignalHandler" data-name="procodile::signalhandler">
+      <a href="../Procodile/SignalHandler.html">SignalHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/StatusCLIOutput" data-name="procodile::statusclioutput">
+      <a href="../Procodile/StatusCLIOutput.html">StatusCLIOutput</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor" data-name="procodile::supervisor">
+      <a href="../Procodile/Supervisor.html">Supervisor</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/SupervisorMessages" data-name="procodile::supervisormessages">
+      <a href="../Procodile/SupervisorMessages.html">SupervisorMessages</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/SupervisorOptions" data-name="procodile::supervisoroptions">
+      <a href="../Procodile/SupervisorOptions.html">SupervisorOptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/TCPProxy" data-name="procodile::tcpproxy">
+      <a href="../Procodile/TCPProxy.html">TCPProxy</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="procodile/String" data-name="string">
+      <a href="../String.html">String</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">struct</span> Procodile::ControlClientReplyForStatusCommand
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/ControlClientReplyForStatusCommand.html">Procodile::ControlClientReplyForStatusCommand</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="included-modules" class="anchor" href="#included-modules">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Included Modules
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type">JSON::Serializable</li>
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/procfile_option.cr#L150" target="_blank">
+        procodile/procfile_option.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28version%3AString%2Cmessages%3AArray%28SupervisorMessages%29%2Croot%3AString%2Capp_name%3AString%2Csupervisor%3ANamedTuple%28started_at%3AInt64%2Cpid%3AInt64%29%2Cinstances%3AHash%28String%2CArray%28InstanceConfig%29%29%2Cprocesses%3AArray%28ControlClientProcessStatus%29%2Cenvironment_variables%3AHash%28String%2CString%29%2Cprocfile_path%3AString%2Coptions_path%3AString%2Clocal_options_path%3AString%2Csock_path%3AString%2Csupervisor_pid_path%3AString%2Cpid_root%3AString%2Cloaded_at%3AInt64%2Clog_root%3AString%7CNil%29-class-method" class="signature"><strong>.new</strong>(version : String, messages : Array(SupervisorMessages), root : String, app_name : String, supervisor : NamedTuple(started_at: Int64, pid: Int64), instances : Hash(String, Array(InstanceConfig)), processes : Array(ControlClientProcessStatus), environment_variables : Hash(String, String), procfile_path : String, options_path : String, local_options_path : String, sock_path : String, supervisor_pid_path : String, pid_root : String, loaded_at : Int64, log_root : String | Nil)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28pull%3AJSON%3A%3APullParser%29-class-method" class="signature"><strong>.new</strong>(pull : JSON::PullParser)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#app_name%3AString-instance-method" class="signature"><strong>#app_name</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#clone-instance-method" class="signature"><strong>#clone</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#copy_with%28version_version%3D%40version%2Cmessages_messages%3D%40messages%2Croot_root%3D%40root%2Capp_name_app_name%3D%40app_name%2Csupervisor_supervisor%3D%40supervisor%2Cinstances_instances%3D%40instances%2Cprocesses_processes%3D%40processes%2Cenvironment_variables_environment_variables%3D%40environment_variables%2Cprocfile_path_procfile_path%3D%40procfile_path%2Coptions_path_options_path%3D%40options_path%2Clocal_options_path_local_options_path%3D%40local_options_path%2Csock_path_sock_path%3D%40sock_path%2Csupervisor_pid_path_supervisor_pid_path%3D%40supervisor_pid_path%2Cpid_root_pid_root%3D%40pid_root%2Cloaded_at_loaded_at%3D%40loaded_at%2Clog_root_log_root%3D%40log_root%29-instance-method" class="signature"><strong>#copy_with</strong>(version _version = @version, messages _messages = @messages, root _root = @root, app_name _app_name = @app_name, supervisor _supervisor = @supervisor, instances _instances = @instances, processes _processes = @processes, environment_variables _environment_variables = @environment_variables, procfile_path _procfile_path = @procfile_path, options_path _options_path = @options_path, local_options_path _local_options_path = @local_options_path, sock_path _sock_path = @sock_path, supervisor_pid_path _supervisor_pid_path = @supervisor_pid_path, pid_root _pid_root = @pid_root, loaded_at _loaded_at = @loaded_at, log_root _log_root = @log_root)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#environment_variables%3AHash%28String%2CString%29-instance-method" class="signature"><strong>#environment_variables</strong> : Hash(String, String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#instances%3AHash%28String%2CArray%28InstanceConfig%29%29-instance-method" class="signature"><strong>#instances</strong> : Hash(String, Array(InstanceConfig))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#loaded_at%3AInt64-instance-method" class="signature"><strong>#loaded_at</strong> : Int64</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#local_options_path%3AString-instance-method" class="signature"><strong>#local_options_path</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#log_root%3AString%7CNil-instance-method" class="signature"><strong>#log_root</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#messages%3AArray%28SupervisorMessages%29-instance-method" class="signature"><strong>#messages</strong> : Array(SupervisorMessages)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#options_path%3AString-instance-method" class="signature"><strong>#options_path</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pid_root%3AString-instance-method" class="signature"><strong>#pid_root</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#processes%3AArray%28ControlClientProcessStatus%29-instance-method" class="signature"><strong>#processes</strong> : Array(ControlClientProcessStatus)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#procfile_path%3AString-instance-method" class="signature"><strong>#procfile_path</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#root%3AString-instance-method" class="signature"><strong>#root</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sock_path%3AString-instance-method" class="signature"><strong>#sock_path</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#supervisor%3ANamedTuple%28started_at%3AInt64%2Cpid%3AInt64%29-instance-method" class="signature"><strong>#supervisor</strong> : NamedTuple(started_at: Int64, pid: Int64)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#supervisor_pid_path%3AString-instance-method" class="signature"><strong>#supervisor_pid_path</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#version%3AString-instance-method" class="signature"><strong>#version</strong> : String</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(version:String,messages:Array(SupervisorMessages),root:String,app_name:String,supervisor:NamedTuple(started_at:Int64,pid:Int64),instances:Hash(String,Array(InstanceConfig)),processes:Array(ControlClientProcessStatus),environment_variables:Hash(String,String),procfile_path:String,options_path:String,local_options_path:String,sock_path:String,supervisor_pid_path:String,pid_root:String,loaded_at:Int64,log_root:String|Nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(version : <a href="../String.html">String</a>, messages : Array(<a href="../Procodile/SupervisorMessages.html">SupervisorMessages</a>), root : <a href="../String.html">String</a>, app_name : <a href="../String.html">String</a>, supervisor : NamedTuple(started_at: Int64, pid: Int64), instances : Hash(<a href="../String.html">String</a>, Array(<a href="../Procodile/InstanceConfig.html">InstanceConfig</a>)), processes : Array(<a href="../Procodile/ControlClientProcessStatus.html">ControlClientProcessStatus</a>), environment_variables : Hash(<a href="../String.html">String</a>, <a href="../String.html">String</a>), procfile_path : <a href="../String.html">String</a>, options_path : <a href="../String.html">String</a>, local_options_path : <a href="../String.html">String</a>, sock_path : <a href="../String.html">String</a>, supervisor_pid_path : <a href="../String.html">String</a>, pid_root : <a href="../String.html">String</a>, loaded_at : Int64, log_root : <a href="../String.html">String</a> | Nil)
+
+        <a class="method-permalink" href="#new%28version%3AString%2Cmessages%3AArray%28SupervisorMessages%29%2Croot%3AString%2Capp_name%3AString%2Csupervisor%3ANamedTuple%28started_at%3AInt64%2Cpid%3AInt64%29%2Cinstances%3AHash%28String%2CArray%28InstanceConfig%29%29%2Cprocesses%3AArray%28ControlClientProcessStatus%29%2Cenvironment_variables%3AHash%28String%2CString%29%2Cprocfile_path%3AString%2Coptions_path%3AString%2Clocal_options_path%3AString%2Csock_path%3AString%2Csupervisor_pid_path%3AString%2Cpid_root%3AString%2Cloaded_at%3AInt64%2Clog_root%3AString%7CNil%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/procfile_option.cr#L150" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(pull:JSON::PullParser)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(pull : JSON::PullParser)
+
+        <a class="method-permalink" href="#new%28pull%3AJSON%3A%3APullParser%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/procfile_option.cr#L167" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="app_name:String-instance-method">
+      <div class="signature">
+        
+        def <strong>app_name</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#app_name%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="clone-instance-method">
+      <div class="signature">
+        
+        def <strong>clone</strong>
+
+        <a class="method-permalink" href="#clone-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/procfile_option.cr#L150" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="copy_with(version_version=@version,messages_messages=@messages,root_root=@root,app_name_app_name=@app_name,supervisor_supervisor=@supervisor,instances_instances=@instances,processes_processes=@processes,environment_variables_environment_variables=@environment_variables,procfile_path_procfile_path=@procfile_path,options_path_options_path=@options_path,local_options_path_local_options_path=@local_options_path,sock_path_sock_path=@sock_path,supervisor_pid_path_supervisor_pid_path=@supervisor_pid_path,pid_root_pid_root=@pid_root,loaded_at_loaded_at=@loaded_at,log_root_log_root=@log_root)-instance-method">
+      <div class="signature">
+        
+        def <strong>copy_with</strong>(version _version = @version, messages _messages = @messages, root _root = @root, app_name _app_name = @app_name, supervisor _supervisor = @supervisor, instances _instances = @instances, processes _processes = @processes, environment_variables _environment_variables = @environment_variables, procfile_path _procfile_path = @procfile_path, options_path _options_path = @options_path, local_options_path _local_options_path = @local_options_path, sock_path _sock_path = @sock_path, supervisor_pid_path _supervisor_pid_path = @supervisor_pid_path, pid_root _pid_root = @pid_root, loaded_at _loaded_at = @loaded_at, log_root _log_root = @log_root)
+
+        <a class="method-permalink" href="#copy_with%28version_version%3D%40version%2Cmessages_messages%3D%40messages%2Croot_root%3D%40root%2Capp_name_app_name%3D%40app_name%2Csupervisor_supervisor%3D%40supervisor%2Cinstances_instances%3D%40instances%2Cprocesses_processes%3D%40processes%2Cenvironment_variables_environment_variables%3D%40environment_variables%2Cprocfile_path_procfile_path%3D%40procfile_path%2Coptions_path_options_path%3D%40options_path%2Clocal_options_path_local_options_path%3D%40local_options_path%2Csock_path_sock_path%3D%40sock_path%2Csupervisor_pid_path_supervisor_pid_path%3D%40supervisor_pid_path%2Cpid_root_pid_root%3D%40pid_root%2Cloaded_at_loaded_at%3D%40loaded_at%2Clog_root_log_root%3D%40log_root%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/procfile_option.cr#L150" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="environment_variables:Hash(String,String)-instance-method">
+      <div class="signature">
+        
+        def <strong>environment_variables</strong> : Hash(<a href="../String.html">String</a>, <a href="../String.html">String</a>)
+
+        <a class="method-permalink" href="#environment_variables%3AHash%28String%2CString%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="instances:Hash(String,Array(InstanceConfig))-instance-method">
+      <div class="signature">
+        
+        def <strong>instances</strong> : Hash(<a href="../String.html">String</a>, Array(<a href="../Procodile/InstanceConfig.html">InstanceConfig</a>))
+
+        <a class="method-permalink" href="#instances%3AHash%28String%2CArray%28InstanceConfig%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="loaded_at:Int64-instance-method">
+      <div class="signature">
+        
+        def <strong>loaded_at</strong> : Int64
+
+        <a class="method-permalink" href="#loaded_at%3AInt64-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="local_options_path:String-instance-method">
+      <div class="signature">
+        
+        def <strong>local_options_path</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#local_options_path%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="log_root:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>log_root</strong> : <a href="../String.html">String</a> | Nil
+
+        <a class="method-permalink" href="#log_root%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="messages:Array(SupervisorMessages)-instance-method">
+      <div class="signature">
+        
+        def <strong>messages</strong> : Array(<a href="../Procodile/SupervisorMessages.html">SupervisorMessages</a>)
+
+        <a class="method-permalink" href="#messages%3AArray%28SupervisorMessages%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="options_path:String-instance-method">
+      <div class="signature">
+        
+        def <strong>options_path</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#options_path%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pid_root:String-instance-method">
+      <div class="signature">
+        
+        def <strong>pid_root</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#pid_root%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="processes:Array(ControlClientProcessStatus)-instance-method">
+      <div class="signature">
+        
+        def <strong>processes</strong> : Array(<a href="../Procodile/ControlClientProcessStatus.html">ControlClientProcessStatus</a>)
+
+        <a class="method-permalink" href="#processes%3AArray%28ControlClientProcessStatus%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="procfile_path:String-instance-method">
+      <div class="signature">
+        
+        def <strong>procfile_path</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#procfile_path%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="root:String-instance-method">
+      <div class="signature">
+        
+        def <strong>root</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#root%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sock_path:String-instance-method">
+      <div class="signature">
+        
+        def <strong>sock_path</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#sock_path%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="supervisor:NamedTuple(started_at:Int64,pid:Int64)-instance-method">
+      <div class="signature">
+        
+        def <strong>supervisor</strong> : NamedTuple(started_at: Int64, pid: Int64)
+
+        <a class="method-permalink" href="#supervisor%3ANamedTuple%28started_at%3AInt64%2Cpid%3AInt64%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="supervisor_pid_path:String-instance-method">
+      <div class="signature">
+        
+        def <strong>supervisor_pid_path</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#supervisor_pid_path%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="version:String-instance-method">
+      <div class="signature">
+        
+        def <strong>version</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#version%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

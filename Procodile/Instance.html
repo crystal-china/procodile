@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 1.6.2">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="procodile">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="procodile">
+  <title>Procodile::Instance - procodile master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          procodile
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="procodile/toplevel" data-name="top level namespace">
+      <a href="../toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="procodile/Procodile" data-name="procodile">
+      <a href="../Procodile.html">Procodile</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/AppDetermination" data-name="procodile::appdetermination">
+      <a href="../Procodile/AppDetermination.html">AppDetermination</a>
+      
+    </li>
+  
+  <li class="parent " data-id="procodile/Procodile/CLI" data-name="procodile::cli">
+      <a href="../Procodile/CLI.html">CLI</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
+      <a href="../Procodile/CLI/CheckConcurrencyCommand.html">CheckConcurrencyCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/ConsoleCommand" data-name="procodile::cli::consolecommand">
+      <a href="../Procodile/CLI/ConsoleCommand.html">ConsoleCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/ExecCommand" data-name="procodile::cli::execcommand">
+      <a href="../Procodile/CLI/ExecCommand.html">ExecCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/HelpCommand" data-name="procodile::cli::helpcommand">
+      <a href="../Procodile/CLI/HelpCommand.html">HelpCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/KillCommand" data-name="procodile::cli::killcommand">
+      <a href="../Procodile/CLI/KillCommand.html">KillCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/LogCommand" data-name="procodile::cli::logcommand">
+      <a href="../Procodile/CLI/LogCommand.html">LogCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/ReloadCommand" data-name="procodile::cli::reloadcommand">
+      <a href="../Procodile/CLI/ReloadCommand.html">ReloadCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/RestartCommand" data-name="procodile::cli::restartcommand">
+      <a href="../Procodile/CLI/RestartCommand.html">RestartCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/RunCommand" data-name="procodile::cli::runcommand">
+      <a href="../Procodile/CLI/RunCommand.html">RunCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/StartCommand" data-name="procodile::cli::startcommand">
+      <a href="../Procodile/CLI/StartCommand.html">StartCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/StatusCommand" data-name="procodile::cli::statuscommand">
+      <a href="../Procodile/CLI/StatusCommand.html">StatusCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/StopCommand" data-name="procodile::cli::stopcommand">
+      <a href="../Procodile/CLI/StopCommand.html">StopCommand</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CliCommand" data-name="procodile::clicommand">
+      <a href="../Procodile/CliCommand.html">CliCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CliOptions" data-name="procodile::clioptions">
+      <a href="../Procodile/CliOptions.html">CliOptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Config" data-name="procodile::config">
+      <a href="../Procodile/Config.html">Config</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClient" data-name="procodile::controlclient">
+      <a href="../Procodile/ControlClient.html">ControlClient</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClientProcessStatus" data-name="procodile::controlclientprocessstatus">
+      <a href="../Procodile/ControlClientProcessStatus.html">ControlClientProcessStatus</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClientReplyForStatusCommand" data-name="procodile::controlclientreplyforstatuscommand">
+      <a href="../Procodile/ControlClientReplyForStatusCommand.html">ControlClientReplyForStatusCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlServer" data-name="procodile::controlserver">
+      <a href="../Procodile/ControlServer.html">ControlServer</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
+      <a href="../Procodile/ControlSession.html">ControlSession</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlSessionData" data-name="procodile::controlsessiondata">
+      <a href="../Procodile/ControlSessionData.html">ControlSessionData</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Error" data-name="procodile::error">
+      <a href="../Procodile/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" current" data-id="procodile/Procodile/Instance" data-name="procodile::instance">
+      <a href="../Procodile/Instance.html">Instance</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/InstanceConfig" data-name="procodile::instanceconfig">
+      <a href="../Procodile/InstanceConfig.html">InstanceConfig</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Message" data-name="procodile::message">
+      <a href="../Procodile/Message.html">Message</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Process" data-name="procodile::process">
+      <a href="../Procodile/Process.html">Process</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ProcessOption" data-name="procodile::processoption">
+      <a href="../Procodile/ProcessOption.html">ProcessOption</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ProcfileOption" data-name="procodile::procfileoption">
+      <a href="../Procodile/ProcfileOption.html">ProcfileOption</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/RunOptions" data-name="procodile::runoptions">
+      <a href="../Procodile/RunOptions.html">RunOptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/SignalHandler" data-name="procodile::signalhandler">
+      <a href="../Procodile/SignalHandler.html">SignalHandler</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/StatusCLIOutput" data-name="procodile::statusclioutput">
+      <a href="../Procodile/StatusCLIOutput.html">StatusCLIOutput</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor" data-name="procodile::supervisor">
+      <a href="../Procodile/Supervisor.html">Supervisor</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/SupervisorMessages" data-name="procodile::supervisormessages">
+      <a href="../Procodile/SupervisorMessages.html">SupervisorMessages</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/SupervisorOptions" data-name="procodile::supervisoroptions">
+      <a href="../Procodile/SupervisorOptions.html">SupervisorOptions</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/TCPProxy" data-name="procodile::tcpproxy">
+      <a href="../Procodile/TCPProxy.html">TCPProxy</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="procodile/String" data-name="string">
+      <a href="../String.html">String</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Procodile::Instance
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/Instance.html">Procodile::Instance</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L4" target="_blank">
+        procodile/instance.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28supervisor%3AProcodile%3A%3ASupervisor%2Cprocess%3AProcodile%3A%3AProcess%2Cid%3AInt32%29-class-method" class="signature"><strong>.new</strong>(supervisor : Procodile::Supervisor, process : Procodile::Process, id : Int32)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#add_respawn%3AInt32-instance-method" class="signature"><strong>#add_respawn</strong> : Int32</a>
+        
+          <div class="summary"><p>Increment the counter of respawns for this process</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#allocate_port%28max_attempts%3D10%29-instance-method" class="signature"><strong>#allocate_port</strong>(max_attempts = <span class="n">10</span>)</a>
+        
+          <div class="summary"><p>Find a port number for this instance to listen on.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#can_respawn%3F%3ABool-instance-method" class="signature"><strong>#can_respawn?</strong> : Bool</a>
+        
+          <div class="summary"><p>Can this process be respawned if needed?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#check%28options%3D%7B%7DofString%3D%3EString%29-instance-method" class="signature"><strong>#check</strong>(options = {} <span class="k">of</span> <span class="t">String</span> <span class="o">=&gt;</span> <span class="t">String</span>)</a>
+        
+          <div class="summary"><p>Check the status of this process and handle as appropriate.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#description-instance-method" class="signature"><strong>#description</strong></a>
+        
+          <div class="summary"><p>Return a description for this instance</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#environment_variables%3AHash%28String%2CString%29-instance-method" class="signature"><strong>#environment_variables</strong> : Hash(String, String)</a>
+        
+          <div class="summary"><p>Return an array of environment variables that should be set</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#failed%3F%3ABool-instance-method" class="signature"><strong>#failed?</strong> : Bool</a>
+        
+          <div class="summary"><p>Has this failed?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#id%3AInt32-instance-method" class="signature"><strong>#id</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#on_stop-instance-method" class="signature"><strong>#on_stop</strong></a>
+        
+          <div class="summary"><p>A method that will be called when this instance has been stopped and it isn't going to be started again</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pid%3AInt64-instance-method" class="signature"><strong>#pid</strong> : Int64</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pid%3D%28pid%3AInt64%29-instance-method" class="signature"><strong>#pid=</strong>(pid : Int64)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pid_file_path%3AString-instance-method" class="signature"><strong>#pid_file_path</strong> : String</a>
+        
+          <div class="summary"><p>Return the path to this instance's PID file</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pid_from_file%3AInt64%7CNil-instance-method" class="signature"><strong>#pid_from_file</strong> : Int64 | Nil</a>
+        
+          <div class="summary"><p>Return the PID that is in the instances process PID file</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#port%3AInt32%3F-instance-method" class="signature"><strong>#port</strong> : Int32?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#port%3D%28port%3AInt32%7CNil%29-instance-method" class="signature"><strong>#port=</strong>(port : Int32 | Nil)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#port_available%3F%28port%29%3ABool-instance-method" class="signature"><strong>#port_available?</strong>(port) : Bool</a>
+        
+          <div class="summary"><p>Is the given port available?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#process%3AProcodile%3A%3AProcess-instance-method" class="signature"><strong>#process</strong> : Procodile::Process</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#process%3D%28process%3AProcodile%3A%3AProcess%29-instance-method" class="signature"><strong>#process=</strong>(process : Procodile::Process)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#respawns%3AInt32-instance-method" class="signature"><strong>#respawns</strong> : Int32</a>
+        
+          <div class="summary"><p>Return the number of times this process has been respawned in the last hour</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#restart%3Aself%7CNil-instance-method" class="signature"><strong>#restart</strong> : <span class="k">self</span> | Nil</a>
+        
+          <div class="summary"><p>Retarts the process using the appropriate method from the process configuration</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#running%3F%3ABool-instance-method" class="signature"><strong>#running?</strong> : Bool</a>
+        
+          <div class="summary"><p>Is this process running? Pass an option to check the given PID instead of the instance</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#should_be_running%3F%3ABool-instance-method" class="signature"><strong>#should_be_running?</strong> : Bool</a>
+        
+          <div class="summary"><p>Should this process be running?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#start-instance-method" class="signature"><strong>#start</strong></a>
+        
+          <div class="summary"><p>Start a new instance of this process</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#status%3AString-instance-method" class="signature"><strong>#status</strong> : String</a>
+        
+          <div class="summary"><p>Return the status of this instance</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stop-instance-method" class="signature"><strong>#stop</strong></a>
+        
+          <div class="summary"><p>Send this signal the signal to stop and mark the instance in a state that tells us that we want it to be stopped.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stopped%3F%3ABool-instance-method" class="signature"><strong>#stopped?</strong> : Bool</a>
+        
+          <div class="summary"><p>Is this stopped?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stopping%3F%3ABool-instance-method" class="signature"><strong>#stopping?</strong> : Bool</a>
+        
+          <div class="summary"><p>Is this instance supposed to be stopping/be stopped?</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tag%3AString%3F-instance-method" class="signature"><strong>#tag</strong> : String?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tidy-instance-method" class="signature"><strong>#tidy</strong></a>
+        
+          <div class="summary"><p>Tidy up when this process isn't needed any more</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#to_hash-instance-method" class="signature"><strong>#to_hash</strong></a>
+        
+          <div class="summary"><p>Return this instance as a hash</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#update_pid%3ABool-instance-method" class="signature"><strong>#update_pid</strong> : Bool</a>
+        
+          <div class="summary"><p>Update the locally cached PID from that stored on the file system.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(supervisor:Procodile::Supervisor,process:Procodile::Process,id:Int32)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(supervisor : <a href="../Procodile/Supervisor.html">Procodile::Supervisor</a>, process : <a href="../Procodile/Process.html">Procodile::Process</a>, id : Int32)
+
+        <a class="method-permalink" href="#new%28supervisor%3AProcodile%3A%3ASupervisor%2Cprocess%3AProcodile%3A%3AProcess%2Cid%3AInt32%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L17" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="add_respawn:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>add_respawn</strong> : Int32
+
+        <a class="method-permalink" href="#add_respawn%3AInt32-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Increment the counter of respawns for this process</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L356" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="allocate_port(max_attempts=10)-instance-method">
+      <div class="signature">
+        
+        def <strong>allocate_port</strong>(max_attempts = <span class="n">10</span>)
+
+        <a class="method-permalink" href="#allocate_port%28max_attempts%3D10%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Find a port number for this instance to listen on. We just check that nothing is already listening on it.
+The process is expected to take it straight away if it wants it.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L389" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="can_respawn?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>can_respawn?</strong> : Bool
+
+        <a class="method-permalink" href="#can_respawn%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Can this process be respawned if needed?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L336" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="check(options={}ofString=&gt;String)-instance-method">
+      <div class="signature">
+        
+        def <strong>check</strong>(options = {} <span class="k">of</span> <span class="t">String</span> <span class="o">=&gt;</span> <span class="t">String</span>)
+
+        <a class="method-permalink" href="#check%28options%3D%7B%7DofString%3D%3EString%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Check the status of this process and handle as appropriate.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L303" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="description-instance-method">
+      <div class="signature">
+        
+        def <strong>description</strong>
+
+        <a class="method-permalink" href="#description-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return a description for this instance</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="environment_variables:Hash(String,String)-instance-method">
+      <div class="signature">
+        
+        def <strong>environment_variables</strong> : Hash(<a href="../String.html">String</a>, <a href="../String.html">String</a>)
+
+        <a class="method-permalink" href="#environment_variables%3AHash%28String%2CString%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return an array of environment variables that should be set</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L57" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="failed?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>failed?</strong> : Bool
+
+        <a class="method-permalink" href="#failed%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Has this failed?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L202" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="id:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>id</strong> : Int32
+
+        <a class="method-permalink" href="#id%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="on_stop-instance-method">
+      <div class="signature">
+        
+        def <strong>on_stop</strong>
+
+        <a class="method-permalink" href="#on_stop-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>A method that will be called when this instance has been stopped and it isn't going to be
+started again</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L226" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pid:Int64-instance-method">
+      <div class="signature">
+        
+        def <strong>pid</strong> : Int64
+
+        <a class="method-permalink" href="#pid%3AInt64-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pid=(pid:Int64)-instance-method">
+      <div class="signature">
+        
+        def <strong>pid=</strong>(pid : Int64)
+
+        <a class="method-permalink" href="#pid%3D%28pid%3AInt64%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pid_file_path:String-instance-method">
+      <div class="signature">
+        
+        def <strong>pid_file_path</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#pid_file_path%3AString-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return the path to this instance's PID file</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L71" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pid_from_file:Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>pid_from_file</strong> : Int64 | Nil
+
+        <a class="method-permalink" href="#pid_from_file%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return the PID that is in the instances process PID file</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L78" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="port:Int32?-instance-method">
+      <div class="signature">
+        
+        def <strong>port</strong> : Int32?
+
+        <a class="method-permalink" href="#port%3AInt32%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="port=(port:Int32|Nil)-instance-method">
+      <div class="signature">
+        
+        def <strong>port=</strong>(port : Int32 | Nil)
+
+        <a class="method-permalink" href="#port%3D%28port%3AInt32%7CNil%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="port_available?(port):Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>port_available?</strong>(port) : Bool
+
+        <a class="method-permalink" href="#port_available%3F%28port%29%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Is the given port available?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L408" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="process:Procodile::Process-instance-method">
+      <div class="signature">
+        
+        def <strong>process</strong> : <a href="../Procodile/Process.html">Procodile::Process</a>
+
+        <a class="method-permalink" href="#process%3AProcodile%3A%3AProcess-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="process=(process:Procodile::Process)-instance-method">
+      <div class="signature">
+        
+        def <strong>process=</strong>(process : <a href="../Procodile/Process.html">Procodile::Process</a>)
+
+        <a class="method-permalink" href="#process%3D%28process%3AProcodile%3A%3AProcess%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L14" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="respawns:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>respawns</strong> : Int32
+
+        <a class="method-permalink" href="#respawns%3AInt32-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return the number of times this process has been respawned in the last hour</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L343" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="restart:self|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>restart</strong> : <span class="k">self</span> | Nil
+
+        <a class="method-permalink" href="#restart%3Aself%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Retarts the process using the appropriate method from the process configuration</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L243" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="running?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>running?</strong> : Bool
+
+        <a class="method-permalink" href="#running%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Is this process running? Pass an option to check the given PID instead of the instance</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L88" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="should_be_running?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>should_be_running?</strong> : Bool
+
+        <a class="method-permalink" href="#should_be_running%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Should this process be running?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L50" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start-instance-method">
+      <div class="signature">
+        
+        def <strong>start</strong>
+
+        <a class="method-permalink" href="#start-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Start a new instance of this process</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L101" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="status:String-instance-method">
+      <div class="signature">
+        
+        def <strong>status</strong> : <a href="../String.html">String</a>
+
+        <a class="method-permalink" href="#status%3AString-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return the status of this instance</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L33" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stop-instance-method">
+      <div class="signature">
+        
+        def <strong>stop</strong>
+
+        <a class="method-permalink" href="#stop-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Send this signal the signal to stop and mark the instance in a state that
+tells us that we want it to be stopped.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L210" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stopped?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>stopped?</strong> : Bool
+
+        <a class="method-permalink" href="#stopped%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Is this stopped?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L195" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stopping?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>stopping?</strong> : Bool
+
+        <a class="method-permalink" href="#stopping%3F%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Is this instance supposed to be stopping/be stopped?</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L188" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tag:String?-instance-method">
+      <div class="signature">
+        
+        def <strong>tag</strong> : <a href="../String.html">String</a>?
+
+        <a class="method-permalink" href="#tag%3AString%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L15" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tidy-instance-method">
+      <div class="signature">
+        
+        def <strong>tidy</strong>
+
+        <a class="method-permalink" href="#tidy-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Tidy up when this process isn't needed any more</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L235" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="to_hash-instance-method">
+      <div class="signature">
+        
+        def <strong>to_hash</strong>
+
+        <a class="method-permalink" href="#to_hash-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Return this instance as a hash</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L370" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="update_pid:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>update_pid</strong> : Bool
+
+        <a class="method-permalink" href="#update_pid%3ABool-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Update the locally cached PID from that stored on the file system.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile_cr/blob/346c27f30d7b2649956e7dd3d353955b2f292ee9/src/procodile/instance.cr#L288" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>
