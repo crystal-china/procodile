@@ -27,7 +27,7 @@ module Procodile
           if @options.json
             puts status.to_json
           elsif @options.json_pretty
-            pp! status
+            puts status
             nil
           elsif @options.simple
             if status.messages.empty?

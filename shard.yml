@@ -8,6 +8,11 @@ authors:
 targets:
   procodile:
     main: src/procodile.cr
+    
+development_dependencies:
+  ameba:
+    github: crystal-ameba/ameba
+    version: ~> 1.1.0
 
 crystal: 1.6.2
 
