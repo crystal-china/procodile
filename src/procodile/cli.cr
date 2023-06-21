@@ -71,7 +71,7 @@ module Procodile
       run_options = Procodile::RunOptions.new
       run_options.respawn = options.respawn
       run_options.stop_when_none = options.stop_when_none
-      run_options.proxy = options.proxy
+      # run_options.proxy = options.proxy
       run_options.force_single_log = options.foreground
       run_options.port_allocations = options.port_allocations
 

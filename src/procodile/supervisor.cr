@@ -2,15 +2,12 @@ require "file_utils"
 require "./logger"
 require "./error"
 require "./control_server"
-require "./tcp_proxy"
 require "./signal_handler"
 
 module Procodile
   class Supervisor
     @tag : String?
-    @tcp_proxy : Procodile::TCPProxy?
-
-    getter config, processes, started_at, tag, tcp_proxy, run_options
+    getter config, processes, started_at, tag, run_options
 
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
@@ -37,11 +34,6 @@ module Procodile
       end
 
       ControlServer.start(self)
-
-      if @run_options.proxy
-        Procodile.log nil, "system", "Proxy is enabled"
-        @tcp_proxy = TCPProxy.start(self)
-      end
 
       watch_for_output
 
@@ -350,7 +342,6 @@ module Procodile
     private def remove_removed_processes
       @processes.reject! do |process, instances|
         if process.removed && instances.empty?
-          @tcp_proxy.try &.remove_process(process)
           true
         else
           false
