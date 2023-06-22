@@ -266,13 +266,13 @@ module Procodile
           loop do
             @signal_handler.handle
 
-            if reader.read_byte
+            if reader.read_byte.nil?
               reader.close
               buffer.delete(reader)
               @readers.delete(reader)
             else
               buffer[reader] ||= ""
-              buffer[reader] += reader.read_string(4096)
+              buffer[reader] += reader.gets_to_end
 
               while buffer[reader].index("\n")
                 line, buffer[reader] = buffer[reader].split("\n", 2)
