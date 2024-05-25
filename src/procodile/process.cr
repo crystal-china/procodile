@@ -21,7 +21,7 @@ module Procodile
     #
     # Increase the instance index and return
     #
-    def get_instance_id : Int32
+    def instance_id : Int32
       MUTEX.synchronize do
         @instance_index = 0 if @instance_index == 10000
         @instance_index += 1
@@ -170,7 +170,7 @@ module Procodile
       #   :pid        => 410794,
       # }
 
-      Instance.new(supervisor, self, get_instance_id)
+      Instance.new(supervisor, self, instance_id)
     end
 
     #
