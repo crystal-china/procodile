@@ -47,7 +47,7 @@ module Procodile
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
       stop(SupervisorOptions.new(stop_supervisor: true))
     ensure
-      loop { supervise; sleep 3 }
+      loop { supervise; sleep 3.seconds }
     end
 
     def start_processes(process_names : Array(String)?, options = SupervisorOptions.new) : Array(Procodile::Instance)

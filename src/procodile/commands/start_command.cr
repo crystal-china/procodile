@@ -108,11 +108,6 @@ module Procodile
           if @options.start_supervisor == false
             raise Error.new "Supervisor is not running and cannot be started because --no-supervisor is set"
           else
-            # 这里调用了 Procodile::Supervisor.new, 并传入所有参数给 start 方法。
-            # Procodile::Supervisor.new(@config, @option).start do
-            # ...
-            # end
-
             self.class.start_supervisor(@config, @options) do |supervisor|
               unless @options.start_processes == false
                 supervisor.start_processes(
