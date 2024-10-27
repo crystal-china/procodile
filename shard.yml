@@ -1,5 +1,5 @@
 name: procodile
-version: 1.0.19
+version: 1.0.20
 
 authors:
   - Adam Cooke <me@adamcooke.io>
@@ -13,6 +13,6 @@ development_dependencies:
   ameba:
     github: crystal-ameba/ameba
 
-crystal: 1.6.2
+crystal: 1.14.0
 
 license: MIT
