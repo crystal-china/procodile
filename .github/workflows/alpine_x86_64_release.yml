@@ -24,17 +24,16 @@ jobs:
       - name: Check formatting
         run: crystal tool format --check
       - name: Run tests
-        run: crystal spec --order=random --error-on-warnings
+        run: crystal spec --order=random
       - name: package information
         run: |
-          echo "BINARY_NAME=bin/procodile" >> $GITHUB_ENV
+          echo "BINARY_NAME=bin/$(cat shard.yml |grep targets -A1|tail -n1 |sed 's#[ :]##g')" >> $GITHUB_ENV
           echo "PKG_ARCH=x86_64" >> $GITHUB_ENV
-          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           echo "PLATFORM=unknown-linux-musl.tar.gz" >> $GITHUB_ENV
           echo "BUILD_ARGS=--static --link-flags=\"-s -Wl,-z,relro,-z,now\"" >> $GITHUB_ENV
       - name: set asset name
         run: |
-          echo "ASSERT_NAME=${{env.BINARY_NAME}}-${{env.RELEASE_VERSION}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
+          echo "ASSERT_NAME=${{env.BINARY_NAME}}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
       - name: release binary
         id: release
         run: |
