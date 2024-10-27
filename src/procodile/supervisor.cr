@@ -8,10 +8,10 @@ module Procodile
   class Supervisor
     @tag : String?
     getter config, processes, started_at, tag, run_options
+    property readers = {} of IO::FileDescriptor => Procodile::Instance
 
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
-      @readers = {} of IO::FileDescriptor => Procodile::Instance
 
       @signal_handler = SignalHandler.new
       @signal_handler.register(Signal::TERM) { stop_supervisor }
@@ -35,13 +35,11 @@ module Procodile
 
       ControlServer.start(self)
 
+      after_start.call(self) # invoke supervisor.start_processes
+
       watch_for_output
 
       @started_at = Time.local
-
-      after_start.call(self) # invoke supervisor.start_processes
-
-
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
@@ -219,7 +217,7 @@ module Procodile
     end
 
     def add_reader(instance, io)
-      @readers[io] = instance
+      readers[io] = instance
       @signal_handler.notice
     end
 
@@ -234,49 +232,42 @@ module Procodile
     def remove_instance(instance)
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
-        @readers.delete(instance)
+        readers.delete(instance)
       end
     end
 
     private def watch_for_output
-      sleep_chan = Channel(Nil).new
       signal_handler_chan = Channel(Nil).new
       listener_chan = Channel(Nil).new
 
       spawn do
         loop do
-          sleep 30
-          @signal_handler.handle
-          sleep_chan.send nil
-        end
-      end
-
-      spawn do
-        loop do
-          @signal_handler.handle
           @signal_handler.pipe[:reader].read(Bytes.new(999)) rescue nil
           signal_handler_chan.send nil
         end
       end
 
-      @readers.keys.each do |reader|
+      buffer = {} of IO::FileDescriptor => String
+
+      readers.keys.each do |reader|
         spawn do
-          buffer = {} of IO::FileDescriptor => String
-
           loop do
-            @signal_handler.handle
+            Fiber.yield
 
-            if reader.read_byte.nil?
-              reader.close
+            if reader.closed?
               buffer.delete(reader)
-              @readers.delete(reader)
+              readers.delete(reader)
             else
+              str = reader.gets
+
+              next if str.nil?
+
               buffer[reader] ||= ""
-              buffer[reader] += reader.gets_to_end
+              buffer[reader] += "#{str.chomp}\n"
 
               while buffer[reader].index("\n")
                 line, buffer[reader] = buffer[reader].split("\n", 2)
-                if (instance = @readers[reader])
+                if (instance = readers[reader])
                   Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
                 else
                   Procodile.log nil, "unknown", buffer[reader]
@@ -291,8 +282,9 @@ module Procodile
 
       spawn do
         loop do
+          @signal_handler.handle
+
           select
-          when sleep_chan.receive
           when signal_handler_chan.receive
           when listener_chan.receive
           end
