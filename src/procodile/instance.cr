@@ -166,6 +166,7 @@ module Procodile
         @pid = process.pid
 
         log_destination.close
+
         File.write(pid_file_path, "#{@pid}\n")
         @supervisor.add_instance(self, io)
 
@@ -270,7 +271,7 @@ module Procodile
 
         spawn do
           while running?
-            sleep 0.5
+            sleep 0.5.seconds
           end
           new_instance.start
         end

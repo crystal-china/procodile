@@ -26,3 +26,6 @@ Metrics/CyclomaticComplexity:
   MaxComplexity: 10
   Enabled: false
   Severity: Warning
+
+Naming/BlockParameterName:
+  Enabled: false
