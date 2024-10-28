@@ -6,13 +6,12 @@ module Procodile
     def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
     end
 
-    def start_processes(options) : String
-      if options.port_allocations
-        run_options_port_allocations = @supervisor.run_options.port_allocations
-        if run_options_port_allocations
-          run_options_port_allocations.merge!(options.port_allocations.not_nil!)
+    def start_processes(options : ControlSessionData) : String
+      if (ports = options.port_allocations)
+        if (run_options_ports = @supervisor.run_options.port_allocations)
+          run_options_ports.merge!(ports)
         else
-          @supervisor.run_options.port_allocations = options.port_allocations
+          @supervisor.run_options.port_allocations = ports
         end
       end
 
@@ -24,7 +23,7 @@ module Procodile
       "200 #{instances.map(&.to_hash).to_json}"
     end
 
-    def stop(options) : String
+    def stop(options : ControlSessionData) : String
       instances = @supervisor.stop(
         SupervisorOptions.new(
           processes: options.processes,
@@ -35,7 +34,7 @@ module Procodile
       "200 #{instances.map(&.to_hash).to_json}"
     end
 
-    def restart(options) : String
+    def restart(options : ControlSessionData) : String
       instances = @supervisor.restart(
         SupervisorOptions.new(
           processes: options.processes,
@@ -52,18 +51,19 @@ module Procodile
       "200 []"
     end
 
-    def check_concurrency(options) : String
+    def check_concurrency(options : ControlSessionData) : String
       result = @supervisor.check_concurrency(
         SupervisorOptions.new(
           reload: options.reload
         )
       )
-      result = result.transform_values { |instances| instances.map(&.to_hash) }
+
+      result = result.transform_values { |instances, _type| instances.map(&.to_hash) }
 
       "200 #{result.to_json}"
     end
 
-    def status(options) : String
+    def status(options : ControlSessionData) : String
       instances = {} of String => Array(Procodile::InstanceConfig)
 
       @supervisor.processes.each do |process, process_instances|
@@ -98,13 +98,14 @@ module Procodile
     end
 
     {% begin %}
-      def receive_data(data)
-        command, _options = data.split(/\s+/, 2)
-        options = ControlSessionData.from_json(_options)
+      def receive_data(data : String)
+        command, session_data = data.split(/\s+/, 2)
+        options = ControlSessionData.from_json(session_data)
 
         callable = {} of String => Proc(ControlSessionData, String)
 
         {% for e in @type.methods %}
+          # It's interest, @type.methods not include current defined #receive_data method.
           {% if e.name.stringify != "initialize" %}
             callable[{{ e.name.stringify }}] = ->{{ e.name }}(ControlSessionData)
           {% end %}
