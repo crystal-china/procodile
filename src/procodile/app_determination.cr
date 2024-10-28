@@ -13,6 +13,7 @@ module Procodile
     @global_options : ProcfileOption
 
     getter root, procfile
+    getter? in_app_directory = false # not be used for now.
 
     # Start by creating an determination ased on the root and procfile that has been provided
     # to us by the user (from --root and/or --procfile)
@@ -28,7 +29,7 @@ module Procodile
       calculate
     end
 
-    private def calculate
+    private def calculate : Nil
       # Try and find something using the information that has been given to us by the user
       root = find_root_and_procfile(
         @pwd,
@@ -61,13 +62,14 @@ module Procodile
           # directory as the root.
           @root = pwd
           @procfile = "Procfile"
+          @in_app_directory = true
         end
       end
 
       @root
     end
 
-    private def expand_path(path, root = nil) : String
+    private def expand_path(path : String, root : String? = nil) : String
       # Remove trailing slashes for normalization
       path = path.rstrip('/')
 
@@ -81,7 +83,7 @@ module Procodile
       end
     end
 
-    private def find_root_and_procfile_from_options(options) : String?
+    private def find_root_and_procfile_from_options(options : ProcfileOption) : String?
       case options
       when ProcfileOption
         # Use the current hash
@@ -90,7 +92,10 @@ module Procodile
           @global_options.root,
           @global_options.procfile
         )
-        # when Array(ProcfileOption)
+      when Array(ProcfileOption)
+        # Global options is provides a list of apps. We need to know which one of
+        # these we should be looking at.
+        find_root_and_procfile_from_options(options[@app_id])
       end
     end
   end
