@@ -128,7 +128,7 @@ module Procodile
       @local_process_options ||= local_options.processes || {} of String => ProcessOption
     end
 
-    def options_for_process(name) : ProcessOption
+    def options_for_process(name : String) : ProcessOption
       po = process_options[name]? || ProcessOption.new
       local_po = local_process_options[name]? || ProcessOption.new
 
@@ -138,6 +138,7 @@ module Procodile
     def environment_variables : Hash(String, String)
       option_env = options.env || {} of String => String
       local_option_env = local_options.env || {} of String => String
+
       option_env.merge(local_option_env)
     end
 
@@ -183,7 +184,7 @@ module Procodile
       "#{procfile_path}.local"
     end
 
-    private def create_process(name, command, log_color) : Procodile::Process
+    private def create_process(name : String, command : String, log_color : Int32) : Procodile::Process
       process = Procodile::Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color
       process
