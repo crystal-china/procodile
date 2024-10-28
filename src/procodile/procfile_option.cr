@@ -61,11 +61,13 @@ module Procodile
     end
   end
 
-  record CliCommand,
+  record(
+    CliCommand,
     name : String,
     description : String?,
     options : Proc(OptionParser, Procodile::CLI, Nil)?,
     callable : Proc(Nil)
+  )
 
   struct CliOptions
     property foreground : Bool?
@@ -93,12 +95,14 @@ module Procodile
     end
   end
 
-  record ControlSessionData,
+  record(
+    ControlSessionData,
     processes : Array(String)? = [] of String,
     tag : String? = nil,
     port_allocations : Hash(String, Int32)? = nil,
     reload : Bool? = nil,
-    stop_supervisor : Bool? = nil do
+    stop_supervisor : Bool? = nil
+  ) do
     include JSON::Serializable
   end
 
@@ -110,7 +114,8 @@ module Procodile
     property port_allocations : Hash(String, Int32)?
   end
 
-  record InstanceConfig,
+  record(
+    InstanceConfig,
     description : String,
     pid : Int64?,
     respawns : Int32,
@@ -118,11 +123,13 @@ module Procodile
     running : Bool,
     started_at : Int64?,
     tag : String?,
-    port : Int32? do
+    port : Int32?
+  ) do
     include JSON::Serializable
   end
 
-  record ControlClientProcessStatus,
+  record(
+    ControlClientProcessStatus,
     name : String,
     log_color : Int32,
     quantity : Int32,
@@ -133,21 +140,25 @@ module Procodile
     log_path : String?,
     removed : Bool,
     proxy_port : Int32?,
-    proxy_address : String? do
+    proxy_address : String?
+  ) do
     include JSON::Serializable
   end
 
-  record SupervisorMessages,
+  record(
+    SupervisorMessages,
     type : String,
     process : String? = nil,
     current : Int32? = nil,
     desired : Int32? = nil,
     instance : String? = nil,
-    status : String? = nil do
+    status : String? = nil
+  ) do
     include JSON::Serializable
   end
 
-  record ControlClientReplyForStatusCommand,
+  record(
+    ControlClientReplyForStatusCommand,
     version : String,
     messages : Array(SupervisorMessages),
     root : String,
@@ -163,13 +174,16 @@ module Procodile
     supervisor_pid_path : String,
     pid_root : String,
     loaded_at : Int64,
-    log_root : String? do
+    log_root : String?
+  ) do
     include JSON::Serializable
   end
 
-  record SupervisorOptions,
+  record(
+    SupervisorOptions,
     processes : Array(String)? = nil,
     stop_supervisor : Bool? = nil,
     tag : String? = nil,
     reload : Bool? = nil
+  )
 end
