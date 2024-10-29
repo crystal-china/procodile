@@ -22,7 +22,7 @@ module Procodile
 
       def status
         if supervisor_running?
-          status = ControlClient.run(@config.sock_path, "status").as ControlClientReplyForStatusCommand
+          status = ControlClient.run(@config.sock_path, "status").as ControlClient::ReplyOfStatusCommand
 
           if @options.json
             puts status.to_json

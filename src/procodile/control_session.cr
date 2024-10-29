@@ -75,7 +75,7 @@ module Procodile
 
       processes = @supervisor.processes.keys.map(&.to_hash)
 
-      result = ControlClientReplyForStatusCommand.new(
+      result = ControlClient::ReplyOfStatusCommand.new(
         version: Procodile::VERSION,
         messages: @supervisor.messages,
         root: @supervisor.config.root,
