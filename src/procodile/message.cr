@@ -1,6 +1,6 @@
 module Procodile
   module Message
-    def self.parse(message : SupervisorMessages)
+    def self.parse(message : SupervisorMessage)
       case message.type
       when "not_running"
         "#{message.instance} is not running (#{message.status})"

@@ -190,12 +190,12 @@ module Procodile
       }
     end
 
-    def messages : Array(SupervisorMessages)
-      messages = [] of SupervisorMessages
+    def messages : Array(SupervisorMessage)
+      messages = [] of SupervisorMessage
 
       processes.each do |process, process_instances|
         unless process.correct_quantity?(process_instances.size)
-          messages << SupervisorMessages.new(
+          messages << SupervisorMessage.new(
             type: "incorrect_quantity",
             process: process.name,
             current: process_instances.size,
@@ -204,7 +204,7 @@ module Procodile
         end
         process_instances.each do |instance|
           if instance.should_be_running? && instance.status != "Running"
-            messages << SupervisorMessages.new(
+            messages << SupervisorMessage.new(
               type: "not_running",
               instance: instance.description,
               status: instance.status,

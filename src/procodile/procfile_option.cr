@@ -146,7 +146,7 @@ module Procodile
   end
 
   record(
-    SupervisorMessages,
+    SupervisorMessage,
     type : String,
     process : String? = nil,
     current : Int32? = nil,
@@ -160,7 +160,7 @@ module Procodile
   record(
     ControlClientReplyForStatusCommand,
     version : String,
-    messages : Array(SupervisorMessages),
+    messages : Array(SupervisorMessage),
     root : String,
     app_name : String,
     supervisor : NamedTuple(started_at: Int64, pid: Int64),
