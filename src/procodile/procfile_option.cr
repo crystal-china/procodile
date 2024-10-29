@@ -151,21 +151,9 @@ module Procodile
   end
 
   record(
-    SupervisorMessage,
-    type : SupervisorMessageType,
-    process : String? = nil,
-    current : Int32? = nil,
-    desired : Int32? = nil,
-    instance : String? = nil,
-    status : Instance::Status? = nil
-  ) do
-    include JSON::Serializable
-  end
-
-  record(
     ControlClientReplyForStatusCommand,
     version : String,
-    messages : Array(SupervisorMessage),
+    messages : Array(Supervisor::Message),
     root : String,
     app_name : String,
     supervisor : NamedTuple(started_at: Int64, pid: Int64),

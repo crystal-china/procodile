@@ -190,12 +190,12 @@ module Procodile
       }
     end
 
-    def messages : Array(SupervisorMessage)
-      messages = [] of SupervisorMessage
+    def messages : Array(Message)
+      messages = [] of Message
 
       processes.each do |process, process_instances|
         unless process.correct_quantity?(process_instances.size)
-          messages << SupervisorMessage.new(
+          messages << Message.new(
             type: :incorrect_quantity,
             process: process.name,
             current: process_instances.size,
@@ -204,7 +204,7 @@ module Procodile
         end
         process_instances.each do |instance|
           if instance.should_be_running? && !instance.status.running?
-            messages << SupervisorMessage.new(
+            messages << Message.new(
               type: :not_running,
               instance: instance.description,
               status: instance.status,
@@ -362,6 +362,32 @@ module Procodile
           end
         end
       end
+    end
+  end
+end
+
+class Procodile::Supervisor
+  #
+  # record for message
+  struct Message
+    include JSON::Serializable
+    getter type, process, current, desired, instance, status
+
+    def initialize(
+      @type : Type,
+      @process : String? = nil,
+      @current : Int32? = nil,
+      @desired : Int32? = nil,
+      @instance : String? = nil,
+      @status : Instance::Status? = nil
+    )
+    end
+
+    #
+    # Supervisor message type
+    enum Type
+      NotRunning
+      IncorrectQuantity
     end
   end
 end
