@@ -145,9 +145,14 @@ module Procodile
     include JSON::Serializable
   end
 
+  enum SupervisorMessageType
+    NotRunning
+    IncorrectQuantity
+  end
+
   record(
     SupervisorMessage,
-    type : String,
+    type : SupervisorMessageType,
     process : String? = nil,
     current : Int32? = nil,
     desired : Int32? = nil,

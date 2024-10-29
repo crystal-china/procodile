@@ -196,7 +196,7 @@ module Procodile
       processes.each do |process, process_instances|
         unless process.correct_quantity?(process_instances.size)
           messages << SupervisorMessage.new(
-            type: "incorrect_quantity",
+            type: :incorrect_quantity,
             process: process.name,
             current: process_instances.size,
             desired: process.quantity,
@@ -205,7 +205,7 @@ module Procodile
         process_instances.each do |instance|
           if instance.should_be_running? && instance.status != "Running"
             messages << SupervisorMessage.new(
-              type: "not_running",
+              type: :not_running,
               instance: instance.description,
               status: instance.status,
             )
