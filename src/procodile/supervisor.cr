@@ -16,7 +16,7 @@ module Procodile
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
       @signal_handler = SignalHandler.new
       @signal_handler.register(Signal::TERM) { stop_supervisor }
-      @signal_handler.register(Signal::INT) { stop(SupervisorOptions.new(stop_supervisor: true)) }
+      @signal_handler.register(Signal::INT) { stop(Options.new(stop_supervisor: true)) }
       @signal_handler.register(Signal::USR1) { restart }
       @signal_handler.register(Signal::USR2) { }
       @signal_handler.register(Signal::HUP) { reload_config }
@@ -49,7 +49,7 @@ module Procodile
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
-      stop(SupervisorOptions.new(stop_supervisor: true))
+      stop(Options.new(stop_supervisor: true))
     ensure
       loop { supervise; sleep 3.seconds }
     end
@@ -103,7 +103,7 @@ module Procodile
       instances_stopped
     end
 
-    def restart(options = SupervisorOptions.new)
+    def restart(options = Options.new)
       @tag = options.tag
 
       reload_config
@@ -396,4 +396,11 @@ class Procodile::Supervisor
       IncorrectQuantity
     end
   end
+
+  record(Options,
+    processes : Array(String)? = nil,
+    stop_supervisor : Bool? = nil,
+    tag : String? = nil,
+    reload : Bool? = nil
+  )
 end

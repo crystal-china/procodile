@@ -95,17 +95,6 @@ module Procodile
     end
   end
 
-  record(
-    ControlSessionData,
-    processes : Array(String)? = [] of String,
-    tag : String? = nil,
-    port_allocations : Hash(String, Int32)? = nil,
-    reload : Bool? = nil,
-    stop_supervisor : Bool? = nil
-  ) do
-    include JSON::Serializable
-  end
-
   struct RunOptions
     property respawn : Bool?
     property stop_when_none : Bool?
@@ -144,12 +133,4 @@ module Procodile
   ) do
     include JSON::Serializable
   end
-
-  record(
-    SupervisorOptions,
-    processes : Array(String)? = nil,
-    stop_supervisor : Bool? = nil,
-    tag : String? = nil,
-    reload : Bool? = nil
-  )
 end

@@ -3,10 +3,20 @@ require "./version"
 
 module Procodile
   class ControlSession
+    record(Options,
+      processes : Array(String)? = [] of String,
+      tag : String? = nil,
+      port_allocations : Hash(String, Int32)? = nil,
+      reload : Bool? = nil,
+      stop_supervisor : Bool? = nil
+    ) do
+      include JSON::Serializable
+    end
+
     def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
     end
 
-    def start_processes(options : ControlSessionData) : String
+    def start_processes(options : Options) : String
       if (ports = options.port_allocations)
         if (run_options_ports = @supervisor.run_options.port_allocations)
           run_options_ports.merge!(ports)
@@ -17,15 +27,15 @@ module Procodile
 
       instances = @supervisor.start_processes(
         options.processes,
-        SupervisorOptions.new(tag: options.tag)
+        Supervisor::Options.new(tag: options.tag)
       )
 
       "200 #{instances.map(&.to_struct).to_json}"
     end
 
-    def stop(options : ControlSessionData) : String
+    def stop(options : Options) : String
       instances = @supervisor.stop(
-        SupervisorOptions.new(
+        Supervisor::Options.new(
           processes: options.processes,
           stop_supervisor: options.stop_supervisor
         )
@@ -34,9 +44,9 @@ module Procodile
       "200 #{instances.map(&.to_struct).to_json}"
     end
 
-    def restart(options : ControlSessionData) : String
+    def restart(options : Options) : String
       instances = @supervisor.restart(
-        SupervisorOptions.new(
+        Supervisor::Options.new(
           processes: options.processes,
           tag: options.tag
         )
@@ -51,9 +61,9 @@ module Procodile
       "200 []"
     end
 
-    def check_concurrency(options : ControlSessionData) : String
+    def check_concurrency(options : Options) : String
       result = @supervisor.check_concurrency(
-        SupervisorOptions.new(
+        Supervisor::Options.new(
           reload: options.reload
         )
       )
@@ -63,7 +73,7 @@ module Procodile
       "200 #{result.to_json}"
     end
 
-    def status(options : ControlSessionData) : String
+    def status(options : Options) : String
       instances = {} of String => Array(Procodile::InstanceConfig)
 
       @supervisor.processes.each do |process, process_instances|
@@ -100,14 +110,14 @@ module Procodile
     {% begin %}
       def receive_data(data : String)
         command, session_data = data.split(/\s+/, 2)
-        options = ControlSessionData.from_json(session_data)
+        options = Options.from_json(session_data)
 
-        callable = {} of String => Proc(ControlSessionData, String)
+        callable = {} of String => Proc(Options, String)
 
         {% for e in @type.methods %}
           # It's interest, @type.methods not include current defined #receive_data method.
           {% if e.name.stringify != "initialize" %}
-            callable[{{ e.name.stringify }}] = ->{{ e.name }}(ControlSessionData)
+            callable[{{ e.name.stringify }}] = ->{{ e.name }}(Options)
           {% end %}
         {% end %}
 

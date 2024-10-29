@@ -112,7 +112,7 @@ module Procodile
               unless @options.start_processes == false
                 supervisor.start_processes(
                   process_names_from_cli_option,
-                  SupervisorOptions.new(tag: @options.tag)
+                  Supervisor::Options.new(tag: @options.tag)
                 )
               end
             end
