@@ -369,38 +369,40 @@ module Procodile
         end
       end
     end
-  end
-end
 
-class Procodile::Supervisor
-  #
-  # record for message
-  struct Message
-    include JSON::Serializable
-    getter type, process, current, desired, instance, status
+    # Supervisor message
+    struct Message
+      include JSON::Serializable
+      getter type, process, current, desired, instance, status
 
-    def initialize(
-      @type : Type,
-      @process : String? = nil,
-      @current : Int32? = nil,
-      @desired : Int32? = nil,
-      @instance : String? = nil,
-      @status : Instance::Status? = nil
-    )
+      def initialize(
+        @type : Type,
+        @process : String? = nil,
+        @current : Int32? = nil,
+        @desired : Int32? = nil,
+        @instance : String? = nil,
+        @status : Instance::Status? = nil
+      )
+      end
+
+      # Supervisor message type
+      enum Type
+        NotRunning
+        IncorrectQuantity
+      end
     end
 
-    #
-    # Supervisor message type
-    enum Type
-      NotRunning
-      IncorrectQuantity
+    # Supervisor options
+    struct Options
+      getter processes, stop_supervisor, tag, reload
+
+      def initialize(
+        @processes : Array(String)? = nil,
+        @stop_supervisor : Bool? = nil,
+        @tag : String? = nil,
+        @reload : Bool? = nil
+      )
+      end
     end
   end
-
-  record(Options,
-    processes : Array(String)? = nil,
-    stop_supervisor : Bool? = nil,
-    tag : String? = nil,
-    reload : Bool? = nil
-  )
 end

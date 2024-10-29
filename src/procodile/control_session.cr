@@ -3,16 +3,6 @@ require "./version"
 
 module Procodile
   class ControlSession
-    record(Options,
-      processes : Array(String)? = [] of String,
-      tag : String? = nil,
-      port_allocations : Hash(String, Int32)? = nil,
-      reload : Bool? = nil,
-      stop_supervisor : Bool? = nil
-    ) do
-      include JSON::Serializable
-    end
-
     def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
     end
 
@@ -133,5 +123,21 @@ module Procodile
         end
       end
     {% end %}
+
+    # Control session options
+    struct Options
+      include JSON::Serializable
+
+      getter processes, tag, port_allocations, reload, stop_supervisor
+
+      def initialize(
+        @processes : Array(String)? = [] of String,
+        @tag : String? = nil,
+        @port_allocations : Hash(String, Int32)? = nil,
+        @reload : Bool? = nil,
+        @stop_supervisor : Bool? = nil
+      )
+      end
+    end
   end
 end

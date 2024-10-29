@@ -57,28 +57,35 @@ module Procodile
     def disconnect : Nil
       @socket.try &.close
     end
-  end
-end
 
-class Procodile::ControlClient
-  record(ReplyOfStatusCommand,
-    version : String,
-    messages : Array(Supervisor::Message),
-    root : String,
-    app_name : String,
-    supervisor : NamedTuple(started_at: Int64, pid: Int64),
-    instances : Hash(String, Array(InstanceConfig)),
-    processes : Array(ControlClientProcessStatus),
-    environment_variables : Hash(String, String),
-    procfile_path : String,
-    options_path : String,
-    local_options_path : String,
-    sock_path : String,
-    supervisor_pid_path : String,
-    pid_root : String,
-    loaded_at : Int64,
-    log_root : String?
-  ) do
-    include JSON::Serializable
+    # Reply of `procodile status`
+    struct ReplyOfStatusCommand
+      include JSON::Serializable
+
+      getter version, messages, root, app_name, supervisor, instances,
+        processes, environment_variables, procfile_path, options_path,
+        local_options_path, sock_path, supervisor_pid_path, pid_root,
+        loaded_at, log_root
+
+      def initialize(
+        @version : String,
+        @messages : Array(Supervisor::Message),
+        @root : String,
+        @app_name : String,
+        @supervisor : NamedTuple(started_at: Int64, pid: Int64),
+        @instances : Hash(String, Array(InstanceConfig)),
+        @processes : Array(ControlClientProcessStatus),
+        @environment_variables : Hash(String, String),
+        @procfile_path : String,
+        @options_path : String,
+        @local_options_path : String,
+        @sock_path : String,
+        @supervisor_pid_path : String,
+        @pid_root : String,
+        @loaded_at : Int64,
+        @log_root : String?
+      )
+      end
+    end
   end
 end
