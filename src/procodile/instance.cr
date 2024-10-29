@@ -2,6 +2,14 @@ require "./supervisor"
 
 module Procodile
   class Instance
+    enum Status
+      Unknown
+      Stopped
+      Stopping
+      Running
+      Failed
+    end
+
     @supervisor : Procodile::Supervisor
     @stopping_at : Time?
     @started_at : Time? = nil
@@ -231,17 +239,17 @@ module Procodile
     #
     # Return the status of this instance
     #
-    def status : String
+    def status : Status
       if stopped?
-        "Stopped"
+        Status::Stopped
       elsif stopping?
-        "Stopping"
+        Status::Stopping
       elsif running?
-        "Running"
+        Status::Running
       elsif failed?
-        "Failed"
+        Status::Failed
       else
-        "Unknown"
+        Status::Unknown
       end
     end
 

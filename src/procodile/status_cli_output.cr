@@ -54,7 +54,7 @@ module Procodile
         else
           instances.each do |instance|
             print "|| => ".color(process.log_color) + instance.description.to_s.ljust(17, ' ').color(process.log_color)
-            print instance.status.ljust(10, ' ')
+            print instance.status.to_s.ljust(10, ' ')
             print "   #{formatted_timestamp(instance.started_at).ljust(10, ' ')}"
             print "   pid:#{instance.pid.to_s.ljust(6, ' ')}"
             print "   respawns:#{instance.respawns.to_s.ljust(4, ' ')}"

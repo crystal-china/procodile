@@ -203,7 +203,7 @@ module Procodile
           )
         end
         process_instances.each do |instance|
-          if instance.should_be_running? && instance.status != "Running"
+          if instance.should_be_running? && !instance.status.running?
             messages << SupervisorMessage.new(
               type: :not_running,
               instance: instance.description,

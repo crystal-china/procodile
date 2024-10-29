@@ -119,7 +119,7 @@ module Procodile
     description : String,
     pid : Int64?,
     respawns : Int32,
-    status : String,
+    status : Instance::Status,
     running : Bool,
     started_at : Int64?,
     tag : String?,
@@ -157,7 +157,7 @@ module Procodile
     current : Int32? = nil,
     desired : Int32? = nil,
     instance : String? = nil,
-    status : String? = nil
+    status : Instance::Status? = nil
   ) do
     include JSON::Serializable
   end
