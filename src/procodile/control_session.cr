@@ -20,7 +20,7 @@ module Procodile
         SupervisorOptions.new(tag: options.tag)
       )
 
-      "200 #{instances.map(&.to_hash).to_json}"
+      "200 #{instances.map(&.to_struct).to_json}"
     end
 
     def stop(options : ControlSessionData) : String
@@ -31,7 +31,7 @@ module Procodile
         )
       )
 
-      "200 #{instances.map(&.to_hash).to_json}"
+      "200 #{instances.map(&.to_struct).to_json}"
     end
 
     def restart(options : ControlSessionData) : String
@@ -42,7 +42,7 @@ module Procodile
         )
       )
 
-      "200 " + instances.map { |a| a.map { |i| i ? i.to_hash : nil } }.to_json
+      "200 " + instances.map { |a| a.map { |i| i ? i.to_struct : nil } }.to_json
     end
 
     def reload_config(options) : String
@@ -58,7 +58,7 @@ module Procodile
         )
       )
 
-      result = result.transform_values { |instances, _type| instances.map(&.to_hash) }
+      result = result.transform_values { |instances, _type| instances.map(&.to_struct) }
 
       "200 #{result.to_json}"
     end
@@ -69,7 +69,7 @@ module Procodile
       @supervisor.processes.each do |process, process_instances|
         instances[process.name] = [] of Procodile::InstanceConfig
         process_instances.each do |instance|
-          instances[process.name] << instance.to_hash
+          instances[process.name] << instance.to_struct
         end
       end
 
