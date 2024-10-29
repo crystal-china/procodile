@@ -109,7 +109,7 @@ module Procodile
   struct RunOptions
     property respawn : Bool?
     property stop_when_none : Bool?
-    property proxy : Bool?
+    property? proxy = false
     property force_single_log : Bool?
     property port_allocations : Hash(String, Int32)?
   end

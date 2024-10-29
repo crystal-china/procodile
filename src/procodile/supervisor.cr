@@ -6,13 +6,14 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    @tag : String?
-    getter config, processes, started_at, tag, run_options
+    getter config, run_options
+    getter tag : String?
+    getter tcp_proxy : TCPProxy?
+    getter started_at : Time?
+    getter processes = {} of Procodile::Process => Array(Procodile::Instance)
     property readers = {} of IO::FileDescriptor => Procodile::Instance
 
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
-      @processes = {} of Procodile::Process => Array(Procodile::Instance)
-
       @signal_handler = SignalHandler.new
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(SupervisorOptions.new(stop_supervisor: true)) }
@@ -34,6 +35,11 @@ module Procodile
       end
 
       ControlServer.start(self)
+
+      if @run_options.proxy?
+        Procodile.log nil, "system", "Proxy is enabled"
+        @tcp_proxy = TCPProxy.start(self)
+      end
 
       after_start.call(self) # invoke supervisor.start_processes
 
