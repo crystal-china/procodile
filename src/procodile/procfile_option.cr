@@ -102,21 +102,4 @@ module Procodile
     property force_single_log : Bool?
     property port_allocations : Hash(String, Int32)?
   end
-
-  record(
-    ControlClientProcessStatus,
-    name : String,
-    log_color : Int32,
-    quantity : Int32,
-    max_respawns : Int32,
-    respawn_window : Int32,
-    command : String,
-    restart_mode : Signal | String | Nil,
-    log_path : String?,
-    removed : Bool,
-    proxy_port : Int32?,
-    proxy_address : String?
-  ) do
-    include JSON::Serializable
-  end
 end

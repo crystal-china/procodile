@@ -177,7 +177,7 @@ module Procodile
     # Return a hash
     #
     def to_hash
-      ControlClientProcessStatus.new(
+      ControlClient::ProcessStatus.new(
         name: self.name,
         log_color: self.log_color,
         quantity: self.quantity,

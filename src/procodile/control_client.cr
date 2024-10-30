@@ -74,7 +74,7 @@ module Procodile
         @app_name : String,
         @supervisor : NamedTuple(started_at: Int64, pid: Int64),
         @instances : Hash(String, Array(Instance::Config)),
-        @processes : Array(ControlClientProcessStatus),
+        @processes : Array(ProcessStatus),
         @environment_variables : Hash(String, String),
         @procfile_path : String,
         @options_path : String,
@@ -84,6 +84,27 @@ module Procodile
         @pid_root : String,
         @loaded_at : Int64,
         @log_root : String?
+      )
+      end
+    end
+
+    struct ProcessStatus
+      include JSON::Serializable
+
+      getter name, log_color, quantity, max_respawns, respawn_window, command, restart_mode, log_path, removed, proxy_port, proxy_address
+
+      def initialize(
+        @name : String,
+        @log_color : Int32,
+        @quantity : Int32,
+        @max_respawns : Int32,
+        @respawn_window : Int32,
+        @command : String,
+        @restart_mode : Signal | String | Nil,
+        @log_path : String?,
+        @removed : Bool,
+        @proxy_port : Int32?,
+        @proxy_address : String?
       )
       end
     end
