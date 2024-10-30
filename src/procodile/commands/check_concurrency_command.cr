@@ -15,7 +15,7 @@ module Procodile
             @config.sock_path,
             "check_concurrency",
             reload: @options.reload
-          ).as NamedTuple(started: Array(InstanceConfig), stopped: Array(InstanceConfig))
+          ).as NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
 
           if reply["started"].empty? && reply["stopped"].empty?
             puts "Processes are running as configured"

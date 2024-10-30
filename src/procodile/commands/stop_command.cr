@@ -24,7 +24,7 @@ module Procodile
             "stop",
             processes: process_names_from_cli_option,
             stop_supervisor: @options.stop_supervisor,
-          ).as(Array(InstanceConfig))
+          ).as(Array(Instance::Config))
 
           if instances.empty?
             puts "No processes were stopped."

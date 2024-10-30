@@ -80,7 +80,7 @@ module Procodile
             processes: process_names_from_cli_option,
             tag: @options.tag,
             port_allocations: @options.port_allocations,
-          ).as Array(InstanceConfig)
+          ).as Array(Instance::Config)
 
           if instances.empty?
             puts "No processes to start."

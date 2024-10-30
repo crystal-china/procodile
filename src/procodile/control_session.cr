@@ -64,10 +64,10 @@ module Procodile
     end
 
     def status(options : Options) : String
-      instances = {} of String => Array(Procodile::InstanceConfig)
+      instances = {} of String => Array(Instance::Config)
 
       @supervisor.processes.each do |process, process_instances|
-        instances[process.name] = [] of Procodile::InstanceConfig
+        instances[process.name] = [] of Instance::Config
         process_instances.each do |instance|
           instances[process.name] << instance.to_struct
         end

@@ -104,20 +104,6 @@ module Procodile
   end
 
   record(
-    InstanceConfig,
-    description : String,
-    pid : Int64?,
-    respawns : Int32,
-    status : Instance::Status,
-    running : Bool,
-    started_at : Int64?,
-    tag : String?,
-    port : Int32?
-  ) do
-    include JSON::Serializable
-  end
-
-  record(
     ControlClientProcessStatus,
     name : String,
     log_color : Int32,

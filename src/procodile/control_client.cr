@@ -3,9 +3,9 @@ require "socket"
 
 module Procodile
   class ControlClient
-    alias SocketResponse = Array(InstanceConfig) |
-                           Array(Tuple(InstanceConfig?, InstanceConfig?)) |
-                           NamedTuple(started: Array(InstanceConfig), stopped: Array(InstanceConfig)) |
+    alias SocketResponse = Array(Instance::Config) |
+                           Array(Tuple(Instance::Config?, Instance::Config?)) |
+                           NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)) |
                            ReplyOfStatusCommand | Bool
 
     def self.run(sock_path : String, command : String, **options) : SocketResponse
@@ -36,11 +36,11 @@ module Procodile
         if code.to_i == 200 && reply && !reply.empty?
           case command
           when "start_processes", "stop"
-            Array(InstanceConfig).from_json(reply)
+            Array(Instance::Config).from_json(reply)
           when "restart"
-            Array(Tuple(InstanceConfig?, InstanceConfig?)).from_json(reply)
+            Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
           when "check_concurrency"
-            NamedTuple(started: Array(InstanceConfig), stopped: Array(InstanceConfig)).from_json(reply)
+            NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)).from_json(reply)
           when "status"
             ReplyOfStatusCommand.from_json(reply)
           else # e.g. reload command
@@ -73,7 +73,7 @@ module Procodile
         @root : String,
         @app_name : String,
         @supervisor : NamedTuple(started_at: Int64, pid: Int64),
-        @instances : Hash(String, Array(InstanceConfig)),
+        @instances : Hash(String, Array(Instance::Config)),
         @processes : Array(ControlClientProcessStatus),
         @environment_variables : Hash(String, String),
         @procfile_path : String,

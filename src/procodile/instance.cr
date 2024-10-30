@@ -218,10 +218,10 @@ module Procodile
     #
     # Return this instance as a hash
     #
-    def to_struct : InstanceConfig
+    def to_struct : Config
       started_at = @started_at
 
-      InstanceConfig.new(
+      Config.new(
         description: self.description,
         pid: self.pid,
         respawns: self.respawns,
@@ -429,6 +429,24 @@ module Procodile
     #
     private def can_respawn? : Bool
       !stopping? && (respawns + 1) <= @process.max_respawns
+    end
+
+    struct Config
+      include JSON::Serializable
+
+      getter description, pid, respawns, status, running, started_at, tag, port
+
+      def initialize(
+        @description : String,
+        @pid : Int64?,
+        @respawns : Int32,
+        @status : Instance::Status,
+        @running : Bool,
+        @started_at : Int64?,
+        @tag : String?,
+        @port : Int32?
+      )
+      end
     end
   end
 end
