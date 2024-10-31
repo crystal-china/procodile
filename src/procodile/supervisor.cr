@@ -223,7 +223,7 @@ module Procodile
     end
 
     def add_reader(instance, io)
-      readers[io] = instance
+      @readers[io] = instance
       @signal_handler.notice
     end
 
@@ -238,7 +238,7 @@ module Procodile
     def remove_instance(instance)
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
-        readers.delete(instance)
+        @readers.delete(instance)
       end
     end
 
@@ -255,14 +255,14 @@ module Procodile
 
       buffer = {} of IO::FileDescriptor => String
 
-      readers.keys.each do |reader|
+      @readers.keys.each do |reader|
         spawn do
           loop do
             Fiber.yield
 
             if reader.closed?
               buffer.delete(reader)
-              readers.delete(reader)
+              @readers.delete(reader)
             else
               str = reader.gets
 
@@ -273,7 +273,7 @@ module Procodile
 
               while buffer[reader].index("\n")
                 line, buffer[reader] = buffer[reader].split("\n", 2)
-                if (instance = readers[reader])
+                if (instance = @readers[reader])
                   Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
                 else
                   Procodile.log nil, "unknown", buffer[reader]
