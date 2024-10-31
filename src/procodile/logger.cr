@@ -1,7 +1,9 @@
 require "./color"
 
 module Procodile
-  class_getter mutex = Mutex.new
+  def self.mutex
+    @@mutex ||= Mutex.new
+  end
 
   def self.log(color : Int32?, name : String, text : String)
     mutex.synchronize do
