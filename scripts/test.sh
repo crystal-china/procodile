@@ -107,7 +107,7 @@ header 'Checking procodile restart will failed when run app3.sh ...' &&
 
     while ! bin/procodile status |grep -F 'app3.4' |grep -F 'Failed' |grep -F 'respawns:5'; do
         sleep 1
-        echo 'Waiting respawns to 5'
+        echo 'Waiting respawns to become 5'
     done
 
 header 'Change Procfile to set correct env for app3.sh' &&
