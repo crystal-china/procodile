@@ -11,19 +11,22 @@ module Procodile
       Failed
     end
 
-    @supervisor : Procodile::Supervisor
     @stopping_at : Time?
     @started_at : Time? = nil
     @respawns : Int32 = 0
     @failed_at : Time?
-    @pid = uninitialized Int64
 
+    @pid = uninitialized Int64
     property pid
-    property process : Procodile::Process, port : Int32?
-    getter id : Int32, tag : String?
+
+    property process
+    property port : Int32?
+
+    getter id
+    getter tag : String?
     getter? stopped : Bool = false
 
-    def initialize(@supervisor, @process, @id)
+    def initialize(@supervisor : Procodile::Supervisor, @process : Procodile::Process, @id : Int32)
     end
 
     #
@@ -64,7 +67,6 @@ module Procodile
         elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
           # Allocate ports to this process sequentially from the starting port
           process = @supervisor.processes[@process]
-
           allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
 
           until @port
@@ -187,7 +189,7 @@ module Procodile
       return if failed?
 
       # Everything is OK. The process is running.
-      return if running?
+      return true if running?
 
       # If the process isn't running any more, update the PID in our memory from
       # the file in case the process has changed itself.
@@ -295,7 +297,7 @@ module Procodile
     # A method that will be called when this instance has been stopped and it isn't going to be
     # started again
     #
-    def on_stop
+    def on_stop : Nil
       @started_at = nil
       @stopped = true
 
@@ -306,7 +308,7 @@ module Procodile
     # Find a port number for this instance to listen on. We just check that nothing is already listening on it.
     # The process is expected to take it straight away if it wants it.
     #
-    private def allocate_port(max_attempts = 10)
+    private def allocate_port(max_attempts = 10) : Nil
       attempts = 0
 
       until @port
@@ -346,7 +348,7 @@ module Procodile
     #
     # Tidy up when this process isn't needed any more
     #
-    private def tidy
+    private def tidy : Nil
       FileUtils.rm_rf(self.pid_file_path)
       Procodile.log(@process.log_color, description, "Removed PID file")
     end
@@ -366,6 +368,26 @@ module Procodile
     end
 
     #
+    # Return the number of times this process has been respawned in the last hour
+    #
+    private def respawns : Int32
+      last_respawn = @last_respawn
+
+      if @respawns.nil? || last_respawn.nil? || last_respawn < (Time.local - @process.respawn_window.seconds)
+        0
+      else
+        @respawns
+      end
+    end
+
+    #
+    # Can this process be respawned if needed?
+    #
+    private def can_respawn? : Bool
+      !stopping? && (respawns + 1) <= @process.max_respawns
+    end
+
+    #
     # Return an array of environment variables that should be set
     #
     private def environment_variables : Hash(String, String)
@@ -377,19 +399,6 @@ module Procodile
       vars["PORT"] = @port.to_s if @port
 
       vars
-    end
-
-    #
-    # Return the number of times this process has been respawned in the last hour
-    #
-    private def respawns : Int32
-      last_respawn = @last_respawn
-
-      if @respawns.nil? || last_respawn.nil? || last_respawn < (Time.local - @process.respawn_window.seconds)
-        0
-      else
-        @respawns
-      end
     end
 
     #
@@ -422,13 +431,6 @@ module Procodile
         pid = File.read(pid_file_path)
         pid.blank? ? nil : pid.strip.to_i64
       end
-    end
-
-    #
-    # Can this process be respawned if needed?
-    #
-    private def can_respawn? : Bool
-      !stopping? && (respawns + 1) <= @process.max_respawns
     end
 
     struct Config
