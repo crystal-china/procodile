@@ -73,7 +73,7 @@ module Procodile
         end
       end
 
-      processes = @supervisor.processes.keys.map(&.to_hash)
+      processes = @supervisor.processes.keys.map(&.to_struct)
 
       result = ControlClient::ReplyOfStatusCommand.new(
         version: Procodile::VERSION,

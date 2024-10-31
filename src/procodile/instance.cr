@@ -327,7 +327,7 @@ module Procodile
     #
     # Is the given port available?
     #
-    private def port_available?(port) : Bool
+    private def port_available?(port : Int32) : Bool
       case @process.network_protocol
       when "tcp"
         server = TCPServer.new("127.0.0.1", port)

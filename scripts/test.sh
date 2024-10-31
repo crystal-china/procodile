@@ -130,23 +130,5 @@ HEREDOC
 
 header 'Checking procodile restart -papp3  ...' &&
     bin/procodile restart -papp3 && sleep 3 &&
-    bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$'
-
-#     cat <<'HEREDOC' > Procfile
-# app1: sh ${ROOT}/scripts/test_log.sh
-# app2: sh ${ROOT}/scripts/test_log.sh
-# HEREDOC
-
-# header 'Checking procodile reload ...' &&
-#     bin/procodile reload && sleep 3 && bin/procodile status &&
-
-#     cat <<'HEREDOC' > Procfile
-# app1: sh ${ROOT}/scripts/test_log.sh
-# app2: sh ${ROOT}/scripts/test_log.sh
-# app3: sh ${ROOT}/scripts/test_log.sh
-# HEREDOC
-
-# header 'Checking procodile reload again ...' &&
-#     bin/procodile reload && sleep 3 && bin/procodile status &&
-#     header 'Checking procodile kill ...' &&
-#     bin/procodile kill
+    bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$' &&
+    bin/procodile kill

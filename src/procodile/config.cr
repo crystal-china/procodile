@@ -10,8 +10,8 @@ module Procodile
     @procfile_path : String?
     @options : ProcfileOption?
     @local_options : ProcfileOption?
-    @process_options : Hash(String, ProcessOption)?
-    @local_process_options : Hash(String, ProcessOption)?
+    @process_options : Hash(String, Process::Option)?
+    @local_process_options : Hash(String, Process::Option)?
     @loaded_at : Time?
     @environment_variables : Hash(String, String)?
 
@@ -120,17 +120,17 @@ module Procodile
       @local_options ||= load_local_options_from_file
     end
 
-    def process_options : Hash(String, ProcessOption)
-      @process_options ||= options.processes || {} of String => ProcessOption
+    def process_options : Hash(String, Process::Option)
+      @process_options ||= options.processes || {} of String => Process::Option
     end
 
-    def local_process_options : Hash(String, ProcessOption)
-      @local_process_options ||= local_options.processes || {} of String => ProcessOption
+    def local_process_options : Hash(String, Process::Option)
+      @local_process_options ||= local_options.processes || {} of String => Process::Option
     end
 
-    def options_for_process(name : String) : ProcessOption
-      po = process_options[name]? || ProcessOption.new
-      local_po = local_process_options[name]? || ProcessOption.new
+    def options_for_process(name : String) : Process::Option
+      po = process_options[name]? || Process::Option.new
+      local_po = local_process_options[name]? || Process::Option.new
 
       po.merge(local_po)
     end

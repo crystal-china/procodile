@@ -2,10 +2,8 @@ require "./instance"
 
 module Procodile
   class Process
-    @config : Procodile::Config
-    @name : String
-    @command : String
-    @log_color : Int32
+    @log_color : Int32 = 0
+    @instance_index : Int32 = 0
     @removed : Bool = false
 
     MUTEX = Mutex.new
@@ -13,19 +11,11 @@ module Procodile
     getter config, name
     property command, options, log_color, removed
 
-    def initialize(@config, @name, @command, @options = ProcessOption.new)
-      @log_color = 0
-      @instance_index = 0
-    end
+    delegate quantity, max_respawns, respawn_window, term_signal, allocate_port_from,
+      proxy_port, network_protocol, proxy?, proxy_address, restart_mode,
+      to: @options
 
-    #
-    # Increase the instance index and return
-    #
-    def instance_id : Int32
-      MUTEX.synchronize do
-        @instance_index = 0 if @instance_index == 10000
-        @instance_index += 1
-      end
+    def initialize(@config : Procodile::Config, @name : String, @command : String, @options = Option.new)
     end
 
     #
@@ -50,27 +40,6 @@ module Procodile
     end
 
     #
-    # How many instances of this process should be started
-    #
-    def quantity : Int32
-      @options.quantity || 1
-    end
-
-    #
-    # The maximum number of times this process can be respawned in the given period
-    #
-    def max_respawns : Int32
-      @options.max_respawns || 5
-    end
-
-    #
-    # The respawn window. One hour by default.
-    #
-    def respawn_window : Int32
-      @options.respawn_window || 3600
-    end
-
-    #
     # Return the path where log output for this process should be written to. If
     # none, output will be written to the supervisor log.
     #
@@ -78,13 +47,6 @@ module Procodile
       log_path = @options.log_path
 
       log_path ? File.expand_path(log_path, @config.root) : default_log_path
-    end
-
-    #
-    # Return the defualt log file name
-    #
-    def default_log_file_name : String
-      @options.log_file_name || "#{@name}.log"
     end
 
     #
@@ -100,70 +62,23 @@ module Procodile
     end
 
     #
-    # Return the signal to send to terminate the process
+    # Return the defualt log file name
     #
-    def term_signal : Signal
-      @options.term_signal || Signal::TERM
-    end
-
-    #
-    # Defines how this process should be restarted
-    #
-    # start-term = start new instances and send term to children
-    # usr1 = just send a usr1 signal to the current instance
-    # usr2 = just send a usr2 signal to the current instance
-    # term-start = stop the old instances, when no longer running, start a new one
-    #
-    def restart_mode : String | Signal
-      @options.restart_mode || "term-start"
-    end
-
-    #
-    # Return the first port that ports should be allocated from for this process
-    #
-    def allocate_port_from : Int32?
-      @options.allocate_port_from
-    end
-
-    #
-    # Is this process enabled for proxying?
-    #
-    def proxy? : Bool
-      !!@options.proxy_port
-    end
-
-    #
-    # Return the port for the proxy to listen on for this process type
-    #
-    def proxy_port : Int32?
-      proxy? ? @options.proxy_port : nil
-    end
-
-    #
-    # Return the port for the proxy to listen on for this process type
-    #
-    def proxy_address : String?
-      proxy? ? @options.proxy_address || "127.0.0.1" : nil
-    end
-
-    #
-    # Return the network protocol for this process
-    #
-    def network_protocol : String
-      @options.network_protocol || "tcp"
+    def default_log_file_name : String
+      @options.log_file_name || "#{@name}.log"
     end
 
     #
     # Generate an array of new instances for this process (based on its quantity)
     #
-    def generate_instances(supervisor, quantity = self.quantity) : Array(Procodile::Instance)
+    def generate_instances(supervisor : Procodile::Supervisor, quantity : Int32 = self.quantity) : Array(Procodile::Instance)
       Array.new(quantity) { create_instance(supervisor) }
     end
 
     #
     # Create a new instance
     #
-    def create_instance(supervisor) : Instance
+    def create_instance(supervisor : Procodile::Supervisor) : Instance
       # supervisor is A Procodile::Supervisor object like this:
       # {
       #   :started_at => 1667297292,
@@ -174,9 +89,9 @@ module Procodile
     end
 
     #
-    # Return a hash
+    # Return a struct
     #
-    def to_hash
+    def to_struct
       ControlClient::ProcessStatus.new(
         name: self.name,
         log_color: self.log_color,
@@ -195,11 +110,93 @@ module Procodile
     #
     # Is the given quantity suitable for this process?
     #
-    def correct_quantity?(quantity)
+    def correct_quantity?(quantity : Int32)
       if self.restart_mode == "start-term"
         quantity >= self.quantity
       else
         self.quantity == quantity
+      end
+    end
+
+    #
+    # Increase the instance index and return
+    #
+    private def instance_id : Int32
+      MUTEX.synchronize do
+        @instance_index = 0 if @instance_index == 10000
+        @instance_index += 1
+      end
+    end
+
+    struct Option
+      include YAML::Serializable
+
+      # How many instances of this process should be started
+      property quantity = 1
+
+      # Defines how this process should be restarted
+      #
+      # start-term = start new instances and send term to children
+      # Signal::USR1 = just send a usr1 signal to the current instance
+      # Signal::USR2 = just send a usr2 signal to the current instance
+      # term-start = stop the old instances, when no longer running, start a new one
+      property restart_mode : Signal | String = "term-start"
+
+      # The maximum number of times this process can be respawned in the given period
+      property max_respawns = 5
+
+      # The respawn window. One hour by default.
+      property respawn_window = 3600
+      property log_path : String?
+      property log_file_name : String?
+
+      # Return the signal to send to terminate the process
+      property term_signal = Signal::TERM
+
+      # Return the first port that ports should be allocated from for this process
+      property allocate_port_from : Int32?
+
+      # Return the port for the proxy to listen on for this process type
+      property proxy_port : Int32?
+
+      # property proxy_address : String?
+      setter proxy_address : String?
+
+      # Return the network protocol for this process
+      property network_protocol = "tcp"
+
+      property env = {} of String => String
+
+      def initialize
+      end
+
+      # Is this process enabled for proxying?
+      def proxy? : Bool
+        !!proxy_port
+      end
+
+      # Return the port for the proxy to listen on for this process type
+      def proxy_address : String?
+        proxy? ? @proxy_address || "127.0.0.1" : nil
+      end
+
+      def merge(other : self?)
+        new_process_option = self
+
+        new_process_option.quantity = other.quantity if other.quantity
+        new_process_option.restart_mode = other.restart_mode if other.restart_mode
+        new_process_option.max_respawns = other.max_respawns if other.max_respawns
+        new_process_option.respawn_window = other.respawn_window if other.respawn_window
+        new_process_option.log_path = other.log_path if other.log_path
+        new_process_option.log_file_name = other.log_file_name if other.log_file_name
+        new_process_option.term_signal = other.term_signal if other.term_signal
+        new_process_option.allocate_port_from = other.allocate_port_from if other.allocate_port_from
+        new_process_option.proxy_port = other.proxy_port if other.proxy_port
+        new_process_option.proxy_address = other.proxy_address if other.proxy_address
+        new_process_option.network_protocol = other.network_protocol if other.network_protocol
+        new_process_option.env = new_process_option.env.merge(other.env) if other.env
+
+        new_process_option
       end
     end
   end
