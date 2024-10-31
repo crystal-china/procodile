@@ -39,6 +39,7 @@ HEREDOC
 
 cat <<'HEREDOC' > Procfile.local
 app_name: test
+pid_root: new_pids
 env:
   foo: foo
 
@@ -57,6 +58,7 @@ shards build &&
     bin/procodile start && sleep 3 &&
     header 'Checking procodile status --simple ...' &&
     bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$' &&
+    [ -f new_pids/app1.1.pid ] &&
     header 'Checking procodile restart when started ...' &&
     bin/procodile restart && sleep 3 &&
     bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$' &&
@@ -75,6 +77,7 @@ shards build &&
     header 'Change Procfile.local to set quantity of app1 from 1 to 2 ...' &&
     cat <<'HEREDOC' > Procfile.local
 app_name: test
+pid_root: new_pids
 env:
   foo: foo
 
@@ -111,6 +114,7 @@ header 'Change Procfile to set correct env for app3.sh' &&
 
     cat <<'HEREDOC' > Procfile.local
 app_name: test
+pid_root: new_pids
 env:
   foo: foo
 
