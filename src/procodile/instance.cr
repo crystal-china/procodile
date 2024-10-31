@@ -12,21 +12,17 @@ module Procodile
     end
 
     @stopping_at : Time?
-    @started_at : Time? = nil
-    @respawns : Int32 = 0
+    @started_at : Time?
     @failed_at : Time?
 
-    @pid = uninitialized Int64
-    property pid
-
-    property process
-    property port : Int32?
-
-    getter id
-    getter tag : String?
-    getter? stopped : Bool = false
+    property pid, process, port : Int32?
+    getter id, tag : String?
+    getter? stopped
 
     def initialize(@supervisor : Procodile::Supervisor, @process : Procodile::Process, @id : Int32)
+      @respawns = 0
+      @pid = uninitialized Int64
+      @stopped = false
     end
 
     #

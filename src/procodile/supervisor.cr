@@ -10,11 +10,13 @@ module Procodile
     getter tag : String?
     getter tcp_proxy : TCPProxy?
     getter started_at : Time?
-    getter processes = {} of Procodile::Process => Array(Procodile::Instance)
-    property readers = {} of IO::FileDescriptor => Procodile::Instance
+    getter processes, readers
 
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
+      @processes = {} of Procodile::Process => Array(Procodile::Instance)
+      @readers = {} of IO::FileDescriptor => Procodile::Instance
       @signal_handler = SignalHandler.new
+
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(Options.new(stop_supervisor: true)) }
       @signal_handler.register(Signal::USR1) { restart }
