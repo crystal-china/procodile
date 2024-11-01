@@ -183,17 +183,12 @@ module Procodile
       def merge(other : self?)
         new_process_option = self
 
-        new_process_option.quantity = other.quantity if other.quantity
-        new_process_option.restart_mode = other.restart_mode if other.restart_mode
-        new_process_option.max_respawns = other.max_respawns if other.max_respawns
-        new_process_option.respawn_window = other.respawn_window if other.respawn_window
-        new_process_option.log_path = other.log_path if other.log_path
-        new_process_option.log_file_name = other.log_file_name if other.log_file_name
-        new_process_option.term_signal = other.term_signal if other.term_signal
-        new_process_option.allocate_port_from = other.allocate_port_from if other.allocate_port_from
-        new_process_option.proxy_port = other.proxy_port if other.proxy_port
-        new_process_option.proxy_address = other.proxy_address if other.proxy_address
-        new_process_option.network_protocol = other.network_protocol if other.network_protocol
+        {% for i in @type.instance_vars %}
+          {% if i.name != "env" %}
+            new_process_option.{{i.name}} = other.{{i.name}} if other.{{i.name}}
+          {% end %}
+        {% end %}
+
         new_process_option.env = new_process_option.env.merge(other.env) if other.env
 
         new_process_option

@@ -58,10 +58,9 @@ module Procodile
 
     def start_processes(process_names : Array(String)?, options = SupervisorOptions.new) : Array(Procodile::Instance)
       @tag = options.tag
+      instances_started = [] of Procodile::Instance
 
       reload_config
-
-      instances_started = [] of Procodile::Instance
 
       @config.processes.each do |name, process|
         next if process_names && !process_names.includes?(name.to_s) # Not a process we want
