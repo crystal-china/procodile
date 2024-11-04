@@ -353,6 +353,7 @@ module Procodile
         instances.reject! do |instance|
           if instance.stopping? && !instance.running?
             instance.on_stop
+            
             true
           else
             false
