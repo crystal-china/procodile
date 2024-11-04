@@ -6,11 +6,11 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    getter config, run_options
-    getter tag : String?
-    getter tcp_proxy : TCPProxy?
-    getter started_at : Time?
-    getter processes, readers
+    @started_at = uninitialized Time
+    @tag : String?
+    @tcp_proxy : TCPProxy?
+
+    getter config, run_options, tag, tcp_proxy, processes, readers, started_at
 
     def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
@@ -28,7 +28,7 @@ module Procodile
       @run_options.respawn != false
     end
 
-    def start(after_start : Proc(Procodile::Supervisor, Nil))
+    def start(after_start : Proc(Procodile::Supervisor, Nil)) : Nil
       Procodile.log nil, "system", "Procodile supervisor started with PID #{::Process.pid}"
       Procodile.log nil, "system", "Application root is #{@config.root}"
 
@@ -40,6 +40,7 @@ module Procodile
 
       if @run_options.proxy?
         Procodile.log nil, "system", "Proxy is enabled"
+
         @tcp_proxy = TCPProxy.start(self)
       end
 
@@ -50,7 +51,9 @@ module Procodile
       @started_at = Time.local
     rescue e
       Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
+
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
+
       stop(Options.new(stop_supervisor: true))
     ensure
       loop { supervise; sleep 3.seconds }
@@ -86,6 +89,7 @@ module Procodile
 
       if processes.nil?
         Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
+
         @processes.each do |_, instances|
           instances.each do |instance|
             instance.stop
@@ -94,7 +98,9 @@ module Procodile
         end
       else
         instances = process_names_to_instances(processes)
+
         Procodile.log nil, "system", "Stopping #{instances.size} process(es)"
+
         instances.each do |instance|
           instance.stop
           instances_stopped << instance
@@ -104,20 +110,20 @@ module Procodile
       instances_stopped
     end
 
-    def restart(options = Options.new)
+    def restart(options = Options.new) : Array(Array(Procodile::Instance | Nil))
       @tag = options.tag
+      instances_restarted = [] of Array(Procodile::Instance?)
+      processes = options.processes
 
       reload_config
 
-      instances_restarted = [] of Array(Procodile::Instance?)
-
-      processes = options.processes
-
       if processes.nil?
-        Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
         instances = @processes.values.flatten
+
+        Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
       else
         instances = process_names_to_instances(processes)
+
         Procodile.log nil, "system", "Restarting #{instances.size} process(es)"
       end
 
@@ -139,13 +145,15 @@ module Procodile
       instances_restarted
     end
 
-    def stop_supervisor
+    def stop_supervisor : Nil
       Procodile.log nil, "system", "Stopping Procodile supervisor"
+
       FileUtils.rm_rf(File.join(@config.pid_root, "procodile.pid"))
-      ::Process.exit 0
+
+      exit 0
     end
 
-    def supervise
+    def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
       remove_stopped_instances
 
@@ -158,19 +166,22 @@ module Procodile
       end
 
       # If the processes go away, we can stop the supervisor now
-      if @run_options.stop_when_none && @processes.all? { |_, instances| instances.reject(&.failed?).empty? }
+      if @run_options.stop_when_none && all_instances_stopped?
         Procodile.log nil, "system", "All processes have stopped"
+
         stop_supervisor
       end
     end
 
-    def reload_config
+    def reload_config : Nil
       Procodile.log nil, "system", "Reloading configuration"
+
       @config.reload
     end
 
-    def check_concurrency(options = {} of String => String) : Hash(Symbol, Array(Procodile::Instance))
+    def check_concurrency(options : Options = Options.new) : Hash(Symbol, Array(Procodile::Instance))
       Procodile.log nil, "system", "Checking process concurrency"
+
       reload_config unless options.reload == false
 
       result = check_instance_quantities
@@ -178,11 +189,11 @@ module Procodile
       if result[:started].empty? && result[:stopped].empty?
         Procodile.log nil, "system", "Process concurrency looks good"
       else
-        unless result[:started].empty?
+        if result[:started].present?
           Procodile.log nil, "system", "Concurrency check started #{result[:started].map(&.description).join(", ")}"
         end
 
-        unless result[:stopped].empty?
+        if result[:stopped].present?
           Procodile.log nil, "system", "Concurrency check stopped #{result[:stopped].map(&.description).join(", ")}"
         end
       end
@@ -192,7 +203,7 @@ module Procodile
 
     def to_hash
       {
-        started_at: @started_at.not_nil!.to_unix,
+        started_at: @started_at.to_unix,
         pid:        ::Process.pid,
       }
     end
@@ -209,6 +220,7 @@ module Procodile
             desired: process.quantity,
           )
         end
+
         process_instances.each do |instance|
           if instance.should_be_running? && !instance.status.running?
             messages << Message.new(
@@ -223,33 +235,40 @@ module Procodile
       messages
     end
 
-    def add_reader(instance, io)
+    def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
       @readers[io] = instance
+
       @signal_handler.notice
     end
 
-    def add_instance(instance, io = nil)
+    def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
       add_reader(instance, io) if io
+
+      # When the first time start, it is possible @processes[instance.process] is nil
+      # before the process is started.
       @processes[instance.process] ||= [] of Procodile::Instance
+
       unless @processes[instance.process].includes?(instance)
         @processes[instance.process] << instance
       end
     end
 
-    def remove_instance(instance)
+    def remove_instance(instance : Instance) : Nil
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
         @readers.delete(instance)
       end
     end
 
-    private def watch_for_output
+    private def watch_for_output : Nil
       signal_handler_chan = Channel(Nil).new
       listener_chan = Channel(Nil).new
 
       spawn do
         loop do
           @signal_handler.pipe[:reader].read(Bytes.new(999)) rescue nil
+          @signal_handler.handle
+
           signal_handler_chan.send nil
         end
       end
@@ -274,6 +293,7 @@ module Procodile
 
               while buffer[reader].index("\n")
                 line, buffer[reader] = buffer[reader].split("\n", 2)
+
                 if (instance = @readers[reader])
                   Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
                 else
@@ -289,8 +309,6 @@ module Procodile
 
       spawn do
         loop do
-          @signal_handler.handle
-
           select
           when signal_handler_chan.receive
           when listener_chan.receive
@@ -299,25 +317,30 @@ module Procodile
       end
     end
 
-    private def check_instance_quantities(type = :both, processes = nil) : Hash(Symbol, Array(Procodile::Instance))
+    private def check_instance_quantities(type : CheckInstanceQuantitiesType = :both, processes : Array(String)? = nil) : Hash(Symbol, Array(Procodile::Instance))
       status = {:started => [] of Procodile::Instance, :stopped => [] of Procodile::Instance}
 
       @processes.each do |process, instances|
         next if processes && !processes.includes?(process.name)
 
-        if (type == :both || type == :stopped) && (instances.size > process.quantity)
+        if (type.both? || type.stopped?) && instances.size > process.quantity
           quantity_to_stop = instances.size - process.quantity
-          Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
           stopped_instances = instances.first(quantity_to_stop)
+
+          Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
+
           stopped_instances.each(&.stop)
           status[:stopped] = stopped_instances
         end
 
-        if (type == :both || type == :started) && (instances.size < process.quantity)
+        if (type.both? || type.started?) && instances.size < process.quantity
           quantity_needed = process.quantity - instances.size
-          Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
           started_instances = process.generate_instances(self, quantity_needed)
+
+          Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
+
           started_instances.each(&.start)
+
           status[:started] = started_instances
         end
       end
@@ -325,7 +348,7 @@ module Procodile
       status
     end
 
-    private def remove_stopped_instances
+    private def remove_stopped_instances : Nil
       @processes.each do |_, instances|
         instances.reject! do |instance|
           if instance.stopping? && !instance.running?
@@ -338,9 +361,13 @@ module Procodile
       end
     end
 
-    private def remove_removed_processes
+    private def remove_removed_processes : Nil
       @processes.reject! do |process, instances|
         if process.removed && instances.empty?
+          if (tcp_proxy = @tcp_proxy)
+            tcp_proxy.remove_process(process)
+          end
+
           true
         else
           false
@@ -368,6 +395,12 @@ module Procodile
             instances.each { |i| array << i }
           end
         end
+      end
+    end
+
+    private def all_instances_stopped?
+      @processes.all? do |_, instances|
+        instances.reject(&.failed?).empty?
       end
     end
 
@@ -404,6 +437,12 @@ module Procodile
         @reload : Bool? = nil
       )
       end
+    end
+
+    enum CheckInstanceQuantitiesType
+      Both
+      Started
+      Stopped
     end
   end
 end
