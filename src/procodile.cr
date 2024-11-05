@@ -54,7 +54,12 @@ if File.file?(global_config_path)
 end
 
 # Create a determination to work out where we want to load our app from
-ap = Procodile::AppDetermination.new(FileUtils.pwd, options[:root]?, options[:procfile]?, global_config)
+ap = Procodile::AppDetermination.new(
+  FileUtils.pwd,
+  options[:root]?,
+  options[:procfile]?,
+  global_config || Procodile::ProcfileOption.new
+)
 
 begin
   if command != "help"

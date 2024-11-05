@@ -17,6 +17,7 @@ module Procodile
     property exec_prefix : String?
     property env : Hash(String, String)?
     property processes : Hash(String, Process::Option)?
+    property app_id : Process::Option?
 
     def initialize
     end
