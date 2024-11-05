@@ -341,7 +341,7 @@ module Procodile
 
           started_instances.each(&.start)
 
-          status[:started] = started_instances
+          status[:started].concat(started_instances)
         end
       end
 
