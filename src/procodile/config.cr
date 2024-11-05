@@ -21,7 +21,7 @@ module Procodile
       @procfile_path = procfile
 
       unless File.file?(procfile_path)
-        raise Procodile::Error.new("Procfile not found at #{procfile_path}")
+        raise Error.new("Procfile not found at #{procfile_path}")
       end
 
       # We need to check to see if the local or options
@@ -44,7 +44,7 @@ module Procodile
       @loaded_at = Time.local
     end
 
-    def reload
+    def reload : Nil
       @process_list = nil
 
       @options = nil
@@ -69,7 +69,7 @@ module Procodile
 
             process.options = options_for_process(name)
           else
-            Procodile.log nil, "system", "#{name} has been added to the Procfile."
+            Procodile.log nil, "system", "#{name} has been added to the Procfile. Adding it."
             processes[name] = create_process(name, command, COLORS[processes.size.divmod(COLORS.size)[1]])
           end
         end
@@ -77,7 +77,7 @@ module Procodile
         removed_processes = processes.keys - process_list.keys
 
         removed_processes.each do |process_name|
-          if (p = (processes[process_name]))
+          if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)
             Procodile.log nil, "system", "#{process_name} has been removed in the Procfile. It will be removed when it is stopped."

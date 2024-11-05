@@ -3,21 +3,18 @@ require "./tcp_proxy"
 
 module Procodile
   class Instance
-    enum Status
-      Unknown
-      Stopped
-      Stopping
-      Running
-      Failed
-    end
-
     @stopping_at : Time?
     @started_at : Time?
     @failed_at : Time?
+    @port : Int32?
+    @tag : String?
 
-    property pid, process, port : Int32?
-    getter id, tag : String?
+    property pid, process, port
+    getter id, tag
     getter? stopped
+
+    # Return a description for this instance
+    getter description : String { "#{@process.name}.#{@id}" }
 
     def initialize(@supervisor : Procodile::Supervisor, @process : Procodile::Process, @id : Int32)
       @respawns = 0
@@ -82,7 +79,9 @@ module Procodile
           log_destination = writer
           io = reader
         end
+
         @tag = @supervisor.tag.dup if @supervisor.tag
+
         Dir.cd(@process.config.root)
 
         commands = @process.command.split(" ")
@@ -102,11 +101,13 @@ module Procodile
         log_destination.close
 
         File.write(pid_file_path, "#{@pid}\n")
+
         @supervisor.add_instance(self, io)
 
         tag = @tag ? " (tagged with #{@tag})" : ""
 
         Procodile.log(@process.log_color, description, "Started with PID #{@pid}#{tag}")
+
         if self.process.log_path && io.nil?
           Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
         end
@@ -229,13 +230,6 @@ module Procodile
         tag: self.tag,
         port: @port,
       )
-    end
-
-    #
-    # Return a description for this instance
-    #
-    def description : String
-      "#{@process.name}.#{@id}"
     end
 
     #
@@ -369,7 +363,7 @@ module Procodile
     private def respawns : Int32
       last_respawn = @last_respawn
 
-      if @respawns.nil? || last_respawn.nil? || last_respawn < (Time.local - @process.respawn_window.seconds)
+      if @respawns.nil? || last_respawn.nil? || last_respawn < @process.respawn_window.seconds.ago
         0
       else
         @respawns
@@ -405,6 +399,7 @@ module Procodile
       if pid_from_file && pid_from_file != @pid
         @pid = pid_from_file
         @started_at = File.info(self.pid_file_path).modification_time
+
         Procodile.log(@process.log_color, description, "PID file changed. Updated pid to #{@pid}")
         true
       else
@@ -427,6 +422,14 @@ module Procodile
         pid = File.read(pid_file_path)
         pid.blank? ? nil : pid.strip.to_i64
       end
+    end
+
+    enum Status
+      Unknown
+      Stopped
+      Stopping
+      Running
+      Failed
     end
 
     struct Config

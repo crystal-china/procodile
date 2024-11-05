@@ -36,18 +36,18 @@ module Procodile
     # 关联信号和处理函数
     #
     # 这个在 SignalHandler 对象创建之后，被手动调用
-    def register(signal : Signal, &block : ->)
+    def register(signal : Signal, &block : ->) : Nil
       @handlers[signal] ||= [] of Proc(Nil)
 
       @handlers[signal] << block
     end
 
-    def notice
+    def notice : Nil
       @pipe[:writer].puts(".")
     end
 
     # 运行拦截的信号对应的处理函数
-    def handle
+    def handle : Nil
       if (signal = QUEUE.shift?)
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
         @handlers[signal].try &.each(&.call)
