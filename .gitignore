@@ -7,3 +7,4 @@ bin/procodile
 Procfile.*
 /lib
 /bin/ameba*
+/new_pids

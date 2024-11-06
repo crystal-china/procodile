@@ -17,14 +17,14 @@ module Procodile
         end
       end
 
-      def stop
+      def stop : Nil
         if supervisor_running?
           instances = ControlClient.run(
             @config.sock_path,
             "stop",
             processes: process_names_from_cli_option,
             stop_supervisor: @options.stop_supervisor,
-          ).as(Array(InstanceConfig))
+          ).as(Array(Instance::Config))
 
           if instances.empty?
             puts "No processes were stopped."
@@ -42,10 +42,12 @@ module Procodile
             puts "Waiting for supervisor to stop..."
             loop do
               sleep 1.second
+              
               if supervisor_running?
                 sleep 1.second
               else
                 puts "Supervisor has stopped"
+                
                 exit 0
               end
             end

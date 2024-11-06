@@ -3,45 +3,6 @@ require "json"
 require "../../src/procodile/cli"
 
 module Procodile
-  struct ProcessOption
-    include YAML::Serializable
-
-    property quantity : Int32?
-    property restart_mode : Signal | String | Nil
-    property max_respawns : Int32?
-    property respawn_window : Int32?
-    property log_path : String?
-    property log_file_name : String?
-    property term_signal : Signal?
-    property allocate_port_from : Int32?
-    property proxy_port : Int32?
-    property proxy_address : String?
-    property network_protocol : String?
-    property env = {} of String => String
-
-    def initialize
-    end
-
-    def merge(other : self?)
-      new_process_option = self
-
-      new_process_option.quantity = other.quantity if other.quantity
-      new_process_option.restart_mode = other.restart_mode if other.restart_mode
-      new_process_option.max_respawns = other.max_respawns if other.max_respawns
-      new_process_option.respawn_window = other.respawn_window if other.respawn_window
-      new_process_option.log_path = other.log_path if other.log_path
-      new_process_option.log_file_name = other.log_file_name if other.log_file_name
-      new_process_option.term_signal = other.term_signal if other.term_signal
-      new_process_option.allocate_port_from = other.allocate_port_from if other.allocate_port_from
-      new_process_option.proxy_port = other.proxy_port if other.proxy_port
-      new_process_option.proxy_address = other.proxy_address if other.proxy_address
-      new_process_option.network_protocol = other.network_protocol if other.network_protocol
-      new_process_option.env = new_process_option.env.merge(other.env) if other.env
-
-      new_process_option
-    end
-  end
-
   struct ProcfileOption
     include YAML::Serializable
 
@@ -55,17 +16,19 @@ module Procodile
     property console_command : String?
     property exec_prefix : String?
     property env : Hash(String, String)?
-    property processes : Hash(String, ProcessOption)?
+    property processes : Hash(String, Process::Option)?
+    property app_id : Process::Option?
 
     def initialize
     end
   end
 
-  record CliCommand,
-    name : String,
-    description : String?,
-    options : Proc(OptionParser, Procodile::CLI, Nil)?,
-    callable : Proc(Nil)
+  struct CliCommand
+    getter name : String, description : String?, options : Proc(OptionParser, Procodile::CLI, Nil)?, callable : Proc(Nil)
+
+    def initialize(@name, @description, @options, @callable)
+    end
+  end
 
   struct CliOptions
     property foreground : Bool?
@@ -93,83 +56,11 @@ module Procodile
     end
   end
 
-  record ControlSessionData,
-    processes : Array(String)? = [] of String,
-    tag : String? = nil,
-    port_allocations : Hash(String, Int32)? = nil,
-    reload : Bool? = nil,
-    stop_supervisor : Bool? = nil do
-    include JSON::Serializable
-  end
-
   struct RunOptions
     property respawn : Bool?
     property stop_when_none : Bool?
-    property proxy : Bool?
+    property? proxy = false
     property force_single_log : Bool?
     property port_allocations : Hash(String, Int32)?
   end
-
-  record InstanceConfig,
-    description : String,
-    pid : Int64?,
-    respawns : Int32,
-    status : String,
-    running : Bool,
-    started_at : Int64?,
-    tag : String?,
-    port : Int32? do
-    include JSON::Serializable
-  end
-
-  record ControlClientProcessStatus,
-    name : String,
-    log_color : Int32,
-    quantity : Int32,
-    max_respawns : Int32,
-    respawn_window : Int32,
-    command : String,
-    restart_mode : Signal | String | Nil,
-    log_path : String?,
-    removed : Bool,
-    proxy_port : Int32?,
-    proxy_address : String? do
-    include JSON::Serializable
-  end
-
-  record SupervisorMessages,
-    type : String,
-    process : String? = nil,
-    current : Int32? = nil,
-    desired : Int32? = nil,
-    instance : String? = nil,
-    status : String? = nil do
-    include JSON::Serializable
-  end
-
-  record ControlClientReplyForStatusCommand,
-    version : String,
-    messages : Array(SupervisorMessages),
-    root : String,
-    app_name : String,
-    supervisor : NamedTuple(started_at: Int64, pid: Int64),
-    instances : Hash(String, Array(InstanceConfig)),
-    processes : Array(ControlClientProcessStatus),
-    environment_variables : Hash(String, String),
-    procfile_path : String,
-    options_path : String,
-    local_options_path : String,
-    sock_path : String,
-    supervisor_pid_path : String,
-    pid_root : String,
-    loaded_at : Int64,
-    log_root : String? do
-    include JSON::Serializable
-  end
-
-  record SupervisorOptions,
-    processes : Array(String)? = nil,
-    stop_supervisor : Bool? = nil,
-    tag : String? = nil,
-    reload : Bool? = nil
 end

@@ -20,7 +20,7 @@ module Procodile
             "restart",
             processes: process_names_from_cli_option,
             tag: @options.tag,
-          ).as Array(Tuple(InstanceConfig?, InstanceConfig?))
+          ).as Array(Tuple(Instance::Config?, Instance::Config?))
 
           if instances.empty?
             puts "There are no processes to restart."
@@ -37,6 +37,7 @@ module Procodile
               elsif new_instance
                 puts "Started".color(32) + " #{new_instance.description}"
               end
+
               STDOUT.flush
             end
           end

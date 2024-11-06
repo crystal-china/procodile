@@ -1,6 +1,8 @@
 # 信号处理程序
 #
 # 当一个信号被拦截后，首先，这个信号会被加入一个 QUEUE
+# 每一个信号又关联一个 handlers 列表
+# 当运行 #handle 方法时，会依次执行所有的处理器程序。
 
 module Procodile
   class SignalHandler
@@ -31,29 +33,21 @@ module Procodile
       end
     end
 
-    def start
-      spawn do
-        loop do
-          handle
-          sleep 1
-        end
-      end
-    end
-
     # 关联信号和处理函数
     #
     # 这个在 SignalHandler 对象创建之后，被手动调用
-    def register(signal : Signal, &block)
+    def register(signal : Signal, &block : ->) : Nil
       @handlers[signal] ||= [] of Proc(Nil)
+
       @handlers[signal] << block
     end
 
-    def notice
-      @pipe[:writer].write(".".to_slice)
+    def notice : Nil
+      @pipe[:writer].puts(".")
     end
 
     # 运行拦截的信号对应的处理函数
-    def handle
+    def handle : Nil
       if (signal = QUEUE.shift?)
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
         @handlers[signal].try &.each(&.call)

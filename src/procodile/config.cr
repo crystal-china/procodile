@@ -10,8 +10,8 @@ module Procodile
     @procfile_path : String?
     @options : ProcfileOption?
     @local_options : ProcfileOption?
-    @process_options : Hash(String, ProcessOption)?
-    @local_process_options : Hash(String, ProcessOption)?
+    @process_options : Hash(String, Process::Option)?
+    @local_process_options : Hash(String, Process::Option)?
     @loaded_at : Time?
     @environment_variables : Hash(String, String)?
 
@@ -21,7 +21,7 @@ module Procodile
       @procfile_path = procfile
 
       unless File.file?(procfile_path)
-        raise Procodile::Error.new("Procfile not found at #{procfile_path}")
+        raise Error.new("Procfile not found at #{procfile_path}")
       end
 
       # We need to check to see if the local or options
@@ -44,7 +44,7 @@ module Procodile
       @loaded_at = Time.local
     end
 
-    def reload
+    def reload : Nil
       @process_list = nil
 
       @options = nil
@@ -69,7 +69,7 @@ module Procodile
 
             process.options = options_for_process(name)
           else
-            Procodile.log nil, "system", "#{name} has been added to the Procfile."
+            Procodile.log nil, "system", "#{name} has been added to the Procfile. Adding it."
             processes[name] = create_process(name, command, COLORS[processes.size.divmod(COLORS.size)[1]])
           end
         end
@@ -77,7 +77,7 @@ module Procodile
         removed_processes = processes.keys - process_list.keys
 
         removed_processes.each do |process_name|
-          if (p = (processes[process_name]))
+          if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)
             Procodile.log nil, "system", "#{process_name} has been removed in the Procfile. It will be removed when it is stopped."
@@ -120,17 +120,17 @@ module Procodile
       @local_options ||= load_local_options_from_file
     end
 
-    def process_options : Hash(String, ProcessOption)
-      @process_options ||= options.processes || {} of String => ProcessOption
+    def process_options : Hash(String, Process::Option)
+      @process_options ||= options.processes || {} of String => Process::Option
     end
 
-    def local_process_options : Hash(String, ProcessOption)
-      @local_process_options ||= local_options.processes || {} of String => ProcessOption
+    def local_process_options : Hash(String, Process::Option)
+      @local_process_options ||= local_options.processes || {} of String => Process::Option
     end
 
-    def options_for_process(name) : ProcessOption
-      po = process_options[name]? || ProcessOption.new
-      local_po = local_process_options[name]? || ProcessOption.new
+    def options_for_process(name : String) : Process::Option
+      po = process_options[name]? || Process::Option.new
+      local_po = local_process_options[name]? || Process::Option.new
 
       po.merge(local_po)
     end
@@ -138,6 +138,7 @@ module Procodile
     def environment_variables : Hash(String, String)
       option_env = options.env || {} of String => String
       local_option_env = local_options.env || {} of String => String
+
       option_env.merge(local_option_env)
     end
 
@@ -183,7 +184,7 @@ module Procodile
       "#{procfile_path}.local"
     end
 
-    private def create_process(name, command, log_color) : Procodile::Process
+    private def create_process(name : String, command : String, log_color : Int32) : Procodile::Process
       process = Procodile::Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color
       process

@@ -1,19 +1,18 @@
 require "./color"
 
 module Procodile
-  def self.mutex : Mutex
+  def self.mutex
     @@mutex ||= Mutex.new
   end
 
-  def self.log(color, name, text)
+  def self.log(color : Int32?, name : String, text : String)
     mutex.synchronize do
-      text.to_s.lines.map(&.chomp).each do |message|
-        output = ""
-        output += "#{Time.local.to_s("%H:%M:%S")} #{name.ljust(18, ' ')} | ".color(color)
-        output += message
-        STDOUT.puts output
-        STDOUT.flush
+      text.each_line do |message|
+        STDOUT << "#{Time.local.to_s("%H:%M:%S")} #{name.ljust(18, ' ')} | ".color(color)
+        STDOUT << message
+        STDOUT << "\n"
       end
+      STDOUT.flush
     end
   end
 end

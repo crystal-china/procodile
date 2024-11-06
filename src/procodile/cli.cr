@@ -1,6 +1,7 @@
 require "./config"
 require "./control_client"
 require "./commands/*"
+require "./core_ext/process"
 require "./version"
 
 module Procodile
@@ -68,7 +69,7 @@ module Procodile
       options = Procodile::CliOptions.new,
       &block : Proc(Procodile::Supervisor, Nil)
     )
-      run_options = Procodile::RunOptions.new
+      run_options = RunOptions.new
       run_options.respawn = options.respawn
       run_options.stop_when_none = options.stop_when_none
       # run_options.proxy = options.proxy

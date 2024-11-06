@@ -41,6 +41,11 @@ module Procodile
 
           opts.on("--ports PROCESSES", "Choose ports to allocate to processes") do |processes|
             cli.options.port_allocations = processes.split(",").each_with_object({} of String => Int32) do |line, hash|
+              if !line.includes?(":")
+                STDERR.puts "No port specified, e.g. app1:3001,app2:3002"
+                exit
+              end
+
               process, port = line.split(":")
               hash[process] = port.to_i
             end
@@ -56,7 +61,7 @@ module Procodile
         end
       end
 
-      def start
+      def start : Nil
         if supervisor_running?
           if @options.foreground
             raise Error.new "Cannot be started in the foreground because supervisor already running"
@@ -80,24 +85,11 @@ module Procodile
             processes: process_names_from_cli_option,
             tag: @options.tag,
             port_allocations: @options.port_allocations,
-          ).as Array(InstanceConfig)
+          ).as Array(Instance::Config)
 
           if instances.empty?
             puts "No processes to start."
           else
-            # [
-            #     [0] {
-            #         "description" => "test3.1",
-            #                 "pid" => 552746,
-            #            "respawns" => 0,
-            #              "status" => "Running",
-            #             "running" => true,
-            #          "started_at" => 1667370102,
-            #                 "tag" => nil,
-            #                "port" => nil
-            #     }
-            # ]
-
             instances.each do |instance|
               puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
             end
@@ -112,7 +104,7 @@ module Procodile
               unless @options.start_processes == false
                 supervisor.start_processes(
                   process_names_from_cli_option,
-                  SupervisorOptions.new(tag: @options.tag)
+                  Supervisor::Options.new(tag: @options.tag)
                 )
               end
             end

@@ -1,11 +1,11 @@
 module Procodile
   module Message
-    def self.parse(message)
+    def self.parse(message : Supervisor::Message)
       case message.type
-      when "not_running"
+      when .not_running?
         "#{message.instance} is not running (#{message.status})"
-      when "incorrect_quantity"
-        "#{message.process} only has #{message.current} instances (should have #{message.desired})"
+      when .incorrect_quantity?
+        "#{message.process} has #{message.current} instances (should have #{message.desired})"
       end
     end
   end

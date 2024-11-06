@@ -5,12 +5,18 @@ module Procodile
   class ControlServer
     @supervisor : Procodile::Supervisor
 
+    def self.start(supervisor : Procodile::Supervisor) : Nil
+      spawn do
+        socket = self.new(supervisor)
+        socket.listen
+      end
+    end
+
     def initialize(@supervisor)
     end
 
-    def listen
+    def listen : Nil
       sock_path = @supervisor.config.sock_path
-
       server = UNIXServer.new(sock_path)
 
       Procodile.log nil, "control", "Listening at #{sock_path}"
@@ -29,13 +35,6 @@ module Procodile
       end
     ensure
       FileUtils.rm_rf(sock_path.not_nil!)
-    end
-
-    def self.start(supervisor)
-      spawn do
-        socket = self.new(supervisor)
-        socket.listen
-      end
     end
   end
 end
