@@ -63,6 +63,7 @@ module Procodile
       #   end
       # end
 
+
     rescue e
       Procodile.log nil, "proxy", "Exception: #{e.class}: #{e.message}"
       Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")

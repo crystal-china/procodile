@@ -27,7 +27,7 @@ module Procodile
 
           begin
             Dir.cd(@config.root)
-            
+
             ::Process.exec(desired_command, env: environment, shell: true)
           rescue e : RuntimeError
             raise Error.new e.message

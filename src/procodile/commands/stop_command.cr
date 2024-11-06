@@ -42,12 +42,12 @@ module Procodile
             puts "Waiting for supervisor to stop..."
             loop do
               sleep 1.second
-              
+
               if supervisor_running?
                 sleep 1.second
               else
                 puts "Supervisor has stopped"
-                
+
                 exit 0
               end
             end

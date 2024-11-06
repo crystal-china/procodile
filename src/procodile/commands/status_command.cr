@@ -32,7 +32,7 @@ module Procodile
           elsif @options.simple
             if status.messages.empty?
               message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
-              
+
               puts "OK || #{message.join(", ")}"
             else
               message = status.messages.map { |p| Message.parse(p) }.join(", ")
