@@ -15,7 +15,12 @@ module Procodile
       proxy_port, network_protocol, proxy?, proxy_address, restart_mode,
       to: @options
 
-    def initialize(@config : Procodile::Config, @name : String, @command : String, @options = Option.new)
+    def initialize(
+      @config : Procodile::Config,
+      @name : String,
+      @command : String,
+      @options : Option = Option.new
+    )
     end
 
     #

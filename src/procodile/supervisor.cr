@@ -12,7 +12,7 @@ module Procodile
 
     getter config, run_options, tag, tcp_proxy, processes, readers, started_at
 
-    def initialize(@config : Procodile::Config, @run_options = Procodile::RunOptions.new)
+    def initialize(@config : Procodile::Config, @run_options : RunOptions = RunOptions.new)
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
       @readers = {} of IO::FileDescriptor => Procodile::Instance
       @signal_handler = SignalHandler.new
@@ -110,7 +110,7 @@ module Procodile
       instances_stopped
     end
 
-    def restart(options = Options.new) : Array(Array(Procodile::Instance | Nil))
+    def restart(options : Options = Options.new) : Array(Array(Procodile::Instance | Nil))
       @tag = options.tag
       instances_restarted = [] of Array(Procodile::Instance?)
       processes = options.processes

@@ -298,7 +298,7 @@ module Procodile
     # Find a port number for this instance to listen on. We just check that nothing is already listening on it.
     # The process is expected to take it straight away if it wants it.
     #
-    private def allocate_port(max_attempts = 10) : Nil
+    private def allocate_port(max_attempts : Int32 = 10) : Nil
       attempts = 0
 
       until @port
