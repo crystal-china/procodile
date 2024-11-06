@@ -14,6 +14,7 @@ module Procodile
     @local_process_options : Hash(String, Process::Option)?
     @loaded_at : Time?
     @environment_variables : Hash(String, String)?
+    @app_name : String?
 
     getter root, loaded_at
 

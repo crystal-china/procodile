@@ -18,7 +18,7 @@ module Procodile
       @pwd : String,
       given_root : String?,
       @given_procfile : String?,
-      @global_options = ProcfileOption.new
+      @global_options : ProcfileOption = ProcfileOption.new
     )
       @given_root = given_root ? expand_path(given_root, pwd) : nil
 
@@ -35,7 +35,7 @@ module Procodile
       find_root_and_procfile(@pwd, @given_root, @given_procfile)
 
       # Otherwise, try and use the global config we have been given
-      # find_root_and_procfile_from_options(@global_options) if ambiguous?
+      find_root_and_procfile_from_options(@global_options) if ambiguous?
     end
 
     private def find_root_and_procfile(pwd : String, given_root : String?, given_procfile : String?) : String?
@@ -90,8 +90,9 @@ module Procodile
         # Global options is provides a list of apps. We need to know which one of
         # these we should be looking at.
 
+        raise Error.new "Still not support pass array yet."
         # FIXME: Still not work
-        find_root_and_procfile_from_options(options.app_id)
+        # find_root_and_procfile_from_options(options.app_id)
       end
     end
   end
