@@ -50,6 +50,8 @@ processes:
     quantity: 1
 HEREDOC
 
+header 'Building ...'
+header 'Ensure print (15) Successful to pass test.'
 shards build
 bin/procodile
 bin/procodile help
@@ -134,3 +136,5 @@ header '(14) Checking procodile restart -papp3  ...'
 bin/procodile restart -papp3 && sleep 3
 bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$'
 bin/procodile kill
+
+header '(15) Successful'
