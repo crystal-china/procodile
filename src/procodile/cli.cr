@@ -67,7 +67,7 @@ module Procodile
     def self.start_supervisor(
       config : Procodile::Config,
       options = Procodile::CliOptions.new,
-      &block : Proc(Procodile::Supervisor, Nil)
+      &after_start : Proc(Procodile::Supervisor, Nil)
     )
       run_options = RunOptions.new
       run_options.respawn = options.respawn
@@ -93,7 +93,7 @@ module Procodile
       if options.foreground
         File.write(config.supervisor_pid_path, ::Process.pid)
 
-        Supervisor.new(config, run_options).start(block)
+        Supervisor.new(config, run_options).start(after_start)
       else
         FileUtils.rm_rf(File.join(config.pid_root, "*.pid"))
 
@@ -101,7 +101,7 @@ module Procodile
           log_path = File.open(config.log_path, "a")
           STDOUT.reopen(log_path); STDOUT.sync = true
           STDERR.reopen(log_path); STDERR.sync = true
-          Supervisor.new(config, run_options).start(block)
+          Supervisor.new(config, run_options).start(after_start)
         end
 
         spawn { process.wait }
