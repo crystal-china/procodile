@@ -37,6 +37,7 @@ module Procodile
               elsif new_instance
                 puts "Started".color(32) + " #{new_instance.description}"
               end
+
               STDOUT.flush
             end
           end
