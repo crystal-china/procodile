@@ -6,7 +6,7 @@ module Procodile
         end
       end
 
-      def console
+      def console : Nil
         if (cmd = @config.console_command)
           exec(cmd)
         else

@@ -20,7 +20,7 @@ module Procodile
         end
       end
 
-      def status
+      def status : Nil
         if supervisor_running?
           status = ControlClient.run(@config.sock_path, "status").as ControlClient::ReplyOfStatusCommand
 
@@ -32,6 +32,7 @@ module Procodile
           elsif @options.simple
             if status.messages.empty?
               message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
+              
               puts "OK || #{message.join(", ")}"
             else
               message = status.messages.map { |p| Message.parse(p) }.join(", ")

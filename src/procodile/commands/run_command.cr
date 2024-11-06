@@ -6,7 +6,7 @@ module Procodile
         end
       end
 
-      def run(command = nil)
+      def run(command : String? = nil)
         exec(command)
       end
     end

@@ -59,7 +59,7 @@ module Procodile
       loop { supervise; sleep 3.seconds }
     end
 
-    def start_processes(process_names : Array(String)?, options = SupervisorOptions.new) : Array(Procodile::Instance)
+    def start_processes(process_names : Array(String)?, options : Options = Options.new) : Array(Procodile::Instance)
       @tag = options.tag
       instances_started = [] of Procodile::Instance
 
@@ -77,7 +77,7 @@ module Procodile
       instances_started
     end
 
-    def stop(options = SupervisorOptions.new) : Array(Procodile::Instance)
+    def stop(options : Options = Options.new) : Array(Procodile::Instance)
       if options.stop_supervisor
         @run_options.stop_when_none = true
       end

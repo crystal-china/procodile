@@ -61,7 +61,7 @@ module Procodile
         end
       end
 
-      def start
+      def start : Nil
         if supervisor_running?
           if @options.foreground
             raise Error.new "Cannot be started in the foreground because supervisor already running"
@@ -90,19 +90,6 @@ module Procodile
           if instances.empty?
             puts "No processes to start."
           else
-            # [
-            #     [0] {
-            #         "description" => "test3.1",
-            #                 "pid" => 552746,
-            #            "respawns" => 0,
-            #              "status" => "Running",
-            #             "running" => true,
-            #          "started_at" => 1667370102,
-            #                 "tag" => nil,
-            #                "port" => nil
-            #     }
-            # ]
-
             instances.each do |instance|
               puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
             end

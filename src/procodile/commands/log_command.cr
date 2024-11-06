@@ -22,13 +22,11 @@ module Procodile
         opts << "-f" if options.wait
         opts << "-n #{options.lines}" if options.lines
 
-        process = options.process
-
-        if process
-          if (process = @config.processes[process])
+        if (process_opts = options.process)
+          if (process = @config.processes[process_opts])
             log_path = process.log_path
           else
-            raise Error.new "Invalid process name '#{process}'"
+            raise Error.new "Invalid process name '#{process_opts}'"
           end
         else
           log_path = @config.log_path
