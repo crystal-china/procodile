@@ -11,9 +11,7 @@ module Procodile
     getter config, name
     property command, options, log_color, removed
 
-    delegate quantity, max_respawns, respawn_window, term_signal, allocate_port_from,
-      proxy_port, network_protocol, proxy?, proxy_address, restart_mode,
-      to: @options
+    delegate allocate_port_from, proxy_port, to: @options
 
     def initialize(
       @config : Procodile::Config,
@@ -45,6 +43,27 @@ module Procodile
     end
 
     #
+    # How many instances of this process should be started
+    #
+    def quantity : Int32
+      @options.quantity || 1
+    end
+
+    #
+    # The maximum number of times this process can be respawned in the given period
+    #
+    def max_respawns : Int32
+      @options.max_respawns || 5
+    end
+
+    #
+    # The respawn window. One hour by default.
+    #
+    def respawn_window : Int32
+      @options.respawn_window || 3600
+    end
+
+    #
     # Return the path where log output for this process should be written to. If
     # none, output will be written to the supervisor log.
     #
@@ -71,6 +90,46 @@ module Procodile
     #
     def default_log_file_name : String
       @options.log_file_name || "#{@name}.log"
+    end
+
+    #
+    # Return the signal to send to terminate the process
+    #
+    def term_signal : Signal
+      @options.term_signal || Signal::TERM
+    end
+
+    #
+    # Defines how this process should be restarted
+    #
+    # start-term = start new instances and send term to children
+    # usr1 = just send a usr1 signal to the current instance
+    # usr2 = just send a usr2 signal to the current instance
+    # term-start = stop the old instances, when no longer running, start a new one
+    #
+    def restart_mode : Signal | String
+      @options.restart_mode || "term-start"
+    end
+
+    #
+    # Return the network protocol for this process
+    #
+    def network_protocol : String
+      @options.network_protocol || "tcp"
+    end
+
+    #
+    # Is this process enabled for proxying?
+    #
+    def proxy? : Bool
+      !!@options.proxy_port
+    end
+
+    #
+    # Return the port for the proxy to listen on for this process type
+    #
+    def proxy_address : String?
+      proxy? ? @options.proxy_address || "127.0.0.1" : nil
     end
 
     #
@@ -137,7 +196,7 @@ module Procodile
       include YAML::Serializable
 
       # How many instances of this process should be started
-      property quantity = 1
+      property quantity : Int32?
 
       # Defines how this process should be restarted
       #
@@ -145,18 +204,18 @@ module Procodile
       # Signal::USR1 = just send a usr1 signal to the current instance
       # Signal::USR2 = just send a usr2 signal to the current instance
       # term-start = stop the old instances, when no longer running, start a new one
-      property restart_mode : Signal | String = "term-start"
+      property restart_mode : Signal | String | Nil
 
       # The maximum number of times this process can be respawned in the given period
-      property max_respawns = 5
+      property max_respawns : Int32?
 
       # The respawn window. One hour by default.
-      property respawn_window = 3600
+      property respawn_window : Int32?
       property log_path : String?
       property log_file_name : String?
 
       # Return the signal to send to terminate the process
-      property term_signal = Signal::TERM
+      property term_signal : Signal?
 
       # Return the first port that ports should be allocated from for this process
       property allocate_port_from : Int32?
@@ -165,24 +224,14 @@ module Procodile
       property proxy_port : Int32?
 
       # property proxy_address : String?
-      setter proxy_address : String?
+      property proxy_address : String?
 
       # Return the network protocol for this process
-      property network_protocol = "tcp"
+      property network_protocol : String?
 
       property env = {} of String => String
 
       def initialize
-      end
-
-      # Is this process enabled for proxying?
-      def proxy? : Bool
-        !!proxy_port
-      end
-
-      # Return the port for the proxy to listen on for this process type
-      def proxy_address : String?
-        proxy? ? @proxy_address || "127.0.0.1" : nil
       end
 
       def merge(other : self?)
