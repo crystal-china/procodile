@@ -11,9 +11,9 @@ describe Procodile::ProcfileOption do
     procfile_option.exec_prefix.should eq "bundle exec"
     procfile_option.env.should eq({"RAILS_ENV" => "production", "FRUIT" => "apple", "VEGETABLE" => "potato", "PORT" => "3000"})
 
-    procfile_option.processes.should be_a Hash(String, Procodile::ProcessOption)
+    procfile_option.processes.should be_a Hash(String, Procodile::Process::Option)
 
-    process_option = Procodile::ProcessOption.new
+    process_option = Procodile::Process::Option.new
     process_option.quantity = 2
     process_option.restart_mode = Signal::USR2
     process_option.term_signal = Signal::TERM

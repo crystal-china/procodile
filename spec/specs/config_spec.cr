@@ -120,11 +120,11 @@ describe Procodile::Config do
     end
 
     it "should be able to return options for a process" do
-      config.options_for_process("proc1").should be_a Procodile::ProcessOption
+      config.options_for_process("proc1").should be_a Procodile::Process::Option
       config.options_for_process("proc1").quantity.should eq 2
       config.options_for_process("proc1").restart_mode.should eq Signal::USR2
-      config.options_for_process("proc2").should be_a Procodile::ProcessOption
-      config.options_for_process("proc2").should eq Procodile::ProcessOption.new
+      config.options_for_process("proc2").should be_a Procodile::Process::Option
+      config.options_for_process("proc2").should eq Procodile::Process::Option.new
     end
   end
 

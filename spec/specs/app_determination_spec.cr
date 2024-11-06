@@ -7,7 +7,6 @@ describe Procodile::AppDetermination do
       pwd: "/",
       given_root: "/app",
       given_procfile: "Procfile",
-      global_options: nil
     )
     ap.root.should eq "/app"
     ap.procfile.should eq "/app/Procfile"
@@ -18,7 +17,6 @@ describe Procodile::AppDetermination do
       pwd: "/",
       given_root: "/app/",
       given_procfile: "Procfile",
-      global_options: nil
     )
     ap.root.should eq "/app"
     ap.procfile.should eq "/app/Procfile"
@@ -29,7 +27,6 @@ describe Procodile::AppDetermination do
       pwd: "/home",
       given_root: "/some/app",
       given_procfile: nil,
-      global_options: nil
     )
     ap.root.should eq "/some/app"
     ap.procfile.should be_nil
@@ -40,7 +37,6 @@ describe Procodile::AppDetermination do
       pwd: "/app",
       given_root: nil,
       given_procfile: "/myapps/Procfile",
-      global_options: nil
     )
     ap.root.should eq "/myapps"
     ap.procfile.should eq "/myapps/Procfile"
