@@ -153,26 +153,6 @@ module Procodile
       exit 0
     end
 
-    def supervise : Nil
-      # Tell instances that have been stopped that they have been stopped
-      remove_stopped_instances
-
-      # Remove removed processes
-      remove_removed_processes
-
-      # Check all instances that we manage and let them do their things.
-      @processes.each do |_, instances|
-        instances.each(&.check)
-      end
-
-      # If the processes go away, we can stop the supervisor now
-      if @run_options.stop_when_none && all_instances_stopped?
-        Procodile.log nil, "system", "All processes have stopped"
-
-        stop_supervisor
-      end
-    end
-
     def reload_config : Nil
       Procodile.log nil, "system", "Reloading configuration"
 
@@ -257,6 +237,26 @@ module Procodile
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
         @readers.delete(instance)
+      end
+    end
+
+    private def supervise : Nil
+      # Tell instances that have been stopped that they have been stopped
+      remove_stopped_instances
+
+      # Remove removed processes
+      remove_removed_processes
+
+      # Check all instances that we manage and let them do their things.
+      @processes.each do |_, instances|
+        instances.each(&.check)
+      end
+
+      # If the processes go away, we can stop the supervisor now
+      if @run_options.stop_when_none && all_instances_stopped?
+        Procodile.log nil, "system", "All processes have stopped"
+
+        stop_supervisor
       end
     end
 
