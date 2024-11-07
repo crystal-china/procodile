@@ -165,7 +165,7 @@ module Procodile
         new_instance.port = self.port
 
         spawn do
-          @supervisor.remove_instance(self)
+          # @supervisor.remove_instance(self)
 
           while running?
             sleep 0.5.seconds
