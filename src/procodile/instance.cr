@@ -39,14 +39,6 @@ module Procodile
       else
         port_allocations = @supervisor.run_options.port_allocations
 
-        #         {
-        #              :respawn => nil,
-        #       :stop_when_none => nil,
-        #                :proxy => nil,
-        #     :force_single_log => nil,
-        #     :port_allocations => nil
-        # }
-
         if port_allocations && (chosen_port = port_allocations[@process.name]?)
           if chosen_port == 0
             allocate_port
@@ -157,21 +149,28 @@ module Procodile
           new_instance.port = self.port
           new_instance.start
         end
+
         self
       when "start-term"
         new_instance = @process.create_instance(@supervisor)
         new_instance.start
+
         stop
+
         new_instance
       when "term-start"
         stop
+
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
 
         spawn do
+          @supervisor.remove_instance(self)
+
           while running?
             sleep 0.5.seconds
           end
+
           new_instance.start
         end
 
