@@ -129,7 +129,7 @@ module Procodile
     # Retarts the process using the appropriate method from the process configuration
     #
     # Why would this return self here?
-    def restart : self?
+    def restart(wg : WaitGroup) : self?
       restart_mode = @process.restart_mode
 
       Procodile.log(@process.log_color, description, "Restarting using #{restart_mode} mode")
@@ -159,19 +159,24 @@ module Procodile
 
         new_instance
       when "term-start"
+        wg.add
+
         stop
 
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
 
         spawn do
-          # @supervisor.remove_instance(self)
-
           while running?
+            # 这里必须设定为至少 1, 原来 0.5 可能会造成 wg#wait 失败，然后异常退出
             sleep 0.5.seconds
           end
 
+          @supervisor.remove_instance(self)
+
           new_instance.start
+        ensure
+          wg.done
         end
 
         new_instance
