@@ -215,12 +215,6 @@ module Procodile
       messages
     end
 
-    def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
-      @readers[io] = instance
-
-      @signal_handler.notice
-    end
-
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
       add_reader(instance, io) if io
 
@@ -403,6 +397,12 @@ module Procodile
       @processes.all? do |_, instances|
         instances.reject(&.failed?).empty?
       end
+    end
+
+    private def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
+      @readers[io] = instance
+
+      @signal_handler.notice
     end
 
     # Supervisor message
