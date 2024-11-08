@@ -15,24 +15,43 @@ module Procodile
     def initialize(@supervisor)
     end
 
+    def handle_client(session, client)
+      while (line = client.gets)
+        if (response = session.receive_data(line.strip))
+          client.puts response
+        end
+      end
+    end
+
     def listen : Nil
       sock_path = @supervisor.config.sock_path
       server = UNIXServer.new(sock_path)
 
       Procodile.log nil, "control", "Listening at #{sock_path}"
 
-      loop do
-        client = server.accept
+      while (client = server.accept)
         session = ControlSession.new(@supervisor, client)
 
-        while (line = client.gets)
-          if (response = session.receive_data(line.strip))
-            client.puts response
-          end
-        end
-
-        client.close
+        spawn handle_client(session, client)
       end
+
+      # loop do
+      #   Procodile.mutex.synchronize do
+      #     client = server.accept
+
+      #     session = ControlSession.new(@supervisor, client)
+
+      #     while (line = client.gets)
+      #       if (response = session.receive_data(line.strip))
+      #         client.puts response
+      #       end
+      #     end
+
+      #     client.close
+      #   end
+      # end
+
+
     ensure
       FileUtils.rm_rf(sock_path) if sock_path
     end

@@ -15,16 +15,8 @@ module Procodile
       socket.try &.disconnect
     end
 
-    def initialize(sock_path : String, block : Proc(ControlClient, Nil)? = nil)
+    def initialize(sock_path : String)
       @socket = UNIXSocket.new(sock_path)
-
-      if block
-        begin
-          block.call(self)
-        ensure
-          disconnect
-        end
-      end
     end
 
     def run(command : String, **options) : SocketResponse

@@ -67,7 +67,7 @@ begin
   end
 
   cli.dispatch(command)
-rescue ex : Procodile::Error
-  STDERR.puts "Error: #{ex.message}".color(31)
-  exit 1
+  # rescue ex : Procodile::Error
+  #   STDERR.puts "Error: #{ex.message}".color(31)
+  #   exit 1
 end

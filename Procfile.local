@@ -1,0 +1,10 @@
+app_name: test
+pid_root: new_pids
+env:
+  foo: foo
+
+processes:
+  app1:
+    quantity: 1
+  app2:
+    quantity: 1
