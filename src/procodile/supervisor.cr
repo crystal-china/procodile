@@ -146,8 +146,12 @@ module Procodile
       checked = check_instance_quantities(:started, processes)[:started].map { |i| [nil, i] }
       instances_restarted.concat checked
 
+      puts "f"*100
+      puts "f1"*100
       # 确保所有的 @reader 设定完毕，再启动 log listener
+      sleep 1
       wg.wait
+      puts "g"*100
 
       log_listener_reader
 

@@ -35,12 +35,13 @@ module Procodile
     end
 
     def restart(options : Options) : String
-      instances = @supervisor.restart(
-        Supervisor::Options.new(
-          processes: options.processes,
-          tag: options.tag
-        )
+      opt = Supervisor::Options.new(
+        processes: options.processes,
+        tag: options.tag
       )
+      puts "d"*100
+      instances = @supervisor.restart(opt)
+      puts "e"*100
 
       "200 " + instances.map { |a| a.map { |i| i ? i.to_struct : nil } }.to_json
     end
@@ -115,10 +116,16 @@ module Procodile
 
         if callable[command]?
           begin
-            callable[command].call(options)
-          rescue e : Procodile::Error
-            Procodile.log nil, "control", "Error: #{e.message}".color(31)
-            "500 #{e.message}"
+            puts "c"*100
+            p! command
+            p! callable[command]
+            p! options
+            x = callable[command].call(options)
+            puts "d"*100
+            x
+          # rescue e : Procodile::Error
+          #   Procodile.log nil, "control", "Error: #{e.message}".color(31)
+          #   "500 #{e.message}"
           end
         else
           "404 Invaid command"
