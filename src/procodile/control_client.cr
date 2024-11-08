@@ -29,6 +29,7 @@ module Procodile
 
     def run(command, **options) : SocketResponse
       @socket.puts("#{command} #{options.to_json}")
+      puts "#{command} #{options.to_json}"
 
       if (data = @socket.gets)
         code, reply = data.strip.split(/\s+/, 2)
@@ -50,6 +51,7 @@ module Procodile
           raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
+        p! data
         raise Error.new "Control server disconnected. data: #{data.inspect}"
       end
     end

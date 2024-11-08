@@ -16,6 +16,7 @@ module Procodile
     end
 
     def listen : Nil
+      puts "1"*100
       sock_path = @supervisor.config.sock_path
       server = UNIXServer.new(sock_path)
 
@@ -26,7 +27,15 @@ module Procodile
         session = ControlSession.new(@supervisor, client)
 
         while (line = client.gets)
-          if (response = session.receive_data(line.strip))
+          pp! line
+          begin
+            response = session.receive_data(line.strip)
+          rescue Exception
+            STDERR.puts "2"*100
+            response = "200 ok"
+          end
+          pp! response
+          if response
             client.puts response
           end
         end
