@@ -47,10 +47,10 @@ module Procodile
             true
           end
         else
-          raise Error.new "Error from control server: #{code} (#{reply.inspect})"
+          raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
-        raise Error.new "Control server disconnected."
+        raise Error.new "Control server disconnected. data: #{data.inspect}"
       end
     end
 
@@ -72,7 +72,7 @@ module Procodile
         @messages : Array(Supervisor::Message),
         @root : String,
         @app_name : String,
-        @supervisor : NamedTuple(started_at: Int64, pid: Int64),
+        @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
         @instances : Hash(String, Array(Instance::Config)),
         @processes : Array(ProcessStatus),
         @environment_variables : Hash(String, String),

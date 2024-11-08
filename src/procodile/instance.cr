@@ -39,14 +39,6 @@ module Procodile
       else
         port_allocations = @supervisor.run_options.port_allocations
 
-        #         {
-        #              :respawn => nil,
-        #       :stop_when_none => nil,
-        #                :proxy => nil,
-        #     :force_single_log => nil,
-        #     :port_allocations => nil
-        # }
-
         if port_allocations && (chosen_port = port_allocations[@process.name]?)
           if chosen_port == 0
             allocate_port
@@ -137,7 +129,7 @@ module Procodile
     # Retarts the process using the appropriate method from the process configuration
     #
     # Why would this return self here?
-    def restart : self?
+    def restart(wg : WaitGroup) : self?
       restart_mode = @process.restart_mode
 
       Procodile.log(@process.log_color, description, "Restarting using #{restart_mode} mode")
@@ -157,22 +149,34 @@ module Procodile
           new_instance.port = self.port
           new_instance.start
         end
+
         self
       when "start-term"
         new_instance = @process.create_instance(@supervisor)
         new_instance.start
+
         stop
+
         new_instance
       when "term-start"
+        wg.add
+
         stop
+
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
 
         spawn do
           while running?
+            # 这里必须设定为至少 1, 原来 0.5 可能会造成 wg#wait 失败，然后异常退出
             sleep 0.5.seconds
           end
+
+          @supervisor.remove_instance(self)
+
           new_instance.start
+        ensure
+          wg.done
         end
 
         new_instance

@@ -1,4 +1,5 @@
 require "file_utils"
+require "wait_group"
 require "./logger"
 require "./error"
 require "./control_server"
@@ -6,9 +7,9 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    @started_at = uninitialized Time
     @tag : String?
     @tcp_proxy : TCPProxy?
+    @started_at : Time?
 
     getter config, run_options, tag, tcp_proxy, processes, readers, started_at
 
@@ -16,6 +17,8 @@ module Procodile
       @processes = {} of Procodile::Process => Array(Procodile::Instance)
       @readers = {} of IO::FileDescriptor => Procodile::Instance
       @signal_handler = SignalHandler.new
+      @signal_handler_chan = Channel(Nil).new
+      @log_listener_chan = Channel(Nil).new
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(Options.new(stop_supervisor: true)) }
@@ -111,6 +114,7 @@ module Procodile
     end
 
     def restart(options : Options = Options.new) : Array(Array(Procodile::Instance | Nil))
+      wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Procodile::Instance?)
       processes = options.processes
@@ -134,13 +138,18 @@ module Procodile
       instances.each do |instance|
         next if instance.stopping?
 
-        new_instance = instance.restart
+        new_instance = instance.restart(wg)
         instances_restarted << [instance, new_instance]
       end
 
       # Start any processes that are needed at this point
       checked = check_instance_quantities(:started, processes)[:started].map { |i| [nil, i] }
       instances_restarted.concat checked
+
+      # 确保所有的 @reader 设定完毕，再启动 log listener
+      wg.wait
+
+      log_listener_reader
 
       instances_restarted
     end
@@ -151,26 +160,6 @@ module Procodile
       FileUtils.rm_rf(File.join(@config.pid_root, "procodile.pid"))
 
       exit 0
-    end
-
-    def supervise : Nil
-      # Tell instances that have been stopped that they have been stopped
-      remove_stopped_instances
-
-      # Remove removed processes
-      remove_removed_processes
-
-      # Check all instances that we manage and let them do their things.
-      @processes.each do |_, instances|
-        instances.each(&.check)
-      end
-
-      # If the processes go away, we can stop the supervisor now
-      if @run_options.stop_when_none && all_instances_stopped?
-        Procodile.log nil, "system", "All processes have stopped"
-
-        stop_supervisor
-      end
     end
 
     def reload_config : Nil
@@ -202,8 +191,10 @@ module Procodile
     end
 
     def to_hash
+      started_at = @started_at
+
       {
-        started_at: @started_at.to_unix,
+        started_at: started_at ? started_at.to_unix : nil,
         pid:        ::Process.pid,
       }
     end
@@ -235,12 +226,6 @@ module Procodile
       messages
     end
 
-    def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
-      @readers[io] = instance
-
-      @signal_handler.notice
-    end
-
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
       add_reader(instance, io) if io
 
@@ -256,62 +241,80 @@ module Procodile
     def remove_instance(instance : Instance) : Nil
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
-        @readers.delete(instance)
+        @readers.delete(@readers.key_for(instance))
       end
     end
 
-    private def watch_for_output : Nil
-      signal_handler_chan = Channel(Nil).new
-      listener_chan = Channel(Nil).new
-
-      spawn do
-        loop do
-          @signal_handler.pipe[:reader].read(Bytes.new(999)) rescue nil
-          @signal_handler.handle
-
-          signal_handler_chan.send nil
-        end
-      end
-
+    private def log_listener_reader
       buffer = {} of IO::FileDescriptor => String
-
+      # After run restart command, @readers need to be update.
+      # Ruby version @readers is wrapped by a loop, so can workaround this.
+      # Crystal version need rerun this method again after restart.
       @readers.keys.each do |reader|
         spawn do
           loop do
             Fiber.yield
 
-            if reader.closed?
-              buffer.delete(reader)
-              @readers.delete(reader)
-            else
-              str = reader.gets
+            str = reader.gets
 
-              next if str.nil?
+            next if str.nil?
 
-              buffer[reader] ||= ""
-              buffer[reader] += "#{str.chomp}\n"
+            buffer[reader] ||= ""
+            buffer[reader] += "#{str.chomp}\n"
 
-              while buffer[reader].index("\n")
-                line, buffer[reader] = buffer[reader].split("\n", 2)
+            while buffer[reader].index("\n")
+              line, buffer[reader] = buffer[reader].split("\n", 2)
 
-                if (instance = @readers[reader])
-                  Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
-                else
-                  Procodile.log nil, "unknown", buffer[reader]
-                end
+              if (instance = @readers[reader])
+                Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
+              else
+                Procodile.log nil, "unknown", buffer[reader]
               end
             end
 
-            listener_chan.send nil
+            @log_listener_chan.send nil
           end
         end
       end
+    end
+
+    private def supervise : Nil
+      # Tell instances that have been stopped that they have been stopped
+      remove_stopped_instances
+
+      # Remove removed processes
+      remove_removed_processes
+
+      # Check all instances that we manage and let them do their things.
+      @processes.each do |_, instances|
+        instances.each(&.check)
+      end
+
+      # If the processes go away, we can stop the supervisor now
+      if @run_options.stop_when_none && all_instances_stopped?
+        Procodile.log nil, "system", "All processes have stopped"
+
+        stop_supervisor
+      end
+    end
+
+    private def watch_for_output : Nil
+      spawn do
+        loop do
+          @signal_handler.pipe[:reader].read(Bytes.new(999)) rescue nil
+          @signal_handler.handle
+
+          @signal_handler_chan.send nil
+        end
+      end
+
+      log_listener_reader
 
       spawn do
         loop do
           select
-          when signal_handler_chan.receive
-          when listener_chan.receive
+          when @signal_handler_chan.receive
+          when @log_listener_chan.receive
           end
         end
       end
@@ -403,6 +406,12 @@ module Procodile
       @processes.all? do |_, instances|
         instances.reject(&.failed?).empty?
       end
+    end
+
+    private def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
+      @readers[io] = instance
+
+      @signal_handler.notice
     end
 
     # Supervisor message
