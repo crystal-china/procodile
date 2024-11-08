@@ -156,8 +156,8 @@ module Procodile
 
       if log_path
         File.expand_path(log_path, self.root)
-      elsif log_path.nil? && self.log_root
-        File.join(self.log_root.not_nil!, "procodile.log")
+      elsif log_path.nil? && (log_root = self.log_root)
+        File.join(log_root, "procodile.log")
       else
         File.expand_path("procodile.log", self.root)
       end

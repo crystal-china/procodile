@@ -34,7 +34,7 @@ module Procodile
         client.close
       end
     ensure
-      FileUtils.rm_rf(sock_path.not_nil!)
+      FileUtils.rm_rf(sock_path) if sock_path
     end
   end
 end

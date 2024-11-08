@@ -75,6 +75,8 @@ module Procodile
 
       processes = @supervisor.processes.keys.map(&.to_struct)
 
+      loaded_at = @supervisor.config.loaded_at
+
       result = ControlClient::ReplyOfStatusCommand.new(
         version: Procodile::VERSION,
         messages: @supervisor.messages,
@@ -91,7 +93,7 @@ module Procodile
         log_root: @supervisor.config.log_root,
         supervisor_pid_path: @supervisor.config.supervisor_pid_path,
         pid_root: @supervisor.config.pid_root,
-        loaded_at: @supervisor.config.loaded_at.not_nil!.to_unix,
+        loaded_at: loaded_at ? loaded_at.to_unix : nil,
       )
 
       "200 #{result.to_json}"
