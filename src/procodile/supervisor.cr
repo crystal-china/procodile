@@ -114,6 +114,10 @@ module Procodile
     end
 
     def restart(options : Options = Options.new) : Array(Array(Procodile::Instance | Nil))
+      if @run_options.foreground?
+        Procodile.log nil, "system", "Use restart command on processes running in foreground will fails easily, please use with caution."
+      end
+
       wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Procodile::Instance?)

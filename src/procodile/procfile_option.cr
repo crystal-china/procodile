@@ -31,7 +31,7 @@ module Procodile
   end
 
   struct CliOptions
-    property foreground : Bool?
+    property foreground : Bool = false
     property respawn : Bool?
     property stop_when_none : Bool?
     property proxy : Bool?
@@ -61,6 +61,7 @@ module Procodile
     property stop_when_none : Bool?
     property? proxy = false
     property force_single_log : Bool?
+    property? foreground : Bool = false
     property port_allocations : Hash(String, Int32)?
   end
 end
