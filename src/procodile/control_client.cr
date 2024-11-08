@@ -27,7 +27,7 @@ module Procodile
       end
     end
 
-    def run(command, **options) : SocketResponse
+    def run(command : String, **options) : SocketResponse
       @socket.puts("#{command} #{options.to_json}")
 
       if (data = @socket.gets)
