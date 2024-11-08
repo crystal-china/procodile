@@ -7,9 +7,9 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    @started_at = uninitialized Time
     @tag : String?
     @tcp_proxy : TCPProxy?
+    @started_at : Time?
 
     getter config, run_options, tag, tcp_proxy, processes, readers, started_at
 
@@ -191,8 +191,10 @@ module Procodile
     end
 
     def to_hash
+      started_at = @started_at
+
       {
-        started_at: @started_at.to_unix,
+        started_at: started_at ? started_at.to_unix : nil,
         pid:        ::Process.pid,
       }
     end
@@ -248,9 +250,6 @@ module Procodile
       # After run restart command, @readers need to be update.
       # Ruby version @readers is wrapped by a loop, so can workaround this.
       # Crystal version need rerun this method again after restart.
-
-      # uncomment following code will cause `Invalid memory access (signal 11)` error.
-      # puts @readers
       @readers.keys.each do |reader|
         spawn do
           loop do
