@@ -41,11 +41,11 @@ module Procodile
 
       ControlServer.start(self)
 
-      if @run_options.proxy?
-        Procodile.log nil, "system", "Proxy is enabled"
+      # if @run_options.proxy?
+      #   Procodile.log nil, "system", "Proxy is enabled"
 
-        @tcp_proxy = TCPProxy.start(self)
-      end
+      #   @tcp_proxy = TCPProxy.start(self)
+      # end
 
       after_start.call(self) # invoke supervisor.start_processes
 

@@ -8,6 +8,7 @@ module Procodile
     @failed_at : Time?
     @port : Int32?
     @tag : String?
+    @pid : Int64?
 
     property pid, process, port
     getter id, tag
@@ -18,7 +19,6 @@ module Procodile
 
     def initialize(@supervisor : Procodile::Supervisor, @process : Procodile::Process, @id : Int32)
       @respawns = 0
-      @pid = uninitialized Int64
       @stopped = false
     end
 
@@ -119,7 +119,10 @@ module Procodile
 
       if running?
         Procodile.log(@process.log_color, description, "Sending #{@process.term_signal} to #{@pid}")
-        ::Process.signal(@process.term_signal, @pid)
+
+        if (pid = @pid)
+          ::Process.signal(@process.term_signal, pid)
+        end
       else
         Procodile.log(@process.log_color, description, "Process already stopped")
       end
@@ -139,7 +142,10 @@ module Procodile
       case restart_mode
       when Signal::USR1, Signal::USR2
         if running?
-          ::Process.signal(restart_mode.as(Signal), @pid)
+          if (pid = @pid)
+            ::Process.signal(restart_mode.as(Signal), pid)
+          end
+
           @tag = @supervisor.tag if @supervisor.tag
           Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} signal to process #{@pid}")
         else

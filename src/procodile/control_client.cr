@@ -82,7 +82,7 @@ module Procodile
         @sock_path : String,
         @supervisor_pid_path : String,
         @pid_root : String,
-        @loaded_at : Int64,
+        @loaded_at : Int64?,
         @log_root : String?
       )
       end
