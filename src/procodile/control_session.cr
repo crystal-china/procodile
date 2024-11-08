@@ -6,7 +6,7 @@ module Procodile
     def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
     end
 
-    def start_processes(options : Options) : String
+    private def start_processes(options : Options) : String
       if (ports = options.port_allocations)
         if (run_options_ports = @supervisor.run_options.port_allocations)
           run_options_ports.merge!(ports)
@@ -23,7 +23,7 @@ module Procodile
       "200 #{instances.map(&.to_struct).to_json}"
     end
 
-    def stop(options : Options) : String
+    private def stop(options : Options) : String
       instances = @supervisor.stop(
         Supervisor::Options.new(
           processes: options.processes,
@@ -34,7 +34,7 @@ module Procodile
       "200 #{instances.map(&.to_struct).to_json}"
     end
 
-    def restart(options : Options) : String
+    private def restart(options : Options) : String
       instances = @supervisor.restart(
         Supervisor::Options.new(
           processes: options.processes,
@@ -45,13 +45,13 @@ module Procodile
       "200 " + instances.map { |a| a.map { |i| i ? i.to_struct : nil } }.to_json
     end
 
-    def reload_config(options) : String
+    private def reload_config(options) : String
       @supervisor.reload_config
 
       "200 []"
     end
 
-    def check_concurrency(options : Options) : String
+    private def check_concurrency(options : Options) : String
       result = @supervisor.check_concurrency(
         Supervisor::Options.new(
           reload: options.reload
@@ -63,7 +63,7 @@ module Procodile
       "200 #{result.to_json}"
     end
 
-    def status(options : Options) : String
+    private def status(options : Options) : String
       instances = {} of String => Array(Instance::Config)
 
       @supervisor.processes.each do |process, process_instances|
