@@ -255,9 +255,10 @@ module Procodile
           loop do
             Fiber.yield
 
-            str = reader.gets
-
-            next if str.nil?
+            if (str = reader.gets).nil?
+              sleep 0.1
+              next
+            end
 
             buffer[reader] ||= ""
             buffer[reader] += "#{str.chomp}\n"
