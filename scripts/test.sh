@@ -46,22 +46,25 @@ env:
 processes:
   app1:
     allocate_port_from: 28128
-    quantity: 1
   app2:
     allocate_port_from: 28320
-    quantity: 1
+  app3:
+    allocate_port_from: 28502
 HEREDOC
 
 header 'Building ...'
-header 'Ensure print (15) Successful to pass test.'
-shards build
+header 'Ensure print (15) Successful to pass through the test.'
+which shards && [ -f shards.yml ] && shards build
 bin/procodile
-bin/procodile help
 bin/procodile kill && sleep 3  # ensure kill before test.
 header '(1) Checking procodile start ...'
 bin/procodile start && sleep 3
 header '(2) Checking procodile status --simple ...'
 bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
+header '(2.1) Checking PORT envs'
+bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
+bin/procodile status |grep 'app2\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28320'
+bin/procodile status |grep 'app3\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28502'
 [ -s new_pids/procodile.pid ]
 header '(3) Checking procodile restart when started ...'
 bin/procodile restart && sleep 3
@@ -88,14 +91,20 @@ env:
 
 processes:
   app1:
+    allocate_port_from: 28128
     quantity: 2
   app2:
-    quantity: 1
+    allocate_port_from: 28320
+  app3:
+    allocate_port_from: 28502
 HEREDOC
 
 header '(9) Checking procodile check_concurrency ...'
 bin/procodile check_concurrency
 bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$'
+header '(9.1) Checking PORT envs for app1'
+bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
+bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28129'
 header '(10) Checking procodile log ...'
 bin/procodile log
 
@@ -109,12 +118,16 @@ HEREDOC
 
 header '(12) Checking procodile restart will failed when run app3.sh ...'
 bin/procodile restart && sleep 3
+header '(12.1) Checking procodile restart app3.sh Unknown status ...'
 bin/procodile status |grep -F 'app3.4' |grep -F 'Unknown'
 
 while ! bin/procodile status |grep -F 'app3.4' |grep -F 'Failed' |grep -F 'respawns:5'; do
     sleep 1
     echo 'Waiting respawns to become 5'
 done
+
+header '(12.1) Checking procodile restart app3.sh Failed status ...'
+bin/procodile status |grep -F 'app3.4' |grep -F 'Failed'
 
 header '(13) Change Procfile to set correct env for app3.sh'
 
@@ -126,8 +139,10 @@ env:
 
 processes:
   app1:
+    allocate_port_from: 28128
     quantity: 2
   app2:
+    allocate_port_from: 28320
     quantity: 1
   app3:
     env:
