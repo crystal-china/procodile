@@ -2,7 +2,7 @@ test-app/log
 test-app/pids
 test-app/procodile.log
 global.yml
-bin/procodile
+bin/*
 /procodile
 Procfile.*
 /lib
