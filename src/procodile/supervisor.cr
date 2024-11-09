@@ -261,7 +261,7 @@ module Procodile
             Fiber.yield
 
             if (str = reader.gets).nil?
-              sleep 0.1
+              sleep 0.1.seconds
               next
             end
 
