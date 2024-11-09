@@ -75,6 +75,7 @@ module Procodile
       # run_options.proxy = options.proxy
       run_options.force_single_log = options.foreground
       run_options.port_allocations = options.port_allocations
+      run_options.foreground = options.foreground
 
       tidy_pids(config)
 

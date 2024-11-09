@@ -15,17 +15,21 @@ module Procodile
 
       def restart
         if supervisor_running?
-          instances = ControlClient.run(
+          instance_configs = ControlClient.run(
             @config.sock_path,
             "restart",
             processes: process_names_from_cli_option,
             tag: @options.tag,
           ).as Array(Tuple(Instance::Config?, Instance::Config?))
 
-          if instances.empty?
+          if instance_configs.empty?
             puts "There are no processes to restart."
           else
-            instances.each do |old_instance, new_instance|
+            if instance_configs.first.to_a.compact[0].foreground?
+              puts "WARNING: Using the restart command in foreground mode tends to be prone to failure, use it with caution."
+            end
+
+            instance_configs.each do |old_instance, new_instance|
               if old_instance && new_instance
                 if old_instance.description == new_instance.description
                   puts "Restarted".color(35) + " #{old_instance.description}"

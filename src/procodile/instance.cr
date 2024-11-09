@@ -239,6 +239,7 @@ module Procodile
         started_at: started_at ? started_at.to_unix : nil,
         tag: self.tag,
         port: @port,
+        foreground: @supervisor.run_use_foreground?
       )
     end
 
@@ -445,7 +446,10 @@ module Procodile
     struct Config
       include JSON::Serializable
 
-      getter description, pid, respawns, status, running, started_at, tag, port
+      getter description, pid, respawns, status, running, started_at,
+        tag, port
+
+      getter? foreground
 
       def initialize(
         @description : String,
@@ -455,7 +459,10 @@ module Procodile
         @running : Bool,
         @started_at : Int64?,
         @tag : String?,
-        @port : Int32?
+        @port : Int32?,
+
+        # foreground is used for supervisor, but add here for simplicity communication
+        @foreground : Bool = false
       )
       end
     end

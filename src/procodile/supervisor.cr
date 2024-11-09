@@ -113,11 +113,11 @@ module Procodile
       instances_stopped
     end
 
-    def restart(options : Options = Options.new) : Array(Array(Procodile::Instance | Nil))
-      if @run_options.foreground?
-        Procodile.log nil, "system", "Use restart command on processes running in foreground will fails easily, please use with caution."
-      end
+    def run_use_foreground?
+      @run_options.foreground?
+    end
 
+    def restart(options : Options = Options.new) : Array(Array(Procodile::Instance | Nil))
       wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Procodile::Instance?)
@@ -151,6 +151,7 @@ module Procodile
       instances_restarted.concat checked
 
       # 确保所有的 @reader 设定完毕，再启动 log listener
+      # 这个代码仍旧有机会造成 UNIXSever 立即退出，但是没有任何 backtrace, 原因未知
       wg.wait
 
       log_listener_reader
