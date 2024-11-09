@@ -241,7 +241,7 @@ module Procodile
     def remove_instance(instance : Instance) : Nil
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
-        @readers.delete(@readers.key_for(instance))
+        @readers.delete(instance)
       end
     end
 
