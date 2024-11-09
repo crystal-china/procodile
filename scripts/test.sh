@@ -45,8 +45,10 @@ env:
 
 processes:
   app1:
+    allocate_port_from: 28128
     quantity: 1
   app2:
+    allocate_port_from: 28320
     quantity: 1
 HEREDOC
 

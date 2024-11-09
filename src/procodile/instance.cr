@@ -51,7 +51,7 @@ module Procodile
           allocate_port
         elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
           # Allocate ports to this process sequentially from the starting port
-          process = @supervisor.processes[@process]
+          process = @supervisor.processes[@process]?
           allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
 
           until @port
