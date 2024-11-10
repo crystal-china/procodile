@@ -39,7 +39,7 @@ module Procodile
       {% end %}
 
         def initialize
-          @options = Procodile::CliOptions.new
+          @options = Options.new
           @config = uninitialized Procodile::Config
 
           {% for e in COMMANDS %}
@@ -159,6 +159,32 @@ module Procodile
         # end
 
         processes
+      end
+    end
+
+    struct Options
+      property foreground : Bool = false
+      property respawn : Bool?
+      property stop_when_none : Bool?
+      property proxy : Bool?
+      property tag : String?
+      property port_allocations : Hash(String, Int32)?
+      property start_supervisor : Bool?
+      property start_processes : Bool?
+      property stop_supervisor : Bool?
+      property wait_until_supervisor_stopped : Bool?
+      property reload : Bool?
+      property json : Bool?
+      property json_pretty : Bool?
+      property simple : Bool?
+      property processes : String? # A String split by comma.
+      property clean : Bool?
+      property development : Bool?
+      property wait : Bool?
+      property lines : Int32?
+      property process : String?
+
+      def initialize
       end
     end
   end
