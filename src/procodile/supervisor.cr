@@ -111,7 +111,7 @@ module Procodile
       instances_stopped
     end
 
-    def run_use_foreground?
+    def run_use_foreground? : Bool
       @run_options.foreground?
     end
 

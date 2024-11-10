@@ -66,7 +66,7 @@ module Procodile
 
     def self.start_supervisor(
       config : Procodile::Config,
-      options = Procodile::CliOptions.new,
+      options : Options = Options.new,
       &after_start : Proc(Procodile::Supervisor, Nil)
     )
       run_options = Supervisor::RunOptions.new
