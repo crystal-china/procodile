@@ -454,12 +454,18 @@ module Procodile
     end
 
     struct RunOptions
-      property respawn : Bool?
-      property stop_when_none : Bool?
-      property? proxy = false
-      property force_single_log : Bool?
-      property? foreground : Bool = false
-      property port_allocations : Hash(String, Int32)?
+      property respawn, stop_when_none, force_single_log, port_allocations
+      property? proxy, foreground
+
+      def initialize(
+        @respawn : Bool?,
+        @stop_when_none : Bool?,
+        @force_single_log : Bool?,
+        @port_allocations : Hash(String, Int32)?,
+        @proxy : Bool?,
+        @foreground : Bool = false,
+      )
+      end
     end
 
     enum CheckInstanceQuantitiesType

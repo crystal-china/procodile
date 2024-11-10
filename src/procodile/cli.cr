@@ -69,13 +69,14 @@ module Procodile
       options : Options = Options.new,
       &after_start : Proc(Procodile::Supervisor, Nil)
     )
-      run_options = Supervisor::RunOptions.new
-      run_options.respawn = options.respawn
-      run_options.stop_when_none = options.stop_when_none
-      # run_options.proxy = options.proxy
-      run_options.force_single_log = options.foreground
-      run_options.port_allocations = options.port_allocations
-      run_options.foreground = !!options.foreground
+      run_options = Supervisor::RunOptions.new(
+        respawn: options.respawn,
+        stop_when_none: options.stop_when_none,
+        proxy: options.proxy,
+        force_single_log: options.foreground,
+        port_allocations: options.port_allocations,
+        foreground: !!options.foreground
+      )
 
       tidy_pids(config)
 
