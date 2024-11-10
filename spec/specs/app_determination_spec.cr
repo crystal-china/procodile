@@ -52,7 +52,7 @@ describe Procodile::AppDetermination do
       pwd: "/myapps",
       given_root: nil,
       given_procfile: nil,
-      global_options: Procodile::ProcfileOption.from_yaml(global_options)
+      global_options: Procodile::Config::Option.from_yaml(global_options)
     )
     ap.root.should eq "/app"
     ap.procfile.should eq "/app/Procfile"
