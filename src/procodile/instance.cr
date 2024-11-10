@@ -120,9 +120,7 @@ module Procodile
       if running?
         Procodile.log(@process.log_color, description, "Sending #{@process.term_signal} to #{@pid}")
 
-        if (pid = @pid)
-          ::Process.signal(@process.term_signal, pid)
-        end
+        ::Process.signal(@process.term_signal, @pid.not_nil!)
       else
         Procodile.log(@process.log_color, description, "Process already stopped")
       end
@@ -142,9 +140,7 @@ module Procodile
       case restart_mode
       when Signal::USR1, Signal::USR2
         if running?
-          if (pid = @pid)
-            ::Process.signal(restart_mode.as(Signal), pid)
-          end
+          ::Process.signal(restart_mode.as(Signal), @pid.not_nil!)
 
           @tag = @supervisor.tag if @supervisor.tag
           Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} signal to process #{@pid}")
