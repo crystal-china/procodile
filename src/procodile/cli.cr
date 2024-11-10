@@ -22,8 +22,8 @@ module Procodile
     ]
     property options, config
 
-    def self.commands : Hash(String, CliCommand)
-      @@commands ||= {} of String => CliCommand
+    def self.commands : Hash(String, Command)
+      @@commands ||= {} of String => Command
     end
 
     @@options = {} of Symbol => Proc(OptionParser, Procodile::CLI, Nil)
@@ -46,7 +46,7 @@ module Procodile
             {% name = e[0] %}
             {% description = e[1] %}
 
-            self.class.commands[{{ name.id.stringify }}] = CliCommand.new(
+            self.class.commands[{{ name.id.stringify }}] = Command.new(
               name: {{ name.id.stringify }},
               description: {{ description.id.stringify }},
               options: @@options[{{ name }}],
@@ -159,6 +159,13 @@ module Procodile
         # end
 
         processes
+      end
+    end
+
+    struct Command
+      getter name : String, description : String?, options : Proc(OptionParser, Procodile::CLI, Nil)?, callable : Proc(Nil)
+
+      def initialize(@name, @description, @options, @callable)
       end
     end
 

@@ -22,11 +22,4 @@ module Procodile
     def initialize
     end
   end
-
-  struct CliCommand
-    getter name : String, description : String?, options : Proc(OptionParser, Procodile::CLI, Nil)?, callable : Proc(Nil)
-
-    def initialize(@name, @description, @options, @callable)
-    end
-  end
 end
