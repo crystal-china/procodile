@@ -55,13 +55,4 @@ module Procodile
     def initialize
     end
   end
-
-  struct RunOptions
-    property respawn : Bool?
-    property stop_when_none : Bool?
-    property? proxy = false
-    property force_single_log : Bool?
-    property? foreground : Bool = false
-    property port_allocations : Hash(String, Int32)?
-  end
 end
