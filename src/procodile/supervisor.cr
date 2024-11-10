@@ -244,7 +244,10 @@ module Procodile
     def remove_instance(instance : Instance) : Nil
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
-        @readers.delete(instance)
+
+        # Only useful when run in foreground
+        key = @readers.key_for?(instance)
+        @readers.delete(key) if key
       end
     end
 
