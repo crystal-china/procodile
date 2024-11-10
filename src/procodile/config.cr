@@ -8,8 +8,8 @@ module Procodile
     @process_list : Hash(String, String)?
     @processes : Hash(String, Procodile::Process)?
     @procfile_path : String?
-    @options : ProcfileOption?
-    @local_options : ProcfileOption?
+    @options : Option?
+    @local_options : Option?
     @process_options : Hash(String, Process::Option)?
     @local_process_options : Hash(String, Process::Option)?
     @loaded_at : Time?
@@ -113,11 +113,11 @@ module Procodile
       @process_list ||= load_process_list_from_file
     end
 
-    def options : ProcfileOption
+    def options : Option
       @options ||= load_options_from_file
     end
 
-    def local_options : ProcfileOption
+    def local_options : Option
       @local_options ||= load_local_options_from_file
     end
 
@@ -195,19 +195,39 @@ module Procodile
       Hash(String, String).from_yaml(File.read(procfile_path))
     end
 
-    private def load_options_from_file : ProcfileOption
+    private def load_options_from_file : Option
       if File.exists?(options_path)
-        ProcfileOption.from_yaml(File.read(options_path))
+        Option.from_yaml(File.read(options_path))
       else
-        ProcfileOption.new
+        Option.new
       end
     end
 
-    private def load_local_options_from_file : ProcfileOption
+    private def load_local_options_from_file : Option
       if File.exists?(local_options_path)
-        ProcfileOption.from_yaml(File.read(local_options_path))
+        Option.from_yaml(File.read(local_options_path))
       else
-        ProcfileOption.new
+        Option.new
+      end
+    end
+
+    struct Option
+      include YAML::Serializable
+
+      property app_name : String?
+      property root : String?
+      property procfile : String?
+      property pid_root : String?
+      property log_path : String?
+      property log_root : String?
+      property user : String?
+      property console_command : String?
+      property exec_prefix : String?
+      property env : Hash(String, String)?
+      property processes : Hash(String, Process::Option)?
+      property app_id : Process::Option?
+
+      def initialize
       end
     end
   end

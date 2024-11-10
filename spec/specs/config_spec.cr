@@ -12,13 +12,13 @@ describe Procodile::Config do
     end
 
     it "should not have any options" do
-      config.options.should be_a Procodile::ProcfileOption
-      config.options.should eq Procodile::ProcfileOption.new
+      config.options.should be_a Procodile::Config::Option
+      config.options.should eq Procodile::Config::Option.new
     end
 
     it "should not have any local options" do
-      config.local_options.should be_a Procodile::ProcfileOption
-      config.local_options.should eq Procodile::ProcfileOption.new
+      config.local_options.should be_a Procodile::Config::Option
+      config.local_options.should eq Procodile::Config::Option.new
     end
 
     it "should have a determined pid root and socket path" do

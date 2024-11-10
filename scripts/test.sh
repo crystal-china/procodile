@@ -75,6 +75,12 @@ bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should hav
 header '(5) Checking procodile stop ...'
 bin/procodile stop && sleep 3
 bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1), app3 has 0 instances (should have 1)$'
+header '(5.1) Checking procodile start when stopped ...'
+bin/procodile start && sleep 3
+bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
+header '(5.2) Checking procodile stop when started ...'
+bin/procodile stop && sleep 3
+bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1), app3 has 0 instances (should have 1)$'
 header '(6) Checking procodile restart when stopped ...'
 bin/procodile restart && sleep 3
 bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
@@ -119,15 +125,15 @@ HEREDOC
 header '(12) Checking procodile restart will failed when run app3.sh ...'
 bin/procodile restart && sleep 3
 header '(12.1) Checking procodile restart app3.sh Unknown status ...'
-bin/procodile status |grep -F 'app3.4' |grep -F 'Unknown'
+bin/procodile status |grep -F 'app3.5' |grep -F 'Unknown'
 
-while ! bin/procodile status |grep -F 'app3.4' |grep -F 'Failed' |grep -F 'respawns:5'; do
+while ! bin/procodile status |grep -F 'app3.5' |grep -F 'Failed' |grep -F 'respawns:5'; do
     sleep 1
     echo 'Waiting respawns to become 5'
 done
 
 header '(12.1) Checking procodile restart app3.sh Failed status ...'
-bin/procodile status |grep -F 'app3.4' |grep -F 'Failed'
+bin/procodile status |grep -F 'app3.5' |grep -F 'Failed'
 
 header '(13) Change Procfile to set correct env for app3.sh'
 

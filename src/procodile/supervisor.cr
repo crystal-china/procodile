@@ -1,5 +1,3 @@
-require "file_utils"
-require "wait_group"
 require "./logger"
 require "./error"
 require "./control_server"
@@ -41,11 +39,11 @@ module Procodile
 
       ControlServer.start(self)
 
-      # if @run_options.proxy?
-      #   Procodile.log nil, "system", "Proxy is enabled"
+      if @run_options.proxy?
+        Procodile.log nil, "system", "Proxy is enabled"
 
-      #   @tcp_proxy = TCPProxy.start(self)
-      # end
+        @tcp_proxy = TCPProxy.start(self)
+      end
 
       after_start.call(self) # invoke supervisor.start_processes
 
@@ -113,7 +111,7 @@ module Procodile
       instances_stopped
     end
 
-    def run_use_foreground?
+    def run_use_foreground? : Bool
       @run_options.foreground?
     end
 
@@ -246,7 +244,10 @@ module Procodile
     def remove_instance(instance : Instance) : Nil
       if @processes[instance.process]
         @processes[instance.process].delete(instance)
-        @readers.delete(instance)
+
+        # Only useful when run in foreground
+        key = @readers.key_for?(instance)
+        @readers.delete(key) if key
       end
     end
 
@@ -261,7 +262,7 @@ module Procodile
             Fiber.yield
 
             if (str = reader.gets).nil?
-              sleep 0.1
+              sleep 0.1.seconds
               next
             end
 
@@ -451,6 +452,21 @@ module Procodile
         @stop_supervisor : Bool? = nil,
         @tag : String? = nil,
         @reload : Bool? = nil
+      )
+      end
+    end
+
+    struct RunOptions
+      property respawn, stop_when_none, force_single_log, port_allocations
+      property? proxy, foreground
+
+      def initialize(
+        @respawn : Bool?,
+        @stop_when_none : Bool?,
+        @force_single_log : Bool?,
+        @port_allocations : Hash(String, Int32)?,
+        @proxy : Bool?,
+        @foreground : Bool = false,
       )
       end
     end

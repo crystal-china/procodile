@@ -1,5 +1,3 @@
-require "./procfile_option"
-
 module Procodile
   #
   # This class is responsible for determining which application should be used
@@ -18,7 +16,7 @@ module Procodile
       @pwd : String,
       given_root : String?,
       @given_procfile : String?,
-      @global_options : ProcfileOption = ProcfileOption.new
+      @global_options : Config::Option = Config::Option.new
     )
       @given_root = given_root ? expand_path(given_root, pwd) : nil
 
@@ -81,12 +79,12 @@ module Procodile
       end
     end
 
-    private def find_root_and_procfile_from_options(options : ProcfileOption) : String?
+    private def find_root_and_procfile_from_options(options : Config::Option) : String?
       case options
-      when ProcfileOption
+      when Config::Option
         # Use the current hash
         find_root_and_procfile(@pwd, options.root, options.procfile)
-      when Array(ProcfileOption)
+      when Array(Config::Option)
         # Global options is provides a list of apps. We need to know which one of
         # these we should be looking at.
 

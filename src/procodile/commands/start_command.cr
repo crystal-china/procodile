@@ -56,7 +56,7 @@ module Procodile
             cli.options.respawn = false
             cli.options.foreground = true
             cli.options.stop_when_none = true
-            # cli.options.proxy = true
+            cli.options.proxy = true
           end
         end
       end
@@ -79,7 +79,7 @@ module Procodile
             raise Error.new "Cannot enable the proxy when the supervisor is running"
           end
 
-          instances = ControlClient.run(
+          instance_configs = ControlClient.run(
             @config.sock_path,
             "start_processes",
             processes: process_names_from_cli_option,
@@ -87,11 +87,11 @@ module Procodile
             port_allocations: @options.port_allocations,
           ).as Array(Instance::Config)
 
-          if instances.empty?
+          if instance_configs.empty?
             puts "No processes to start."
           else
-            instances.each do |instance|
-              puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
+            instance_configs.each do |instance_config|
+              puts "Started".color(32) + " #{instance_config.description} (PID: #{instance_config.pid})"
             end
           end
         else

@@ -22,14 +22,17 @@ module Procodile
 
       def status : Nil
         if supervisor_running?
-          status = ControlClient.run(@config.sock_path, "status").as ControlClient::ReplyOfStatusCommand
+          status = ControlClient.run(
+            @config.sock_path, "status"
+          ).as ControlClient::ReplyOfStatusCommand
 
-          if @options.json
+          case @options
+          when .json
             puts status.to_json
-          elsif @options.json_pretty
+          when .json_pretty
             puts status
             nil
-          elsif @options.simple
+          when .simple
             if status.messages.empty?
               message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
 

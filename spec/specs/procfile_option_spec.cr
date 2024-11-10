@@ -1,10 +1,9 @@
 require "../spec_helper"
-require "../../src/procodile/procfile_option"
 
-describe Procodile::ProcfileOption do
+describe Procodile::Config::Option do
   it "should allow root and procfile to be provided" do
     procfile_option_file = File.join(APPS_ROOT, "full", "Procfile.options")
-    procfile_option = Procodile::ProcfileOption.from_yaml(File.read(procfile_option_file))
+    procfile_option = Procodile::Config::Option.from_yaml(File.read(procfile_option_file))
     procfile_option.app_name.should eq "specapp"
     procfile_option.pid_root.should eq "tmp/pids"
     procfile_option.log_path.should eq "log/procodile.log"

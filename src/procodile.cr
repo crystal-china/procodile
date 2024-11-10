@@ -1,5 +1,10 @@
 require "option_parser"
+require "yaml"
+require "json"
+require "socket"
 require "file_utils"
+require "wait_group"
+
 require "./procodile/app_determination"
 require "./procodile/cli"
 
@@ -50,7 +55,7 @@ end
 global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
 
 if File.file?(global_config_path)
-  global_config = Procodile::ProcfileOption.from_yaml(File.read(global_config_path))
+  global_config = Procodile::Config::Option.from_yaml(File.read(global_config_path))
 end
 
 # Create a determination to work out where we want to load our app from
@@ -58,7 +63,7 @@ ap = Procodile::AppDetermination.new(
   FileUtils.pwd,
   options[:root]?,
   options[:procfile]?,
-  global_config || Procodile::ProcfileOption.new
+  global_config || Procodile::Config::Option.new
 )
 
 begin
