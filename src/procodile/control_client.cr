@@ -1,6 +1,3 @@
-require "json"
-require "socket"
-
 module Procodile
   class ControlClient
     alias SocketResponse = Array(Instance::Config) |

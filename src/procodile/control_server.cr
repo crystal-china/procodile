@@ -1,4 +1,3 @@
-require "socket"
 require "./control_session"
 
 module Procodile

@@ -1,5 +1,3 @@
-require "./procfile_option"
-
 module Procodile
   #
   # This class is responsible for determining which application should be used
