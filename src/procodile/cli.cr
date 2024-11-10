@@ -75,7 +75,7 @@ module Procodile
       # run_options.proxy = options.proxy
       run_options.force_single_log = options.foreground
       run_options.port_allocations = options.port_allocations
-      run_options.foreground = options.foreground
+      run_options.foreground = !!options.foreground
 
       tidy_pids(config)
 
@@ -170,7 +170,7 @@ module Procodile
     end
 
     struct Options
-      property foreground : Bool = false
+      property foreground : Bool?
       property respawn : Bool?
       property stop_when_none : Bool?
       property proxy : Bool?
