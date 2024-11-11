@@ -1,3 +1,4 @@
+require "polydocopt"
 require "option_parser"
 require "yaml"
 require "json"
