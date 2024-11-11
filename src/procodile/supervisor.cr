@@ -26,14 +26,14 @@ module Procodile
     end
 
     def allow_respawning? : Bool
-      @run_options.respawn != false
+      @run_options.respawn? != false
     end
 
     def start(after_start : Proc(Procodile::Supervisor, Nil)) : Nil
       Procodile.log nil, "system", "Procodile supervisor started with PID #{::Process.pid}"
       Procodile.log nil, "system", "Application root is #{@config.root}"
 
-      if @run_options.respawn == false
+      if @run_options.respawn? == false
         Procodile.log nil, "system", "Automatic respawning is disabled"
       end
 
@@ -298,7 +298,7 @@ module Procodile
       end
 
       # If the processes go away, we can stop the supervisor now
-      if @run_options.stop_when_none && all_instances_stopped?
+      if @run_options.stop_when_none? && all_instances_stopped?
         Procodile.log nil, "system", "All processes have stopped"
 
         stop_supervisor
@@ -457,8 +457,8 @@ module Procodile
     end
 
     struct RunOptions
-      property respawn, stop_when_none, force_single_log, port_allocations
-      property? proxy, foreground
+      property port_allocations
+      property? proxy, foreground, force_single_log, respawn, stop_when_none
 
       def initialize(
         @respawn : Bool?,

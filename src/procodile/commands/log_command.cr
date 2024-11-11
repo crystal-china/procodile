@@ -4,7 +4,7 @@ module Procodile
       macro included
         options :log do |opts, cli|
           opts.on("-f", "Wait for additional data and display it straight away") do
-            cli.options.wait = true
+            cli.options.follow = true
           end
 
           opts.on("-n LINES", "The number of previous lines to return") do |lines|
@@ -19,7 +19,7 @@ module Procodile
 
       def log
         opts = [] of String
-        opts << "-f" if options.wait
+        opts << "-f" if options.follow?
         opts << "-n #{options.lines}" if options.lines
 
         if (process_opts = options.process)

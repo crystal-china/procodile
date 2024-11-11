@@ -62,7 +62,7 @@ module Procodile
           end
         end
 
-        if self.process.log_path && @supervisor.run_options.force_single_log != true
+        if self.process.log_path && @supervisor.run_options.force_single_log? != true
           FileUtils.mkdir_p(File.dirname(self.process.log_path))
           log_destination = File.open(self.process.log_path, "a")
           io = nil

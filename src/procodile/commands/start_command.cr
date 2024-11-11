@@ -52,7 +52,6 @@ module Procodile
           end
 
           opts.on("-d", "--dev", "Run in development mode") do
-            cli.options.development = true
             cli.options.respawn = false
             cli.options.foreground = true
             cli.options.stop_when_none = true
@@ -63,19 +62,19 @@ module Procodile
 
       def start : Nil
         if supervisor_running?
-          if @options.foreground
+          if @options.foreground?
             raise Error.new "Cannot be started in the foreground because supervisor already running"
           end
 
-          if @options.respawn
+          if @options.respawn?
             raise Error.new "Cannot disable respawning because supervisor is already running"
           end
 
-          if @options.stop_when_none
+          if @options.stop_when_none?
             raise Error.new "Cannot stop supervisor when none running because supervisor is already running"
           end
 
-          if @options.proxy
+          if @options.proxy?
             raise Error.new "Cannot enable the proxy when the supervisor is running"
           end
 
@@ -97,11 +96,11 @@ module Procodile
         else
           # The supervisor isn't actually running. We need to start it before processes can be
           # begin being processed
-          if @options.start_supervisor == false
+          if @options.start_supervisor? == false
             raise Error.new "Supervisor is not running and cannot be started because --no-supervisor is set"
           else
             self.class.start_supervisor(@config, @options) do |supervisor|
-              unless @options.start_processes == false
+              unless @options.start_processes? == false
                 supervisor.start_processes(
                   process_names_from_cli_option,
                   Supervisor::Options.new(tag: @options.tag)

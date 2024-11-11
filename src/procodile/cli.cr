@@ -70,17 +70,17 @@ module Procodile
       &after_start : Proc(Procodile::Supervisor, Nil)
     )
       run_options = Supervisor::RunOptions.new(
-        respawn: options.respawn,
-        stop_when_none: options.stop_when_none,
-        proxy: options.proxy,
-        force_single_log: options.foreground,
+        respawn: options.respawn?,
+        stop_when_none: options.stop_when_none?,
+        proxy: options.proxy?,
+        force_single_log: options.foreground?,
         port_allocations: options.port_allocations,
-        foreground: !!options.foreground
+        foreground: !!options.foreground?
       )
 
       tidy_pids(config)
 
-      if options.clean
+      if options.clean?
         FileUtils.rm_rf(Dir[File.join(config.pid_root, "*")])
         puts "Emptied PID directory"
       end
@@ -92,7 +92,7 @@ module Procodile
       # Set $PROGRAM_NAME in linux
       File.write("/proc/self/comm", "[procodile] #{config.app_name} (#{config.root})")
 
-      if options.foreground
+      if options.foreground?
         File.write(config.supervisor_pid_path, ::Process.pid)
 
         Supervisor.new(config, run_options).start(after_start)
@@ -171,24 +171,23 @@ module Procodile
     end
 
     struct Options
-      property foreground : Bool?
-      property respawn : Bool?
-      property stop_when_none : Bool?
-      property proxy : Bool?
+      property? foreground : Bool?
+      property? respawn : Bool?
+      property? stop_when_none : Bool?
+      property? proxy : Bool?
+      property? json : Bool?
+      property? json_pretty : Bool?
+      property? simple : Bool?
+      property? clean : Bool?
+      property? follow : Bool?
+      property? start_supervisor : Bool?
+      property? start_processes : Bool?
+      property? stop_supervisor : Bool?
+      property? wait_until_supervisor_stopped : Bool?
+      property? reload : Bool?
       property tag : String?
       property port_allocations : Hash(String, Int32)?
-      property start_supervisor : Bool?
-      property start_processes : Bool?
-      property stop_supervisor : Bool?
-      property wait_until_supervisor_stopped : Bool?
-      property reload : Bool?
-      property json : Bool?
-      property json_pretty : Bool?
-      property simple : Bool?
       property processes : String? # A String split by comma.
-      property clean : Bool?
-      property development : Bool?
-      property wait : Bool?
       property lines : Int32?
       property process : String?
 
