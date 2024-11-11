@@ -5,10 +5,10 @@ shards:
     version: 1.6.3
 
   docopt:
-    git: https://github.com/chenkovsky/docopt.cr.git
-    version: 0.2.0+git.commit.620fce4f334ff15d7321e5ecb6665ad258fe9297
+    git: https://github.com/ralsina/docopt.cr.git
+    version: 0.2.1
 
   polydocopt:
     git: https://github.com/ralsina/polydocopt.git
-    version: 0.1.0+git.commit.dd5c96707e38681d0f562f27ce413be5ccb88bc9
+    version: 0.1.0+git.commit.bbc2b3ad83b3f62b94de56c748a9cbfe68212e30
 

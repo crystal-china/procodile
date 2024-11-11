@@ -12,6 +12,7 @@ targets:
 dependencies:
   polydocopt:
     github: ralsina/polydocopt
+    branch: main
 
 development_dependencies:
   ameba:
