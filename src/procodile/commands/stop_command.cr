@@ -23,7 +23,7 @@ module Procodile
             @config.sock_path,
             "stop",
             processes: process_names_from_cli_option,
-            stop_supervisor: @options.stop_supervisor,
+            stop_supervisor: @options.stop_supervisor?,
           ).as(Array(Instance::Config))
 
           if instances.empty?
@@ -34,7 +34,7 @@ module Procodile
             end
           end
 
-          if @options.stop_supervisor
+          if @options.stop_supervisor?
             puts "Supervisor will be stopped when processes are stopped."
           end
 

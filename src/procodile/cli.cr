@@ -179,7 +179,7 @@ module Procodile
       property port_allocations : Hash(String, Int32)?
       property? start_supervisor : Bool?
       property? start_processes : Bool?
-      property stop_supervisor : Bool?
+      property? stop_supervisor : Bool?
       property wait_until_supervisor_stopped : Bool?
       property reload : Bool?
       property json : Bool?
