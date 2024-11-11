@@ -73,9 +73,9 @@ module Procodile
         respawn: options.respawn,
         stop_when_none: options.stop_when_none,
         proxy: options.proxy,
-        force_single_log: options.foreground,
+        force_single_log: options.foreground?,
         port_allocations: options.port_allocations,
-        foreground: !!options.foreground
+        foreground: !!options.foreground?
       )
 
       tidy_pids(config)
@@ -92,7 +92,7 @@ module Procodile
       # Set $PROGRAM_NAME in linux
       File.write("/proc/self/comm", "[procodile] #{config.app_name} (#{config.root})")
 
-      if options.foreground
+      if options.foreground?
         File.write(config.supervisor_pid_path, ::Process.pid)
 
         Supervisor.new(config, run_options).start(after_start)
@@ -171,7 +171,7 @@ module Procodile
     end
 
     struct Options
-      property foreground : Bool?
+      property? foreground : Bool?
       property respawn : Bool?
       property stop_when_none : Bool?
       property proxy : Bool?
