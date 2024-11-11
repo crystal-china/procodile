@@ -75,7 +75,7 @@ module Procodile
             raise Error.new "Cannot stop supervisor when none running because supervisor is already running"
           end
 
-          if @options.proxy
+          if @options.proxy?
             raise Error.new "Cannot enable the proxy when the supervisor is running"
           end
 

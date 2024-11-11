@@ -72,7 +72,7 @@ module Procodile
       run_options = Supervisor::RunOptions.new(
         respawn: options.respawn?,
         stop_when_none: options.stop_when_none?,
-        proxy: options.proxy,
+        proxy: options.proxy?,
         force_single_log: options.foreground?,
         port_allocations: options.port_allocations,
         foreground: !!options.foreground?
@@ -174,7 +174,7 @@ module Procodile
       property? foreground : Bool?
       property? respawn : Bool?
       property? stop_when_none : Bool?
-      property proxy : Bool?
+      property? proxy : Bool?
       property tag : String?
       property port_allocations : Hash(String, Int32)?
       property start_supervisor : Bool?
