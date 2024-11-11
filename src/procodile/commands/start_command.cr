@@ -67,7 +67,7 @@ module Procodile
             raise Error.new "Cannot be started in the foreground because supervisor already running"
           end
 
-          if @options.respawn
+          if @options.respawn?
             raise Error.new "Cannot disable respawning because supervisor is already running"
           end
 
