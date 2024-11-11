@@ -298,7 +298,7 @@ module Procodile
       end
 
       # If the processes go away, we can stop the supervisor now
-      if @run_options.stop_when_none && all_instances_stopped?
+      if @run_options.stop_when_none? && all_instances_stopped?
         Procodile.log nil, "system", "All processes have stopped"
 
         stop_supervisor
@@ -457,8 +457,8 @@ module Procodile
     end
 
     struct RunOptions
-      property stop_when_none, port_allocations
-      property? proxy, foreground, force_single_log, respawn
+      property port_allocations
+      property? proxy, foreground, force_single_log, respawn, stop_when_none
 
       def initialize(
         @respawn : Bool?,
