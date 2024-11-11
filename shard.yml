@@ -9,6 +9,10 @@ targets:
   procodile:
     main: src/procodile.cr
 
+dependencies:
+  polydocopt:
+    github: ralsina/polydocopt
+
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
