@@ -1,10 +1,4 @@
-require "option_parser"
-require "yaml"
-require "json"
-require "socket"
-require "file_utils"
-require "wait_group"
-
+require "./requires"
 require "./procodile/app_determination"
 require "./procodile/cli"
 
@@ -18,7 +12,7 @@ module Procodile
   end
 end
 
-ORIGINAL_ARGV = ARGV.join(" ")
+# ORIGINAL_ARGV = ARGV.join(" ")
 command = ARGV[0]? || "help"
 options = {} of Symbol => String
 cli = Procodile::CLI.new
