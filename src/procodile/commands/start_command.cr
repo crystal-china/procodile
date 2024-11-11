@@ -97,7 +97,7 @@ module Procodile
         else
           # The supervisor isn't actually running. We need to start it before processes can be
           # begin being processed
-          if @options.start_supervisor == false
+          if @options.start_supervisor? == false
             raise Error.new "Supervisor is not running and cannot be started because --no-supervisor is set"
           else
             self.class.start_supervisor(@config, @options) do |supervisor|
