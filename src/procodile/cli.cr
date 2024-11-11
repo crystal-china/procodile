@@ -187,7 +187,7 @@ module Procodile
       property? simple : Bool?
       property processes : String? # A String split by comma.
       property? clean : Bool?
-      property wait : Bool?
+      property? wait : Bool?
       property lines : Int32?
       property process : String?
 

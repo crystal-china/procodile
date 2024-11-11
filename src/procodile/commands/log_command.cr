@@ -19,7 +19,7 @@ module Procodile
 
       def log
         opts = [] of String
-        opts << "-f" if options.wait
+        opts << "-f" if options.wait?
         opts << "-n #{options.lines}" if options.lines
 
         if (process_opts = options.process)
