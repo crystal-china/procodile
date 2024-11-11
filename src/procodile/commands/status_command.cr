@@ -27,12 +27,12 @@ module Procodile
           ).as ControlClient::ReplyOfStatusCommand
 
           case @options
-          when .json
+          when .json?
             puts status.to_json
-          when .json_pretty
+          when .json_pretty?
             puts status
             nil
-          when .simple
+          when .simple?
             if status.messages.empty?
               message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
 
@@ -45,7 +45,7 @@ module Procodile
             StatusCLIOutput.new(status).print_all
           end
         else
-          if @options.simple
+          if @options.simple?
             puts "NotRunning || Procodile supervisor isn't running"
           else
             raise Error.new "Procodile supervisor isn't running"
