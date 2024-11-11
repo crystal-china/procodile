@@ -52,7 +52,6 @@ module Procodile
           end
 
           opts.on("-d", "--dev", "Run in development mode") do
-            cli.options.development = true
             cli.options.respawn = false
             cli.options.foreground = true
             cli.options.stop_when_none = true
