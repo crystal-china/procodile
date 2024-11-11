@@ -71,7 +71,7 @@ module Procodile
             raise Error.new "Cannot disable respawning because supervisor is already running"
           end
 
-          if @options.stop_when_none
+          if @options.stop_when_none?
             raise Error.new "Cannot stop supervisor when none running because supervisor is already running"
           end
 
