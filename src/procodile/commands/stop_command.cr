@@ -38,7 +38,7 @@ module Procodile
             puts "Supervisor will be stopped when processes are stopped."
           end
 
-          if @options.wait_until_supervisor_stopped
+          if @options.wait_until_supervisor_stopped?
             puts "Waiting for supervisor to stop..."
             loop do
               sleep 1.second

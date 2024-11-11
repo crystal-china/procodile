@@ -180,7 +180,7 @@ module Procodile
       property? start_supervisor : Bool?
       property? start_processes : Bool?
       property? stop_supervisor : Bool?
-      property wait_until_supervisor_stopped : Bool?
+      property? wait_until_supervisor_stopped : Bool?
       property reload : Bool?
       property json : Bool?
       property json_pretty : Bool?
