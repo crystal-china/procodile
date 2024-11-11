@@ -80,7 +80,7 @@ module Procodile
 
       tidy_pids(config)
 
-      if options.clean
+      if options.clean?
         FileUtils.rm_rf(Dir[File.join(config.pid_root, "*")])
         puts "Emptied PID directory"
       end
@@ -186,7 +186,7 @@ module Procodile
       property? json_pretty : Bool?
       property? simple : Bool?
       property processes : String? # A String split by comma.
-      property clean : Bool?
+      property? clean : Bool?
       property development : Bool?
       property wait : Bool?
       property lines : Int32?
