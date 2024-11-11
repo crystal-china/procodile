@@ -457,8 +457,8 @@ module Procodile
     end
 
     struct RunOptions
-      property respawn, stop_when_none, force_single_log, port_allocations
-      property? proxy, foreground
+      property respawn, stop_when_none, port_allocations
+      property? proxy, foreground, force_single_log
 
       def initialize(
         @respawn : Bool?,
