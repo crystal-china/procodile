@@ -3,6 +3,9 @@ require "./procodile/app_determination"
 require "./procodile/cli"
 
 module Procodile
+  class Error < Exception
+  end
+
   private def self.root : String
     File.expand_path("..", __DIR__)
   end

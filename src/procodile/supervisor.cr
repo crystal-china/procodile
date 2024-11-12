@@ -1,5 +1,4 @@
 require "./logger"
-require "./error"
 require "./control_server"
 require "./signal_handler"
 
