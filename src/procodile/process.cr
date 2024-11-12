@@ -2,11 +2,11 @@ require "./instance"
 
 module Procodile
   class Process
+    @@mutex = Mutex.new
+
     @log_color : Int32 = 0
     @instance_index : Int32 = 0
     @removed : Bool = false
-
-    MUTEX = Mutex.new
 
     getter config, name
     property command, options, log_color, removed
@@ -186,7 +186,7 @@ module Procodile
     # Increase the instance index and return
     #
     private def instance_id : Int32
-      MUTEX.synchronize do
+      @@mutex.synchronize do
         @instance_index = 0 if @instance_index == 10000
         @instance_index += 1
       end
