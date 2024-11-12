@@ -6,7 +6,7 @@ module Procodile
         end
       end
 
-      def help : Nil
+      private def help : Nil
         puts "\e[45;37mWelcome to Procodile v#{Procodile::VERSION}\e[0m"
         puts "For documentation see https://adam.ac/procodile."
         puts

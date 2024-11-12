@@ -3,11 +3,11 @@ require "./procodile/app_determination"
 require "./procodile/cli"
 
 module Procodile
-  def self.root
+  private def self.root : String
     File.expand_path("..", __DIR__)
   end
 
-  def self.bin_path
+  private def self.bin_path : String
     File.join(root, "bin", "procodile")
   end
 end

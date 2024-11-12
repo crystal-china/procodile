@@ -13,7 +13,7 @@ module Procodile
         end
       end
 
-      def restart
+      private def restart : Nil
         if supervisor_running?
           instance_configs = ControlClient.run(
             @config.sock_path,

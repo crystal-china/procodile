@@ -9,7 +9,7 @@ module Procodile
         end
       end
 
-      def check_concurrency : Nil
+      private def check_concurrency : Nil
         if supervisor_running?
           reply = ControlClient.run(
             @config.sock_path,

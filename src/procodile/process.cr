@@ -234,7 +234,7 @@ module Procodile
       def initialize
       end
 
-      def merge(other : self?)
+      def merge(other : self?) : self
         new_process_option = self
 
         {% for i in @type.instance_vars %}

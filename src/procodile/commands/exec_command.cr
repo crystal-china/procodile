@@ -6,7 +6,7 @@ module Procodile
         end
       end
 
-      def exec(command : String? = nil) : Nil
+      private def exec(command : String? = nil) : Nil
         desired_command = command || ARGV[1..].join(" ")
 
         if (prefix = @config.exec_prefix)
