@@ -1,5 +1,3 @@
-require "./version"
-
 module Procodile
   class ControlSession
     def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
