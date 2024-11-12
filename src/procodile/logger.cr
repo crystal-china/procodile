@@ -1,4 +1,4 @@
-require "./color"
+require "./core_ext/string"
 
 module Procodile
   def self.log(color : Int32?, name : String, text : String) : Nil
