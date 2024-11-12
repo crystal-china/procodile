@@ -424,6 +424,12 @@ module Procodile
 
     # Supervisor message
     struct Message
+      # Message type
+      enum Type
+        NotRunning
+        IncorrectQuantity
+      end
+
       include JSON::Serializable
       getter type, process, current, desired, instance, status
 
@@ -437,10 +443,13 @@ module Procodile
       )
       end
 
-      # Supervisor message type
-      enum Type
-        NotRunning
-        IncorrectQuantity
+      def to_s(io : IO)
+        case type
+        in .not_running?
+          io.print "#{instance} is not running (#{status})"
+        in .incorrect_quantity?
+          io.print "#{process} has #{current} instances (should have #{desired})"
+        end
       end
     end
 
