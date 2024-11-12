@@ -1,5 +1,4 @@
 require "./logger"
-require "./error"
 require "./control_server"
 require "./signal_handler"
 
@@ -251,7 +250,7 @@ module Procodile
       end
     end
 
-    private def log_listener_reader
+    private def log_listener_reader : Nil
       buffer = {} of IO::FileDescriptor => String
       # After run restart command, @readers need to be update.
       # Ruby version @readers is wrapped by a loop, so can workaround this.
@@ -386,10 +385,12 @@ module Procodile
       end
     end
 
-    private def process_names_to_instances(names)
+    private def process_names_to_instances(names : Array(String)) : Array(Procodile::Instance)
       names.each_with_object([] of Procodile::Instance) do |name, array|
         if name =~ /\A(.*)\.(\d+)\z/
+          # app1.1
           process_name, id = $1, $2
+
           @processes.each do |process, instances|
             next unless process.name == process_name
 
@@ -403,13 +404,13 @@ module Procodile
           @processes.each do |process, instances|
             next unless process.name == name
 
-            instances.each { |i| array << i }
+            instances.each { |instance| array << instance }
           end
         end
       end
     end
 
-    private def all_instances_stopped?
+    private def all_instances_stopped? : Bool
       @processes.all? do |_, instances|
         instances.reject(&.failed?).empty?
       end

@@ -1,24 +1,21 @@
-require "option_parser"
-require "yaml"
-require "json"
-require "socket"
-require "file_utils"
-require "wait_group"
-
+require "./requires"
 require "./procodile/app_determination"
 require "./procodile/cli"
 
 module Procodile
-  def self.root
+  class Error < Exception
+  end
+
+  private def self.root : String
     File.expand_path("..", __DIR__)
   end
 
-  def self.bin_path
+  private def self.bin_path : String
     File.join(root, "bin", "procodile")
   end
 end
 
-ORIGINAL_ARGV = ARGV.join(" ")
+# ORIGINAL_ARGV = ARGV.join(" ")
 command = ARGV[0]? || "help"
 options = {} of Symbol => String
 cli = Procodile::CLI.new

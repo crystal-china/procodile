@@ -17,7 +17,7 @@ module Procodile
         end
       end
 
-      def log
+      private def log : Nil
         opts = [] of String
         opts << "-f" if options.follow?
         opts << "-n #{options.lines}" if options.lines

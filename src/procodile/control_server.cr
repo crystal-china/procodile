@@ -14,14 +14,6 @@ module Procodile
     def initialize(@supervisor)
     end
 
-    def handle_client(session, client)
-      while (line = client.gets)
-        if (response = session.receive_data(line.strip))
-          client.puts response
-        end
-      end
-    end
-
     def listen : Nil
       sock_path = @supervisor.config.sock_path
       server = UNIXServer.new(sock_path)
@@ -35,6 +27,14 @@ module Procodile
       end
     ensure
       FileUtils.rm_rf(sock_path) if sock_path
+    end
+
+    private def handle_client(session : ControlSession, client : UNIXSocket) : Nil
+      while (line = client.gets)
+        if (response = session.receive_data(line.strip))
+          client.puts response
+        end
+      end
     end
   end
 end

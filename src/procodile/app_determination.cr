@@ -24,7 +24,7 @@ module Procodile
     end
 
     # No root
-    def ambiguous?
+    def ambiguous? : Bool
       !@root
     end
 

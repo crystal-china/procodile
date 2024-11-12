@@ -1,5 +1,3 @@
-require "./version"
-
 module Procodile
   class ControlSession
     def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
@@ -99,7 +97,7 @@ module Procodile
     end
 
     {% begin %}
-      def receive_data(data : String)
+      def receive_data(data : String) : String
         command, session_data = data.split(/\s+/, 2)
         options = Options.from_json(session_data)
 

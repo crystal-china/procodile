@@ -20,7 +20,7 @@ module Procodile
         end
       end
 
-      def status : Nil
+      private def status : Nil
         if supervisor_running?
           status = ControlClient.run(
             @config.sock_path, "status"

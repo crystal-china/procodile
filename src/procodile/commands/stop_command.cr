@@ -17,7 +17,7 @@ module Procodile
         end
       end
 
-      def stop : Nil
+      private def stop : Nil
         if supervisor_running?
           instances = ControlClient.run(
             @config.sock_path,

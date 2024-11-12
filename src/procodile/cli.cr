@@ -28,10 +28,6 @@ module Procodile
 
     @@options = {} of Symbol => Proc(OptionParser, Procodile::CLI, Nil)
 
-    def self.options(name, &block : Proc(OptionParser, Procodile::CLI, Nil))
-      @@options[name] = block
-    end
-
     {% begin %}
       {% for e in COMMANDS %}
         {% name = e[0] %}
@@ -56,7 +52,7 @@ module Procodile
         end
     {% end %}
 
-    def dispatch(command)
+    def dispatch(command : String) : Nil
       if self.class.commands.has_key?(command)
         self.class.commands[command].callable.call
       else
@@ -68,7 +64,7 @@ module Procodile
       config : Procodile::Config,
       options : Options = Options.new,
       &after_start : Proc(Procodile::Supervisor, Nil)
-    )
+    ) : Nil
       run_options = Supervisor::RunOptions.new(
         respawn: options.respawn?,
         stop_when_none: options.stop_when_none?,
@@ -116,7 +112,7 @@ module Procodile
     end
 
     # Clean up procodile.pid and procodile.sock with all unused pid files
-    def self.tidy_pids(config : Procodile::Config)
+    private def self.tidy_pids(config : Procodile::Config) : Nil
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(config.sock_path)
 
@@ -161,6 +157,10 @@ module Procodile
 
         processes
       end
+    end
+
+    private def self.options(name : Symbol, &block : Proc(OptionParser, Procodile::CLI, Nil))
+      @@options[name] = block
     end
 
     struct Command

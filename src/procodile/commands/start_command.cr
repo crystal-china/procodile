@@ -60,7 +60,7 @@ module Procodile
         end
       end
 
-      def start : Nil
+      private def start : Nil
         if supervisor_running?
           if @options.foreground?
             raise Error.new "Cannot be started in the foreground because supervisor already running"
