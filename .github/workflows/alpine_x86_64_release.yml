@@ -18,7 +18,7 @@ jobs:
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
           restore-keys: ${{ runner.os }}-shards-
       - name: Download source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install shards
         run: shards check || shards install --without-development
       - name: Check formatting
