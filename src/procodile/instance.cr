@@ -170,7 +170,6 @@ module Procodile
 
         spawn do
           while running?
-            # 这里必须设定为至少 1, 原来 0.5 可能会造成 wg#wait 失败，然后异常退出
             sleep 0.5.seconds
           end
 
