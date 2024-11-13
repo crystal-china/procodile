@@ -2,8 +2,14 @@ require "./process"
 
 module Procodile
   class Config
-    # 35 紫，31 红，36 青，32 绿，33 橘，34 蓝
-    COLORS = [35, 31, 36, 32, 33, 34]
+    COLORS = [
+      Colorize::ColorANSI::Magenta, # 35 紫
+      Colorize::ColorANSI::Red,     # 31 红
+      Colorize::ColorANSI::Cyan,    # 36 青
+      Colorize::ColorANSI::Green,   # 32 绿
+      Colorize::ColorANSI::Yellow,  # 33 橘
+      Colorize::ColorANSI::Blue,    # 34 蓝
+    ]
 
     @process_list : Hash(String, String)?
     @processes : Hash(String, Procodile::Process)?
@@ -185,7 +191,7 @@ module Procodile
       "#{procfile_path}.local"
     end
 
-    private def create_process(name : String, command : String, log_color : Int32) : Procodile::Process
+    private def create_process(name : String, command : String, log_color : Colorize::ColorANSI) : Procodile::Process
       process = Procodile::Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color
       process

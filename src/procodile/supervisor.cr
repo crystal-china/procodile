@@ -272,7 +272,7 @@ module Procodile
               line, buffer[reader] = buffer[reader].split("\n", 2)
 
               if (instance = @readers[reader])
-                Procodile.log instance.process.log_color, instance.description, "=> ".color(instance.process.log_color) + line
+                Procodile.log instance.process.log_color, instance.description, "#{"=>".colorize(instance.process.log_color)} #{line}"
               else
                 Procodile.log nil, "unknown", buffer[reader]
               end

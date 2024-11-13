@@ -4,7 +4,7 @@ module Procodile
   class Process
     @@mutex = Mutex.new
 
-    @log_color : Int32 = 0
+    @log_color : Colorize::ColorANSI = Colorize::ColorANSI::Default
     @instance_index : Int32 = 0
     @removed : Bool = false
 

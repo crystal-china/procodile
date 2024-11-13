@@ -30,7 +30,7 @@ module Procodile
             puts "No processes were stopped."
           else
             instances.each do |instance|
-              puts "Stopped".color(31) + " #{instance.description} (PID: #{instance.pid})"
+              puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
             end
           end
 
@@ -43,13 +43,11 @@ module Procodile
             loop do
               sleep 1.second
 
-              if supervisor_running?
-                sleep 1.second
-              else
-                puts "Supervisor has stopped"
+              next if supervisor_running?
 
-                exit 0
-              end
+              puts "Supervisor has stopped"
+
+              exit 0
             end
           end
         else

@@ -170,7 +170,6 @@ module Procodile
 
         spawn do
           while running?
-            # 这里必须设定为至少 1, 原来 0.5 可能会造成 wg#wait 失败，然后异常退出
             sleep 0.5.seconds
           end
 
@@ -205,7 +204,7 @@ module Procodile
           add_respawn
         elsif respawns >= @process.max_respawns
           Procodile.log(@process.log_color, description, "\e[41;37mWarning:\e[0m\e[31m this process has been respawned #{respawns} times and keeps dying.\e[0m")
-          Procodile.log(@process.log_color, description, "It will not be respawned automatically any longer and will no longer be managed.".color(31))
+          Procodile.log(@process.log_color, description, "It will not be respawned automatically any longer and will no longer be managed.".colorize.red.to_s)
 
           @failed_at = Time.local
 

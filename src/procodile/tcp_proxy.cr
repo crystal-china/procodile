@@ -24,7 +24,7 @@ module Procodile
     def add_process(process)
       if process.proxy?
         @listeners[TCPServer.new(process.proxy_address.not_nil!, process.proxy_port.not_nil!)] = process
-        Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".color(32)
+        Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".colorize.green.to_s
         @sp_writer.puts(".")
       end
     rescue e : Exception

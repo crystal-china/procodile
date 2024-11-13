@@ -90,7 +90,7 @@ module Procodile
             puts "No processes to start."
           else
             instance_configs.each do |instance_config|
-              puts "Started".color(32) + " #{instance_config.description} (PID: #{instance_config.pid})"
+              puts "#{"Started".colorize.green} #{instance_config.description} (PID: #{instance_config.pid})"
             end
           end
         else

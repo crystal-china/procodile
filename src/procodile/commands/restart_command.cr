@@ -32,14 +32,14 @@ module Procodile
             instance_configs.each do |old_instance, new_instance|
               if old_instance && new_instance
                 if old_instance.description == new_instance.description
-                  puts "Restarted".color(35) + " #{old_instance.description}"
+                  puts "#{"Restarted".colorize.magenta} #{old_instance.description}"
                 else
-                  puts "Restarted".color(35) + " #{old_instance.description} -> #{new_instance.description}"
+                  puts "#{"Restarted".colorize.magenta} #{old_instance.description} -> #{new_instance.description}"
                 end
               elsif old_instance
-                puts "Stopped".color(31) + " #{old_instance.description}"
+                puts "#{"Stopped".colorize.red} #{old_instance.description}"
               elsif new_instance
-                puts "Started".color(32) + " #{new_instance.description}"
+                puts "#{"Started".colorize.green} #{new_instance.description}"
               end
 
               STDOUT.flush
