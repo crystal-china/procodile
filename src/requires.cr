@@ -1,4 +1,3 @@
-require "polydocopt"
 require "option_parser"
 require "colorize"
 require "yaml"

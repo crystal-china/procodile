@@ -4,11 +4,3 @@ shards:
     git: https://github.com/crystal-ameba/ameba.git
     version: 1.6.3
 
-  docopt:
-    git: https://github.com/ralsina/docopt.cr.git
-    version: 0.2.1
-
-  polydocopt:
-    git: https://github.com/ralsina/polydocopt.git
-    version: 0.1.0+git.commit.bbc2b3ad83b3f62b94de56c748a9cbfe68212e30
-
