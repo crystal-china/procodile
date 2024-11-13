@@ -12,6 +12,8 @@ targets:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
+  source-typer:
+    github: Vici37/cr-source-typer
 
 crystal: 1.14.0
 
