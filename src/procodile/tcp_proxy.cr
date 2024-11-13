@@ -83,9 +83,9 @@ module Procodile
         end
         readers = {:backend => backend_socket, :client => client}
         loop do
-          io = IO.select(readers.values, nil, nil, 0.5)
-          if io && io.first
-            io.first.each do |io|
+          ios = IO.select(readers.values, nil, nil, 0.5)
+          if ios && ios.first
+            ios.first.each do |io|
               readers.keys.each do |key|
                 next unless readers[key] == io
                 opposite_side = key == :client ? :backend : :client
