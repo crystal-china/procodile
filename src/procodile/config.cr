@@ -13,7 +13,6 @@ module Procodile
 
     @process_list : Hash(String, String)?
     @processes : Hash(String, Procodile::Process)?
-    @procfile_path : String?
     @options : Option?
     @local_options : Option?
     @process_options : Hash(String, Process::Option)?
@@ -24,9 +23,7 @@ module Procodile
 
     getter root, loaded_at
 
-    def initialize(@root : String, procfile : String? = nil)
-      @procfile_path = procfile
-
+    def initialize(@root : String, @procfile : String? = nil)
       unless File.file?(procfile_path)
         raise Error.new("Procfile not found at #{procfile_path}")
       end
@@ -52,16 +49,15 @@ module Procodile
     end
 
     def reload : Nil
-      @process_list = nil
-
       @options = nil
       @local_options = nil
 
       @process_options = nil
       @local_process_options = nil
 
-      @loaded_at = nil
+      @process_list = nil
       @environment_variables = nil
+      @loaded_at = nil
 
       if (processes = @processes)
         process_list.each do |name, command|
@@ -180,7 +176,7 @@ module Procodile
     end
 
     def procfile_path : String
-      @procfile_path || File.join(self.root, "Procfile")
+      @procfile || File.join(self.root, "Procfile")
     end
 
     def options_path : String
