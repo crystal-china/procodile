@@ -21,11 +21,11 @@ module Procodile
             puts "Processes are running as configured"
           else
             reply["started"].each do |instance|
-              puts "Started".color(32) + " #{instance.description} (PID: #{instance.pid})"
+              puts "#{"Started".colorize.green} #{instance.description} (PID: #{instance.pid})"
             end
 
             reply["stopped"].each do |instance|
-              puts "Stopped".color(31) + " #{instance.description} (PID: #{instance.pid})"
+              puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
             end
           end
         else

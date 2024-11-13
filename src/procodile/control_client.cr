@@ -84,7 +84,7 @@ module Procodile
 
       def initialize(
         @name : String,
-        @log_color : Int32,
+        @log_color : Colorize::ColorANSI,
         @quantity : Int32,
         @max_respawns : Int32,
         @respawn_window : Int32,

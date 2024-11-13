@@ -19,9 +19,9 @@ module Procodile
           environment = @config.environment_variables
 
           unless ENV["PROCODILE_EXEC_QUIET"]?.try(&.to_i) == 1
-            puts "Running with #{desired_command.color(33)}"
+            puts "Running with #{desired_command.colorize.yellow}"
             environment.each do |key, value|
-              puts "             #{key.color(34)} #{value}"
+              puts "             #{key.colorize.blue} #{value}"
             end
           end
 

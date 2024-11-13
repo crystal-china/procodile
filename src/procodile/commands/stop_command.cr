@@ -30,7 +30,7 @@ module Procodile
             puts "No processes were stopped."
           else
             instances.each do |instance|
-              puts "Stopped".color(31) + " #{instance.description} (PID: #{instance.pid})"
+              puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
             end
           end
 
