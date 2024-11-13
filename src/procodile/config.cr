@@ -236,5 +236,13 @@ module Procodile
       def initialize
       end
     end
+
+    struct GlobalOption
+      include YAML::Serializable
+
+      property name : String?
+      property root : String
+      property procfile : String?
+    end
   end
 end
