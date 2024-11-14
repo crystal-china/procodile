@@ -192,7 +192,7 @@ module Procodile
       result
     end
 
-    def to_hash
+    def to_hash : NamedTuple(started_at: Int64 | Nil, pid: Int64)
       started_at = @started_at
 
       {
@@ -443,7 +443,7 @@ module Procodile
       )
       end
 
-      def to_s(io : IO)
+      def to_s(io : IO) : Nil
         case type
         in .not_running?
           io.print "#{instance} is not running (#{status})"

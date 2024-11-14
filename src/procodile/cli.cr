@@ -159,14 +159,14 @@ module Procodile
       end
     end
 
-    private def self.options(name : Symbol, &block : Proc(OptionParser, Procodile::CLI, Nil))
+    private def self.options(name : Symbol, &block : Proc(OptionParser, Procodile::CLI, Nil)) : Proc(OptionParser, Procodile::CLI, Nil)
       @@options[name] = block
     end
 
     struct Command
       getter name : String, description : String?, options : Proc(OptionParser, Procodile::CLI, Nil)?, callable : Proc(Nil)
 
-      def initialize(@name, @description, @options, @callable)
+      def initialize(@name : String, @description : String, @options : Proc(OptionParser, Procodile::CLI, Nil), @callable : Proc(Nil) | Proc(NoReturn))
       end
     end
 

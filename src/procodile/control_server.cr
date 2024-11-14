@@ -11,7 +11,7 @@ module Procodile
       end
     end
 
-    def initialize(@supervisor)
+    def initialize(@supervisor : Procodile::Supervisor)
     end
 
     def listen : Nil

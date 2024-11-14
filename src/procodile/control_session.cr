@@ -42,7 +42,7 @@ module Procodile
       "200 " + instances.map { |a| a.map { |i| i ? i.to_struct : nil } }.to_json
     end
 
-    private def reload_config(options) : String
+    private def reload_config(options : Procodile::ControlSession::Options) : String
       @supervisor.reload_config
 
       "200 []"

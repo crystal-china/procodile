@@ -6,7 +6,7 @@ module Procodile
         end
       end
 
-      private def run(command : String? = nil)
+      private def run(command : String? = nil) : NoReturn
         exec(command)
       end
     end

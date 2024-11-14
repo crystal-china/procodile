@@ -1,6 +1,6 @@
 module Procodile
   class TCPProxy
-    def self.start(supervisor) : TCPProxy
+    def self.start(supervisor : Procodile::Supervisor) : TCPProxy
       proxy = new(supervisor)
       proxy.start
 
@@ -13,7 +13,7 @@ module Procodile
       @sp_reader, @sp_writer = IO.pipe
     end
 
-    def start
+    def start : Thread
       @supervisor.config.processes.each { |_, p| add_process(p) }
       Thread.new do
         listen
@@ -21,7 +21,7 @@ module Procodile
       end
     end
 
-    def add_process(process)
+    def add_process(process : Procodile::Process) : Nil
       if process.proxy?
         @listeners[TCPServer.new(process.proxy_address.not_nil!, process.proxy_port.not_nil!)] = process
         Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".colorize.green.to_s
@@ -32,36 +32,35 @@ module Procodile
       Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
-    def remove_process(process)
+    def remove_process(process : Procodile::Process) : Nil
       @stopped_processes << process
       @sp_writer.puts(".")
     end
 
-    def listen
-      # loop do
-      #   io = IO.select([@sp_reader] + @listeners.keys, nil, nil, 30)
-      #   if io && io.first
-      #     io.first.each do |io|
-      #       if io == @sp_reader
-      #         io.read_nonblock(999)
-      #         next
-      #       end
+    def listen : Nil # loop do
+    #   io = IO.select([@sp_reader] + @listeners.keys, nil, nil, 30)
+    #   if io && io.first
+    #     io.first.each do |io|
+    #       if io == @sp_reader
+    #         io.read_nonblock(999)
+    #         next
+    #       end
 
-      #       Thread.new(io.accept, io) do |client, server|
-      #         handle_client(client, server)
-      #       end
-      #     end
-      #   end
+    #       Thread.new(io.accept, io) do |client, server|
+    #         handle_client(client, server)
+    #       end
+    #     end
+    #   end
 
-      #   @stopped_processes.reject do |process|
-      #     if io = @listeners.key(process)
-      #       Procodile.log nil, "proxy", "Stopped proxy listener for #{process.name}"
-      #       io.close
-      #       @listeners.delete(io)
-      #     end
-      #     true
-      #   end
-      # end
+    #   @stopped_processes.reject do |process|
+    #     if io = @listeners.key(process)
+    #       Procodile.log nil, "proxy", "Stopped proxy listener for #{process.name}"
+    #       io.close
+    #       @listeners.delete(io)
+    #     end
+    #     true
+    #   end
+    # end
 
 
     rescue e
