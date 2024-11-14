@@ -1,6 +1,6 @@
 module Procodile
   class TCPProxy
-    def self.start(supervisor) : TCPProxy
+    def self.start(supervisor : Supervisor) : TCPProxy
       proxy = new(supervisor)
       proxy.start
 
@@ -13,7 +13,7 @@ module Procodile
       @sp_reader, @sp_writer = IO.pipe
     end
 
-    def start
+    def start : Thread
       @supervisor.config.processes.each { |_, p| add_process(p) }
       Thread.new do
         listen
@@ -21,7 +21,7 @@ module Procodile
       end
     end
 
-    def add_process(process)
+    def add_process(process : Process) : Nil
       if process.proxy?
         @listeners[TCPServer.new(process.proxy_address.not_nil!, process.proxy_port.not_nil!)] = process
         Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".colorize.green.to_s
@@ -32,13 +32,12 @@ module Procodile
       Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
-    def remove_process(process)
+    def remove_process(process : Process) : Nil
       @stopped_processes << process
       @sp_writer.puts(".")
     end
 
-    def listen
-      # loop do
+    def listen : Nil # loop do
       #   io = IO.select([@sp_reader] + @listeners.keys, nil, nil, 30)
       #   if io && io.first
       #     io.first.each do |io|

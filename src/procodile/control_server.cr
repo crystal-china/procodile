@@ -2,16 +2,16 @@ require "./control_session"
 
 module Procodile
   class ControlServer
-    @supervisor : Procodile::Supervisor
+    @supervisor : Supervisor
 
-    def self.start(supervisor : Procodile::Supervisor) : Nil
+    def self.start(supervisor : Supervisor) : Nil
       spawn do
         socket = self.new(supervisor)
         socket.listen
       end
     end
 
-    def initialize(@supervisor)
+    def initialize(@supervisor : Supervisor)
     end
 
     def listen : Nil
