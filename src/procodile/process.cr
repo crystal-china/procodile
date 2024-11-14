@@ -155,7 +155,7 @@ module Procodile
     #
     # Return a struct
     #
-    def to_struct
+    def to_struct : ControlClient::ProcessStatus
       ControlClient::ProcessStatus.new(
         name: self.name,
         log_color: self.log_color,
@@ -174,7 +174,7 @@ module Procodile
     #
     # Is the given quantity suitable for this process?
     #
-    def correct_quantity?(quantity : Int32)
+    def correct_quantity?(quantity : Int32) : Bool
       if self.restart_mode == "start-term"
         quantity >= self.quantity
       else
