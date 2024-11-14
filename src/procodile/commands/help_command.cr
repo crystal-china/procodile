@@ -7,7 +7,7 @@ module Procodile
       end
 
       private def help : Nil
-        puts "\e[45;37mWelcome to Procodile v#{Procodile::VERSION}\e[0m"
+        puts "Welcome to Procodile v#{Procodile::VERSION}".colorize.light_gray.on_magenta
         puts "For documentation see https://adam.ac/procodile."
         puts
 
@@ -16,7 +16,7 @@ module Procodile
 
         self.class.commands.to_a.sort_by { |x| x[0] }.to_h.each do |method, options|
           if options.description
-            puts "  \e[34m#{method.to_s.ljust(18, ' ')}\e[0m #{options.description}"
+            puts "  #{method.to_s.ljust(18, ' ').colorize.blue} #{options.description}"
           end
         end
 

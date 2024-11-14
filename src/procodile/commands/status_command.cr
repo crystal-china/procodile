@@ -76,7 +76,7 @@ module Procodile
         unless status.messages.empty?
           puts
           status.messages.each do |message|
-            puts "\e[31m * #{message}\e[0m"
+            puts " * #{message}".colorize.red
           end
         end
       end
