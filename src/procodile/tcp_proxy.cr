@@ -100,22 +100,23 @@ module Procodile
       else
         instance = instances.sample
 
-        backend_socket = TCPSocket.new("127.0.0.1", instance.port) rescue nil
+        # backend_socket = TCPSocket.new("127.0.0.1", instance.port)
 
-        if backend_socket.nil?
-          Procodile.log nil, "proxy", "Could not connect to #{instance.description}:#{instance.port}"
+        # if backend_socket.nil?
+        #   Procodile.log nil, "proxy", "Could not connect to #{instance.description}:#{instance.port}"
 
-          return
-        end
+        #   return
+        # end
 
-        readers = {backend: backend_socket, client: client}
+        readers = {client: client}
 
         readers.values.each do |io|
           spawn do
             loop do
               readers.keys.each do |key|
-                next unless readers[key] == io
-                opposite_side = (key == :client) ? :backend : :client
+                p! io
+                # next unless readers[key] == io
+                # opposite_side = (key == :client) ? :backend : :client
 
                 # Original ruby version code <==
 
@@ -129,9 +130,9 @@ module Procodile
                 # slice = Bytes.new(1024)
                 # io.read(slice)
                 # readers[opposite_side].write(slice) rescue nil
-                IO.copy io, readers[opposite_side], 1024 rescue nil
+                # IO.copy io, readers[opposite_side], 1024 rescue nil
               end
-              sleep 0.1.seconds
+              # sleep 0.1.seconds
             end
           end
         end
