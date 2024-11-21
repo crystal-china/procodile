@@ -57,7 +57,7 @@ describe Procodile::Config do
         end
 
         it "should have a log color" do
-          process.log_color.should eq 35
+          process.log_color.should eq Colorize::ColorANSI::Magenta
         end
       end
     end

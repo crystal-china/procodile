@@ -43,18 +43,23 @@ describe Procodile::AppDetermination do
   end
 
   it "should use global_options" do
-    global_options = {
-      root:     "/app",
-      procfile: "Procfile",
-    }.to_yaml
+    yaml = <<-'HEREDOC'
+-
+  name: Widgets App
+  root: /path/to/widgets/app
+-
+  name: Another App
+  root: /path/to/another/app
+HEREDOC
 
     ap = Procodile::AppDetermination.new(
       pwd: "/myapps",
       given_root: nil,
       given_procfile: nil,
-      global_options: Procodile::Config::Option.from_yaml(global_options)
+      global_options: Array(Procodile::Config::GlobalOption).from_yaml(yaml)
     )
-    ap.root.should eq "/app"
-    ap.procfile.should eq "/app/Procfile"
+    ap.set_app_id_and_find_root_and_procfile(1)
+    ap.root.should eq "/path/to/another/app"
+    ap.procfile.should be_nil
   end
 end

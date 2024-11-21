@@ -16,7 +16,7 @@ module Procodile
       @pwd : String,
       given_root : String?,
       @given_procfile : String?,
-      @global_options : Array(Config::GlobalOption)
+      @global_options : Array(Config::GlobalOption) = [] of Config::GlobalOption
     )
       @given_root = given_root ? expand_path(given_root, pwd) : nil
 
@@ -109,9 +109,6 @@ module Procodile
         # these we should be looking at.
         if (app_id = @app_id)
           find_root_and_procfile_from_options(options[app_id])
-        else
-          STDERR.puts "Need specify app_id!"
-          exit 1
         end
       end
     end
