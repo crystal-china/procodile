@@ -7,7 +7,7 @@ module Procodile
       end
 
       private def help : Nil
-        puts "Welcome to Procodile v#{Procodile::VERSION}".colorize.light_gray.on_magenta
+        puts "Welcome to Procodile v#{VERSION}".colorize.light_gray.on_magenta
         puts "For documentation see https://adam.ac/procodile."
         puts
 

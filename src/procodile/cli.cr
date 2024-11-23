@@ -2,7 +2,6 @@ require "./config"
 require "./control_client"
 require "./commands/*"
 require "./core_ext/process"
-require "./version"
 
 module Procodile
   class CLI

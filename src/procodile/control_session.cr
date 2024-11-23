@@ -75,7 +75,7 @@ module Procodile
       loaded_at = @supervisor.config.loaded_at
 
       result = ControlClient::ReplyOfStatusCommand.new(
-        version: Procodile::VERSION,
+        version: VERSION,
         messages: @supervisor.messages,
         root: @supervisor.config.root,
         app_name: @supervisor.config.app_name,
@@ -113,7 +113,7 @@ module Procodile
         if callable[command]?
           begin
             callable[command].call(options)
-          rescue e : Procodile::Error
+          rescue e : Error
             Procodile.log nil, "control", "Error: #{e.message}".colorize.red.to_s
             "500 #{e.message}"
           end
