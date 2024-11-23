@@ -35,9 +35,9 @@ module Procodile
             cli.options.stop_when_none = true
           end
 
-          opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
-            cli.options.proxy = true
-          end
+          # opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
+          #   cli.options.proxy = true
+          # end
 
           opts.on("--ports PROCESSES", "Choose ports to allocate to processes") do |processes|
             cli.options.port_allocations = processes.split(",").each_with_object({} of String => Int32) do |line, hash|
