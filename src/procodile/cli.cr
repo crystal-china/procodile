@@ -170,7 +170,7 @@ module Procodile
         @name : String,
         @description : String,
         @options : Proc(OptionParser, Procodile::CLI, Nil),
-        @callable : Proc(Nil)
+        @callable : Proc(Nil),
       )
       end
     end

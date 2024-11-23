@@ -439,7 +439,7 @@ module Procodile
         @current : Int32? = nil,
         @desired : Int32? = nil,
         @instance : String? = nil,
-        @status : Instance::Status? = nil
+        @status : Instance::Status? = nil,
       )
       end
 
@@ -461,7 +461,7 @@ module Procodile
         @processes : Array(String)? = nil,
         @stop_supervisor : Bool? = nil,
         @tag : String? = nil,
-        @reload : Bool? = nil
+        @reload : Bool? = nil,
       )
       end
     end

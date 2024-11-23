@@ -72,7 +72,7 @@ module Procodile
         @supervisor_pid_path : String,
         @pid_root : String,
         @loaded_at : Int64?,
-        @log_root : String?
+        @log_root : String?,
       )
       end
     end
@@ -93,7 +93,7 @@ module Procodile
         @log_path : String?,
         @removed : Bool,
         @proxy_port : Int32?,
-        @proxy_address : String?
+        @proxy_address : String?,
       )
       end
     end

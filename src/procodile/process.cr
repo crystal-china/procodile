@@ -17,7 +17,7 @@ module Procodile
       @config : Procodile::Config,
       @name : String,
       @command : String,
-      @options : Option = Option.new
+      @options : Option = Option.new,
     )
     end
 

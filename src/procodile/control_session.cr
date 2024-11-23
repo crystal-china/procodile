@@ -134,7 +134,7 @@ module Procodile
         @tag : String? = nil,
         @port_allocations : Hash(String, Int32)? = nil,
         @reload : Bool? = nil,
-        @stop_supervisor : Bool? = nil
+        @stop_supervisor : Bool? = nil,
       )
       end
     end

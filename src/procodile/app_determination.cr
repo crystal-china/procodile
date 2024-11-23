@@ -16,7 +16,7 @@ module Procodile
       @pwd : String,
       given_root : String?,
       @given_procfile : String?,
-      @global_options : Array(Config::GlobalOption) = [] of Config::GlobalOption
+      @global_options : Array(Config::GlobalOption) = [] of Config::GlobalOption,
     )
       @given_root = given_root ? expand_path(given_root, pwd) : nil
 

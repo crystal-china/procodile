@@ -465,7 +465,7 @@ module Procodile
         @port : Int32?,
 
         # foreground is used for supervisor, but add here for simplicity communication
-        @foreground : Bool = false
+        @foreground : Bool = false,
       )
       end
     end
