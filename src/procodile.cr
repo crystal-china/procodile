@@ -20,7 +20,7 @@ command = ARGV[0]? || "help"
 options = {} of Symbol => String
 cli = Procodile::CLI.new
 
-OptionParser.parse do |parser|
+opt = OptionParser.new do |parser|
   parser.banner = "Usage: procodile #{command} [options]"
 
   parser.on("-r", "--root PATH", "The path to the root of your application") do |root|
@@ -42,11 +42,15 @@ OptionParser.parse do |parser|
     STDERR.puts parser
     exit 1
   end
-
-  if cli.class.commands[command]? && (option_block = cli.class.commands[command].options)
-    option_block.call(parser, cli)
-  end
 end
+
+if cli.class.commands[command]? && (option_block = cli.class.commands[command].options)
+  option_block.call(opt, cli)
+end
+
+opt.parse
+
+command = ARGV[0]? || "help"
 
 # Get the global configuration file data
 global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
