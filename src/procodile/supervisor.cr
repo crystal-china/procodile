@@ -10,9 +10,9 @@ module Procodile
 
     getter config, run_options, tag, tcp_proxy, processes, readers, started_at
 
-    def initialize(@config : Procodile::Config, @run_options : RunOptions = RunOptions.new)
-      @processes = {} of Procodile::Process => Array(Procodile::Instance)
-      @readers = {} of IO::FileDescriptor => Procodile::Instance
+    def initialize(@config : Config, @run_options : RunOptions = RunOptions.new)
+      @processes = {} of Process => Array(Instance)
+      @readers = {} of IO::FileDescriptor => Instance
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
@@ -28,7 +28,7 @@ module Procodile
       @run_options.respawn? != false
     end
 
-    def start(after_start : Proc(Procodile::Supervisor, Nil)) : Nil
+    def start(after_start : Proc(Supervisor, Nil)) : Nil
       Procodile.log nil, "system", "Procodile supervisor started with PID #{::Process.pid}"
       Procodile.log nil, "system", "Application root is #{@config.root}"
 
@@ -59,9 +59,9 @@ module Procodile
       loop { supervise; sleep 3.seconds }
     end
 
-    def start_processes(process_names : Array(String)?, options : Options = Options.new) : Array(Procodile::Instance)
+    def start_processes(process_names : Array(String)?, options : Options = Options.new) : Array(Instance)
       @tag = options.tag
-      instances_started = [] of Procodile::Instance
+      instances_started = [] of Instance
 
       reload_config
 
@@ -77,7 +77,7 @@ module Procodile
       instances_started
     end
 
-    def stop(options : Options = Options.new) : Array(Procodile::Instance)
+    def stop(options : Options = Options.new) : Array(Instance)
       if options.stop_supervisor
         @run_options.stop_when_none = true
       end
@@ -85,7 +85,7 @@ module Procodile
       reload_config
 
       processes = options.processes
-      instances_stopped = [] of Procodile::Instance
+      instances_stopped = [] of Instance
 
       if processes.nil?
         Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
@@ -114,10 +114,10 @@ module Procodile
       @run_options.foreground?
     end
 
-    def restart(options : Options = Options.new) : Array(Array(Procodile::Instance | Nil))
+    def restart(options : Options = Options.new) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       @tag = options.tag
-      instances_restarted = [] of Array(Procodile::Instance?)
+      instances_restarted = [] of Array(Instance?)
       processes = options.processes
 
       reload_config
@@ -170,7 +170,7 @@ module Procodile
       @config.reload
     end
 
-    def check_concurrency(options : Options = Options.new) : Hash(Symbol, Array(Procodile::Instance))
+    def check_concurrency(options : Options = Options.new) : Hash(Symbol, Array(Instance))
       Procodile.log nil, "system", "Checking process concurrency"
 
       reload_config unless options.reload == false
@@ -233,7 +233,7 @@ module Procodile
 
       # When the first time start, it is possible @processes[instance.process] is nil
       # before the process is started.
-      @processes[instance.process] ||= [] of Procodile::Instance
+      @processes[instance.process] ||= [] of Instance
 
       unless @processes[instance.process].includes?(instance)
         @processes[instance.process] << instance
@@ -326,8 +326,8 @@ module Procodile
       end
     end
 
-    private def check_instance_quantities(type : CheckInstanceQuantitiesType = :both, processes : Array(String)? = nil) : Hash(Symbol, Array(Procodile::Instance))
-      status = {:started => [] of Procodile::Instance, :stopped => [] of Procodile::Instance}
+    private def check_instance_quantities(type : CheckInstanceQuantitiesType = :both, processes : Array(String)? = nil) : Hash(Symbol, Array(Instance))
+      status = {:started => [] of Instance, :stopped => [] of Instance}
 
       @processes.each do |process, instances|
         next if processes && !processes.includes?(process.name)
@@ -385,8 +385,8 @@ module Procodile
       end
     end
 
-    private def process_names_to_instances(names : Array(String)) : Array(Procodile::Instance)
-      names.each_with_object([] of Procodile::Instance) do |name, array|
+    private def process_names_to_instances(names : Array(String)) : Array(Instance)
+      names.each_with_object([] of Instance) do |name, array|
         if name =~ /\A(.*)\.(\d+)\z/
           # app1.1
           process_name, id = $1, $2

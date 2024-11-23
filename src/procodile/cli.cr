@@ -26,7 +26,7 @@ module Procodile
       @@commands ||= {} of String => Command
     end
 
-    @@options = {} of Symbol => Proc(OptionParser, Procodile::CLI, Nil)
+    @@options = {} of Symbol => Proc(OptionParser, CLI, Nil)
 
     {% begin %}
       {% for e in COMMANDS %}
@@ -36,7 +36,7 @@ module Procodile
 
         def initialize
           @options = Options.new
-          @config = uninitialized Procodile::Config
+          @config = uninitialized Config
 
           {% for e in COMMANDS %}
             {% name = e[0] %}
@@ -61,9 +61,9 @@ module Procodile
     end
 
     def self.start_supervisor(
-      config : Procodile::Config,
+      config : Config,
       options : Options = Options.new,
-      &after_start : Proc(Procodile::Supervisor, Nil)
+      &after_start : Proc(Supervisor, Nil)
     ) : Nil
       run_options = Supervisor::RunOptions.new(
         respawn: options.respawn?,
@@ -112,7 +112,7 @@ module Procodile
     end
 
     # Clean up procodile.pid and procodile.sock with all unused pid files
-    private def self.tidy_pids(config : Procodile::Config) : Nil
+    private def self.tidy_pids(config : Config) : Nil
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(config.sock_path)
 
@@ -159,7 +159,7 @@ module Procodile
       end
     end
 
-    private def self.options(name : Symbol, &block : Proc(OptionParser, Procodile::CLI, Nil)) : Nil
+    private def self.options(name : Symbol, &block : Proc(OptionParser, CLI, Nil)) : Nil
       @@options[name] = block
     end
 
@@ -169,7 +169,7 @@ module Procodile
       def initialize(
         @name : String,
         @description : String,
-        @options : Proc(OptionParser, Procodile::CLI, Nil),
+        @options : Proc(OptionParser, CLI, Nil),
         @callable : Proc(Nil),
       )
       end

@@ -1,6 +1,6 @@
 module Procodile
   class ControlSession
-    def initialize(@supervisor : Procodile::Supervisor, @client : UNIXSocket)
+    def initialize(@supervisor : Supervisor, @client : UNIXSocket)
     end
 
     private def start_processes(options : Options) : String

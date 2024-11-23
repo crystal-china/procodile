@@ -12,7 +12,7 @@ module Procodile
     ]
 
     @process_list : Hash(String, String)?
-    @processes : Hash(String, Procodile::Process)?
+    @processes : Hash(String, Process)?
     @options : Option?
     @local_options : Option?
     @process_options : Hash(String, Process::Option)?
@@ -38,7 +38,7 @@ module Procodile
 
       FileUtils.mkdir_p(pid_root)
 
-      @processes = process_list.each_with_index.each_with_object({} of String => Procodile::Process) do |(h, index), hash|
+      @processes = process_list.each_with_index.each_with_object({} of String => Process) do |(h, index), hash|
         name = h[0]
         command = h[1]
 
@@ -107,8 +107,8 @@ module Procodile
       local_options.exec_prefix || options.exec_prefix
     end
 
-    def processes : Hash(String, Procodile::Process)
-      @processes ||= {} of String => Procodile::Process
+    def processes : Hash(String, Process)
+      @processes ||= {} of String => Process
     end
 
     def process_list : Hash(String, String)
@@ -187,8 +187,8 @@ module Procodile
       "#{procfile_path}.local"
     end
 
-    private def create_process(name : String, command : String, log_color : Colorize::ColorANSI) : Procodile::Process
-      process = Procodile::Process.new(self, name, command, options_for_process(name))
+    private def create_process(name : String, command : String, log_color : Colorize::ColorANSI) : Process
+      process = Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color
       process
     end

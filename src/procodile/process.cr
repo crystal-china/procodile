@@ -14,7 +14,7 @@ module Procodile
     delegate allocate_port_from, proxy_port, to: @options
 
     def initialize(
-      @config : Procodile::Config,
+      @config : Config,
       @name : String,
       @command : String,
       @options : Option = Option.new,
@@ -135,15 +135,15 @@ module Procodile
     #
     # Generate an array of new instances for this process (based on its quantity)
     #
-    def generate_instances(supervisor : Procodile::Supervisor, quantity : Int32 = self.quantity) : Array(Procodile::Instance)
+    def generate_instances(supervisor : Supervisor, quantity : Int32 = self.quantity) : Array(Instance)
       Array.new(quantity) { create_instance(supervisor) }
     end
 
     #
     # Create a new instance
     #
-    def create_instance(supervisor : Procodile::Supervisor) : Instance
-      # supervisor is A Procodile::Supervisor object like this:
+    def create_instance(supervisor : Supervisor) : Instance
+      # supervisor is A Supervisor object like this:
       # {
       #   :started_at => 1667297292,
       #   :pid        => 410794,

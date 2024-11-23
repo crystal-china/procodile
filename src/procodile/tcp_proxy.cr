@@ -70,7 +70,7 @@ module Procodile
 
     def handle_client(client, server)
       process = @listeners[server]
-      instances = @supervisor.processes[process] || [] of Array(Procodile::Instance)
+      instances = @supervisor.processes[process] || [] of Array(Instance)
       if instances.empty?
         Procodile.log nil, "proxy", "There are no processes running for #{process.name}"
       else

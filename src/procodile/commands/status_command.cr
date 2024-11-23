@@ -81,7 +81,7 @@ module Procodile
         end
       end
 
-      private def print_processes(status : Procodile::ControlClient::ReplyOfStatusCommand) : Nil
+      private def print_processes(status : ControlClient::ReplyOfStatusCommand) : Nil
         puts
 
         status.processes.each_with_index do |process, index|

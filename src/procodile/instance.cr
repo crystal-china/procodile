@@ -17,7 +17,7 @@ module Procodile
     # Return a description for this instance
     getter description : String { "#{@process.name}.#{@id}" }
 
-    def initialize(@supervisor : Procodile::Supervisor, @process : Procodile::Process, @id : Int32)
+    def initialize(@supervisor : Supervisor, @process : Process, @id : Int32)
       @respawns = 0
       @stopped = false
     end
@@ -324,7 +324,7 @@ module Procodile
           Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
           @port = possible_port
         elsif attempts >= max_attempts
-          raise Procodile::Error.new "Couldn't allocate port for #{@process.name}"
+          raise Error.new "Couldn't allocate port for #{@process.name}"
         end
       end
     end
@@ -344,7 +344,7 @@ module Procodile
         server.close
         true
       else
-        raise Procodile::Error.new "Invalid network_protocol '#{@process.network_protocol}'"
+        raise Error.new "Invalid network_protocol '#{@process.network_protocol}'"
       end
     rescue Socket::BindError
       false
