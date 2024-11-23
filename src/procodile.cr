@@ -31,6 +31,16 @@ opt = OptionParser.new do |parser|
     options[:procfile] = path
   end
 
+  parser.on("-h", "--help", "Show this help message and exit") do
+    STDOUT.puts parser
+    exit 0
+  end
+
+  parser.on("-v", "--version", "Show version") do
+    STDOUT.puts Procodile::VERSION
+    exit 0
+  end
+
   parser.invalid_option do |flag|
     STDERR.puts "Invalid option: #{flag}.\n\n"
     STDERR.puts parser
@@ -44,12 +54,13 @@ opt = OptionParser.new do |parser|
   end
 end
 
-if cli.class.commands[command]? && (option_block = cli.class.commands[command].options)
-  option_block.call(opt, cli)
+if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
+  option_proc.call(opt, cli)
 end
 
 opt.parse
 
+# duplicate on this line is necessory for get new parsed ARGV
 command = ARGV[0]? || "help"
 
 # Get the global configuration file data
