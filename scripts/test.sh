@@ -59,6 +59,7 @@ bin/procodile
 bin/procodile kill && sleep 3  # ensure kill before test.
 header '(1) Checking procodile start ...'
 bin/procodile start && sleep 3
+bin/procodile -r spec/apps/basic/ start && sleep 3
 header '(2) Checking procodile status --simple ...'
 bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
 header '(2.1) Checking PORT envs'
@@ -158,6 +159,7 @@ HEREDOC
 header '(14) Checking procodile restart -papp3  ...'
 bin/procodile restart -papp3 && sleep 3
 bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$'
-bin/procodile kill
+bin/procodile kill && sleep 3
+bin/procodile -r spec/apps/basic/ kill
 
 header '(15) Successful'
