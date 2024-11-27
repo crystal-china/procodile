@@ -287,6 +287,7 @@ module Procodile
           select
           when @signal_handler_chan.receive
           when @log_listener_chan.receive
+          when timeout 30.seconds
           end
         end
       end
