@@ -8,8 +8,8 @@ module Procodile
     end
 
     def initialize(@supervisor : Supervisor)
-      @listeners = {} of TCPServer => Process
-      @stopped_processes = [] of Process
+      @listeners = {} of TCPServer => Procodile::Process
+      @stopped_processes = [] of Procodile::Process
       @sp_reader, @sp_writer = IO.pipe
     end
 
@@ -21,7 +21,7 @@ module Procodile
       end
     end
 
-    def add_process(process : Process) : Nil
+    def add_process(process : Procodile::Process) : Nil
       if process.proxy?
         @listeners[TCPServer.new(process.proxy_address.not_nil!, process.proxy_port.not_nil!)] = process
         Procodile.log nil, "proxy", "Proxying traffic on #{process.proxy_address}:#{process.proxy_port} to #{process.name}".colorize.green.to_s
@@ -32,7 +32,7 @@ module Procodile
       Procodile.log nil, "proxy", e.backtrace[0, 5].join("\n")
     end
 
-    def remove_process(process : Process) : Nil
+    def remove_process(process : Procodile::Process) : Nil
       @stopped_processes << process
       @sp_writer.puts(".")
     end

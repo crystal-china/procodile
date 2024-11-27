@@ -11,7 +11,7 @@ module Procodile
     getter config, run_options, tag, tcp_proxy, processes, readers, started_at
 
     def initialize(@config : Config, @run_options : RunOptions = RunOptions.new)
-      @processes = {} of Process => Array(Instance)
+      @processes = {} of Procodile::Process => Array(Instance)
       @readers = {} of IO::FileDescriptor => Instance
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
@@ -250,40 +250,6 @@ module Procodile
       end
     end
 
-    private def log_listener_reader : Nil
-      buffer = {} of IO::FileDescriptor => String
-      # After run restart command, @readers need to be update.
-      # Ruby version @readers is wrapped by a loop, so can workaround this.
-      # Crystal version need rerun this method again after restart.
-      @readers.keys.each do |reader|
-        spawn do
-          loop do
-            Fiber.yield
-
-            if (str = reader.gets).nil?
-              sleep 0.1.seconds
-              next
-            end
-
-            buffer[reader] ||= ""
-            buffer[reader] += "#{str.chomp}\n"
-
-            while buffer[reader].index("\n")
-              line, buffer[reader] = buffer[reader].split("\n", 2)
-
-              if (instance = @readers[reader])
-                Procodile.log instance.process.log_color, instance.description, "#{"=>".colorize(instance.process.log_color)} #{line}"
-              else
-                Procodile.log nil, "unknown", buffer[reader]
-              end
-            end
-
-            @log_listener_chan.send nil
-          end
-        end
-      end
-    end
-
     private def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
       remove_stopped_instances
@@ -321,6 +287,40 @@ module Procodile
           select
           when @signal_handler_chan.receive
           when @log_listener_chan.receive
+          end
+        end
+      end
+    end
+
+    private def log_listener_reader : Nil
+      buffer = {} of IO::FileDescriptor => String
+      # After run restart command, @readers need to be update.
+      # Ruby version @readers is wrapped by a loop, so can workaround this.
+      # Crystal version need rerun this method again after restart.
+      @readers.keys.each do |reader|
+        spawn do
+          loop do
+            Fiber.yield
+
+            if (str = reader.gets).nil?
+              sleep 0.1.seconds
+              next
+            end
+
+            buffer[reader] ||= ""
+            buffer[reader] += "#{str.chomp}\n"
+
+            while buffer[reader].index("\n")
+              line, buffer[reader] = buffer[reader].split("\n", 2)
+
+              if (instance = @readers[reader])
+                Procodile.log instance.process.log_color, instance.description, "#{"=>".colorize(instance.process.log_color)} #{line}"
+              else
+                Procodile.log nil, "unknown", buffer[reader]
+              end
+            end
+
+            @log_listener_chan.send nil
           end
         end
       end

@@ -17,7 +17,7 @@ module Procodile
     # Return a description for this instance
     getter description : String { "#{@process.name}.#{@id}" }
 
-    def initialize(@supervisor : Supervisor, @process : Process, @id : Int32)
+    def initialize(@supervisor : Supervisor, @process : Procodile::Process, @id : Int32)
       @respawns = 0
       @stopped = false
     end
