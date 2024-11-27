@@ -273,7 +273,7 @@ module Procodile
     private def watch_for_output : Nil
       spawn do
         loop do
-          @signal_handler.pipe[:reader].read(Bytes.new(999)) rescue nil
+          @signal_handler.pipe[:reader].gets
           @signal_handler.handle
 
           @signal_handler_chan.send nil
@@ -303,13 +303,13 @@ module Procodile
           loop do
             Fiber.yield
 
-            if (str = reader.gets).nil?
+            if (str = reader.gets(chomp: true)).nil?
               sleep 0.1.seconds
               next
             end
 
             buffer[reader] ||= ""
-            buffer[reader] += "#{str.chomp}\n"
+            buffer[reader] += "#{str}\n"
 
             while buffer[reader].index("\n")
               line, buffer[reader] = buffer[reader].split("\n", 2)
