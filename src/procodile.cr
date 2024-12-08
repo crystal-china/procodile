@@ -66,7 +66,9 @@ module Procodile
 
   opt.parse
 
-  # duplicate on this line is necessory for get new parsed ARGV
+  #
+  # For fix https://github.com/adamcooke/procodile/issues/30
+  # Duplicate on this line is necessory for get new parsed ARGV.
   command = ARGV[0]? || "help"
 
   # Get the global configuration file data

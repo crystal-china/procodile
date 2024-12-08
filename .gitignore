@@ -8,3 +8,5 @@ Procfile.*
 /lib
 /bin/ameba*
 /new_pids
+*.pid
+.tool-versions
