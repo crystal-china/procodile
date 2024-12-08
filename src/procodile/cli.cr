@@ -160,13 +160,16 @@ module Procodile
     end
 
     struct Command
-      getter name, description, options, callable
+      getter name : String
+      getter description : String
+      getter options : Proc(OptionParser, CLI, Nil)
+      getter callable : Proc(Nil)
 
       def initialize(
         @name : String,
         @description : String,
         @options : Proc(OptionParser, CLI, Nil),
-        @callable : Proc(Nil),
+        @callable : Proc(Nil)
       )
       end
     end
