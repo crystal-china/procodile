@@ -6,9 +6,8 @@ module Procodile
     @app_id : Int32?
     @given_root : String?
 
-    @root : String?
-    @procfile : String?
-    getter root, procfile
+    getter root : String?
+    getter procfile : String?
 
     # Start by creating an determination ased on the root and procfile that has been provided
     # to us by the user (from --root and/or --procfile)
