@@ -21,9 +21,7 @@ module Procodile
     ]
     property options, config
 
-    def self.commands : Hash(String, Command)
-      @@commands ||= {} of String => Command
-    end
+    class_getter commands : Hash(String, Command) { {} of String => Command }
 
     @@options = {} of Symbol => Proc(OptionParser, CLI, Nil)
 
