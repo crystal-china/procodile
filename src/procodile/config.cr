@@ -115,7 +115,7 @@ module Procodile
       option_env = options.env || {} of String => String
       local_option_env = local_options.env || {} of String => String
 
-      option_env.merge(local_option_env)
+      @environment_variables ||= option_env.merge(local_option_env)
     end
 
     def pid_root : String?
