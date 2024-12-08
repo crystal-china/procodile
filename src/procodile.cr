@@ -109,8 +109,7 @@ module Procodile
   end
 
   begin
-    cli = CLI.new
-    cli.config = Config.new(ap.root || "", ap.procfile)
+    cli = CLI.new(config: Config.new(ap.root || "", ap.procfile))
 
     if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
       option_proc.call(opt, cli)
