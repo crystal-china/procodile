@@ -11,15 +11,17 @@ module Procodile
       Colorize::ColorANSI::Blue,    # 34 蓝
     ]
 
-    @process_list : Hash(String, String)?
-    @processes : Hash(String, Procodile::Process)?
-    @options : Option?
-    @local_options : Option?
-    @process_options : Hash(String, Procodile::Process::Option)?
-    @local_process_options : Hash(String, Procodile::Process::Option)?
+    getter process_list : Hash(String, String) { load_process_list_from_file }
+    getter processes : Hash(String, Procodile::Process) { {} of String => Procodile::Process }
+
+    getter options : Option { load_options_from_file }
+    getter local_options : Option { load_local_options_from_file }
+    getter process_options : Hash(String, Procodile::Process::Option) { options.processes || {} of String => Procodile::Process::Option }
+    getter local_process_options : Hash(String, Procodile::Process::Option) { local_options.processes || {} of String => Procodile::Process::Option }
+    getter app_name : String { local_options.app_name || options.app_name || "Procodile" }
+
     @loaded_at : Time?
     @environment_variables : Hash(String, String)?
-    @app_name : String?
 
     getter root, loaded_at
 
@@ -95,40 +97,12 @@ module Procodile
       local_options.user || options.user
     end
 
-    def app_name : String
-      @app_name ||= local_options.app_name || options.app_name || "Procodile"
-    end
-
     def console_command : String?
       local_options.console_command || options.console_command
     end
 
     def exec_prefix : String?
       local_options.exec_prefix || options.exec_prefix
-    end
-
-    def processes : Hash(String, Procodile::Process)
-      @processes ||= {} of String => Procodile::Process
-    end
-
-    def process_list : Hash(String, String)
-      @process_list ||= load_process_list_from_file
-    end
-
-    def options : Option
-      @options ||= load_options_from_file
-    end
-
-    def local_options : Option
-      @local_options ||= load_local_options_from_file
-    end
-
-    def process_options : Hash(String, Procodile::Process::Option)
-      @process_options ||= options.processes || {} of String => Procodile::Process::Option
-    end
-
-    def local_process_options : Hash(String, Procodile::Process::Option)
-      @local_process_options ||= local_options.processes || {} of String => Procodile::Process::Option
     end
 
     def options_for_process(name : String) : Procodile::Process::Option
