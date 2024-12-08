@@ -3,11 +3,19 @@ module Procodile
     module RestartCommand
       macro included
         options :restart do |opts, cli|
-          opts.on("-p", "--processes a,b,c", "Only restart the listed processes or process types") do |processes|
+          opts.on(
+            "-p",
+            "--processes a,b,c",
+            "Only restart the listed processes or process types"
+          ) do |processes|
             cli.options.processes = processes
           end
 
-          opts.on("-t", "--tag TAGNAME", "Tag all started processes with the given tag") do |tag|
+          opts.on(
+            "-t",
+            "--tag TAGNAME",
+            "Tag all started processes with the given tag"
+          ) do |tag|
             cli.options.tag = tag
           end
         end
