@@ -22,7 +22,12 @@ module Procodile
 
     getter loaded_at : Time?
     getter root : String
-    @environment_variables : Hash(String, String)?
+    getter environment_variables : Hash(String, String) do
+      option_env = options.env || {} of String => String
+      local_option_env = local_options.env || {} of String => String
+
+      option_env.merge(local_option_env)
+    end
 
     def initialize(@root : String, @procfile : String? = nil)
       unless File.file?(procfile_path)
@@ -109,13 +114,6 @@ module Procodile
       local_po = local_process_options[name]? || Procodile::Process::Option.new
 
       po.merge(local_po)
-    end
-
-    def environment_variables : Hash(String, String)
-      option_env = options.env || {} of String => String
-      local_option_env = local_options.env || {} of String => String
-
-      @environment_variables ||= option_env.merge(local_option_env)
     end
 
     def pid_root : String?
