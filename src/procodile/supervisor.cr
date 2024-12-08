@@ -11,15 +11,13 @@ module Procodile
     getter started_at : Time?
     getter config : Config
     getter run_options : Supervisor::RunOptions
-    getter processes : Hash(Procodile::Process, Array(Instance))
-    getter readers : Hash(IO::FileDescriptor, Instance)
+    getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
+    getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
 
     def initialize(
       @config : Config,
       @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new
     )
-      @processes = {} of Procodile::Process => Array(Instance)
-      @readers = {} of IO::FileDescriptor => Instance
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
