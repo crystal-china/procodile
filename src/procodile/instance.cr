@@ -233,10 +233,10 @@ module Procodile
     #
     # Return this instance as a hash
     #
-    def to_struct : Config
+    def to_struct : Instance::Config
       started_at = @started_at
 
-      Config.new(
+      Instance::Config.new(
         description: self.description,
         pid: self.pid,
         respawns: self.respawns,
@@ -251,17 +251,17 @@ module Procodile
     #
     # Return the status of this instance
     #
-    def status : Status
+    def status : Instance::Status
       if stopped?
-        Status::Stopped
+        Instance::Status::Stopped
       elsif stopping?
-        Status::Stopping
+        Instance::Status::Stopping
       elsif running?
-        Status::Running
+        Instance::Status::Running
       elsif failed?
-        Status::Failed
+        Instance::Status::Failed
       else
-        Status::Unknown
+        Instance::Status::Unknown
       end
     end
 
@@ -439,40 +439,40 @@ module Procodile
         pid.blank? ? nil : pid.strip.to_i64
       end
     end
+  end
 
-    enum Status
-      Unknown
-      Stopped
-      Stopping
-      Running
-      Failed
-    end
+  enum Instance::Status
+    Unknown
+    Stopped
+    Stopping
+    Running
+    Failed
+  end
 
-    struct Config
-      include JSON::Serializable
+  struct Instance::Config
+    include JSON::Serializable
 
-      getter description : String
-      getter pid : Int64?
-      getter respawns : Int32
-      getter status : Instance::Status
-      getter started_at : Int64?
-      getter tag : String?
-      getter port : Int32?
-      getter? foreground : Bool
+    getter description : String
+    getter pid : Int64?
+    getter respawns : Int32
+    getter status : Instance::Status
+    getter started_at : Int64?
+    getter tag : String?
+    getter port : Int32?
+    getter? foreground : Bool
 
-      def initialize(
-        @description : String,
-        @pid : Int64?,
-        @respawns : Int32,
-        @status : Instance::Status,
-        @started_at : Int64?,
-        @tag : String?,
-        @port : Int32?,
+    def initialize(
+      @description : String,
+      @pid : Int64?,
+      @respawns : Int32,
+      @status : Instance::Status,
+      @started_at : Int64?,
+      @tag : String?,
+      @port : Int32?,
 
-        # foreground is used for supervisor, but add here for simplicity communication
-        @foreground : Bool = false,
-      )
-      end
+      # foreground is used for supervisor, but add here for simplicity communication
+      @foreground : Bool = false,
+    )
     end
   end
 end

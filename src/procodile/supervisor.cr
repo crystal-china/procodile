@@ -337,7 +337,10 @@ module Procodile
       end
     end
 
-    private def check_instance_quantities(type : CheckInstanceQuantitiesType = :both, processes : Array(String)? = nil) : Hash(Symbol, Array(Instance))
+    private def check_instance_quantities(
+      type : Supervisor::CheckInstanceQuantitiesType = :both,
+      processes : Array(String)? = nil
+    ) : Hash(Symbol, Array(Instance))
       status = {:started => [] of Instance, :stopped => [] of Instance}
 
       @processes.each do |process, instances|
@@ -469,12 +472,12 @@ module Procodile
         end
       end
     end
+  end
 
-    enum CheckInstanceQuantitiesType
-      Both
-      Started
-      Stopped
-    end
+  enum Supervisor::CheckInstanceQuantitiesType
+    Both
+    Started
+    Stopped
   end
 
   struct Supervisor::RunOptions
