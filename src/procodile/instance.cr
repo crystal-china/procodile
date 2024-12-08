@@ -451,10 +451,14 @@ module Procodile
     struct Config
       include JSON::Serializable
 
-      getter description, pid, respawns, status, running, started_at,
-        tag, port
-
-      getter? foreground
+      getter description : String
+      getter pid : Int64?
+      getter respawns : Int32
+      getter status : Instance::Status
+      getter started_at : Int64?
+      getter tag : String?
+      getter port : Int32?
+      getter? foreground : Bool
 
       def initialize(
         @description : String,

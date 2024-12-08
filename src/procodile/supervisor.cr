@@ -4,11 +4,15 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    @tag : String?
-    @tcp_proxy : TCPProxy?
     @started_at : Time?
 
-    getter config, run_options, tag, tcp_proxy, processes, readers, started_at
+    getter tag : String?
+    getter tcp_proxy : TCPProxy?
+    getter started_at : Time?
+    getter config : Config
+    getter run_options : RunOptions
+    getter processes : Hash(Procodile::Process, Array(Instance))
+    getter readers : Hash(IO::FileDescriptor, Instance)
 
     def initialize(@config : Config, @run_options : RunOptions = RunOptions.new)
       @processes = {} of Procodile::Process => Array(Instance)
@@ -432,7 +436,13 @@ module Procodile
       end
 
       include JSON::Serializable
-      getter type, process, current, desired, instance, status
+
+      getter type : Type
+      getter process : String?
+      getter current : Int32?
+      getter desired : Int32?
+      getter instance : String?
+      getter status : Instance::Status?
 
       def initialize(
         @type : Type,
@@ -456,7 +466,10 @@ module Procodile
 
     # Supervisor options
     struct Options
-      getter processes, stop_supervisor, tag, reload
+      getter processes : Array(String)?
+      getter stop_supervisor : Bool?
+      getter tag : String?
+      getter reload : Bool?
 
       def initialize(
         @processes : Array(String)? = nil,
@@ -468,8 +481,13 @@ module Procodile
     end
 
     struct RunOptions
-      property port_allocations
-      property? proxy, foreground, force_single_log, respawn, stop_when_none
+      property port_allocations : Hash(String, Int32)?
+
+      property? proxy : Bool?
+      property? foreground : Bool
+      property? force_single_log : Bool?
+      property? respawn : Bool?
+      property? stop_when_none : Bool?
 
       def initialize(
         @respawn : Bool?,

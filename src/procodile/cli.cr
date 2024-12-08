@@ -19,7 +19,8 @@ module Procodile
       {:status, "Show the current status of processes"},
       {:console, "Open a console within the environment"},
     ]
-    property options, config
+    property config : Config
+    property options : Options = Options.new
 
     class_getter commands : Hash(String, Command) { {} of String => Command }
 
@@ -32,8 +33,6 @@ module Procodile
       {% end %}
 
         def initialize(@config : Config)
-          @options = Options.new
-
           {% for e in COMMANDS %}
             {% name = e[0] %}
             {% description = e[1] %}

@@ -3,13 +3,15 @@ require "./instance"
 module Procodile
   class Process
     @@mutex = Mutex.new
-
-    @log_color : Colorize::ColorANSI = Colorize::ColorANSI::Default
     @instance_index : Int32 = 0
-    @removed : Bool = false
 
-    getter config, name
-    property command, options, log_color, removed
+    getter config : Config
+    getter name : String
+
+    property command : String
+    property options : Option
+    property log_color : Colorize::ColorANSI = Colorize::ColorANSI::Default
+    property removed : Bool = false
 
     delegate allocate_port_from, proxy_port, to: @options
 
@@ -229,7 +231,7 @@ module Procodile
       # Return the network protocol for this process
       property network_protocol : String?
 
-      property env = {} of String => String
+      property env : Hash(String, String) = {} of String => String
 
       def initialize
       end

@@ -127,7 +127,11 @@ module Procodile
     struct Options
       include JSON::Serializable
 
-      getter processes, tag, port_allocations, reload, stop_supervisor
+      getter processes : Array(String)?
+      getter tag : String?
+      getter port_allocations : Hash(String, Int32)?
+      getter reload : Bool?
+      getter stop_supervisor : Bool?
 
       def initialize(
         @processes : Array(String)? = [] of String,
