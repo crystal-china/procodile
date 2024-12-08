@@ -20,10 +20,9 @@ module Procodile
     getter local_process_options : Hash(String, Procodile::Process::Option) { local_options.processes || {} of String => Procodile::Process::Option }
     getter app_name : String { local_options.app_name || options.app_name || "Procodile" }
 
-    @loaded_at : Time?
+    getter loaded_at : Time?
+    getter root : String
     @environment_variables : Hash(String, String)?
-
-    getter root, loaded_at
 
     def initialize(@root : String, @procfile : String? = nil)
       unless File.file?(procfile_path)
