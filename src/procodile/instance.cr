@@ -6,13 +6,14 @@ module Procodile
     @stopping_at : Time?
     @started_at : Time?
     @failed_at : Time?
-    @port : Int32?
-    @tag : String?
-    @pid : Int64?
 
-    property pid, process, port
-    getter id, tag
-    getter? stopped
+    property port : Int32?
+    property process : Procodile::Process
+    property pid : Int64?
+
+    getter tag : String?
+    getter id : Int32
+    getter? stopped : Bool
 
     # Return a description for this instance
     getter description : String { "#{@process.name}.#{@id}" }
