@@ -46,36 +46,36 @@ module Procodile
     def disconnect : Nil
       @socket.try &.close
     end
+  end
 
-    struct ProcessStatus
-      include JSON::Serializable
+  struct ControlClient::ProcessStatus
+    include JSON::Serializable
 
-      getter name : String
-      getter log_color : Colorize::ColorANSI
-      getter quantity : Int32
-      getter max_respawns : Int32
-      getter respawn_window : Int32
-      getter command : String
-      getter restart_mode : Signal | String | Nil
-      getter log_path : String?
-      getter removed : Bool
-      getter proxy_port : Int32?
-      getter proxy_address : String?
+    getter name : String
+    getter log_color : Colorize::ColorANSI
+    getter quantity : Int32
+    getter max_respawns : Int32
+    getter respawn_window : Int32
+    getter command : String
+    getter restart_mode : Signal | String | Nil
+    getter log_path : String?
+    getter removed : Bool
+    getter proxy_port : Int32?
+    getter proxy_address : String?
 
-      def initialize(
-        @name : String,
-        @log_color : Colorize::ColorANSI,
-        @quantity : Int32,
-        @max_respawns : Int32,
-        @respawn_window : Int32,
-        @command : String,
-        @restart_mode : Signal | String | Nil,
-        @log_path : String?,
-        @removed : Bool,
-        @proxy_port : Int32?,
-        @proxy_address : String?,
-      )
-      end
+    def initialize(
+      @name : String,
+      @log_color : Colorize::ColorANSI,
+      @quantity : Int32,
+      @max_respawns : Int32,
+      @respawn_window : Int32,
+      @command : String,
+      @restart_mode : Signal | String | Nil,
+      @log_path : String?,
+      @removed : Bool,
+      @proxy_port : Int32?,
+      @proxy_address : String?,
+    )
     end
   end
 
@@ -89,7 +89,7 @@ module Procodile
     getter app_name : String
     getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
     getter instances : Hash(String, Array(Instance::Config))
-    getter processes : Array(ProcessStatus)
+    getter processes : Array(ControlClient::ProcessStatus)
     getter environment_variables : Hash(String, String)
     getter procfile_path : String
     getter options_path : String
@@ -107,7 +107,7 @@ module Procodile
       @app_name : String,
       @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
       @instances : Hash(String, Array(Instance::Config)),
-      @processes : Array(ProcessStatus),
+      @processes : Array(ControlClient::ProcessStatus),
       @environment_variables : Hash(String, String),
       @procfile_path : String,
       @options_path : String,
