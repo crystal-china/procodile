@@ -3,7 +3,7 @@ module Procodile
     alias SocketResponse = Array(Instance::Config) |
                            Array(Tuple(Instance::Config?, Instance::Config?)) |
                            NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)) |
-                           ReplyOfStatusCommand | Bool
+                           ControlClient::ReplyOfStatusCommand | Bool
 
     def self.run(sock_path : String, command : String, **options) : SocketResponse
       socket = self.new(sock_path)
@@ -31,7 +31,7 @@ module Procodile
           when "check_concurrency"
             NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)).from_json(reply)
           when "status"
-            ReplyOfStatusCommand.from_json(reply)
+            ControlClient::ReplyOfStatusCommand.from_json(reply)
           else # e.g. reload command
             true
           end
@@ -45,48 +45,6 @@ module Procodile
 
     def disconnect : Nil
       @socket.try &.close
-    end
-
-    # Reply of `procodile status`
-    struct ReplyOfStatusCommand
-      include JSON::Serializable
-
-      getter version : String
-      getter messages : Array(Supervisor::Message)
-      getter root : String
-      getter app_name : String
-      getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
-      getter instances : Hash(String, Array(Instance::Config))
-      getter processes : Array(ProcessStatus)
-      getter environment_variables : Hash(String, String)
-      getter procfile_path : String
-      getter options_path : String
-      getter local_options_path : String
-      getter sock_path : String
-      getter supervisor_pid_path : String
-      getter pid_root : String
-      getter loaded_at : Int64?
-      getter log_root : String?
-
-      def initialize(
-        @version : String,
-        @messages : Array(Supervisor::Message),
-        @root : String,
-        @app_name : String,
-        @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
-        @instances : Hash(String, Array(Instance::Config)),
-        @processes : Array(ProcessStatus),
-        @environment_variables : Hash(String, String),
-        @procfile_path : String,
-        @options_path : String,
-        @local_options_path : String,
-        @sock_path : String,
-        @supervisor_pid_path : String,
-        @pid_root : String,
-        @loaded_at : Int64?,
-        @log_root : String?,
-      )
-      end
     end
 
     struct ProcessStatus
@@ -118,6 +76,48 @@ module Procodile
         @proxy_address : String?,
       )
       end
+    end
+  end
+
+  # Reply of `procodile status`
+  struct ControlClient::ReplyOfStatusCommand
+    include JSON::Serializable
+
+    getter version : String
+    getter messages : Array(Supervisor::Message)
+    getter root : String
+    getter app_name : String
+    getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
+    getter instances : Hash(String, Array(Instance::Config))
+    getter processes : Array(ProcessStatus)
+    getter environment_variables : Hash(String, String)
+    getter procfile_path : String
+    getter options_path : String
+    getter local_options_path : String
+    getter sock_path : String
+    getter supervisor_pid_path : String
+    getter pid_root : String
+    getter loaded_at : Int64?
+    getter log_root : String?
+
+    def initialize(
+      @version : String,
+      @messages : Array(Supervisor::Message),
+      @root : String,
+      @app_name : String,
+      @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
+      @instances : Hash(String, Array(Instance::Config)),
+      @processes : Array(ProcessStatus),
+      @environment_variables : Hash(String, String),
+      @procfile_path : String,
+      @options_path : String,
+      @local_options_path : String,
+      @sock_path : String,
+      @supervisor_pid_path : String,
+      @pid_root : String,
+      @loaded_at : Int64?,
+      @log_root : String?,
+    )
     end
   end
 end
