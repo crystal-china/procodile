@@ -37,25 +37,19 @@ module Procodile
     end
 
     parser.on("-h", "--help", "Show this help message and exit") do
-      STDOUT.puts parser
-      exit 0
+      abort parser, status: 0
     end
 
     parser.on("-v", "--version", "Show version") do
-      STDOUT.puts VERSION
-      exit 0
+      abort VERSION, status: 0
     end
 
     parser.invalid_option do |flag|
-      STDERR.puts "Invalid option: #{flag}.\n\n"
-      STDERR.puts parser
-      exit 1
+      abort "Invalid option: #{flag}.\n\n#{parser}"
     end
 
     parser.missing_option do |flag|
-      STDERR.puts "Missing option for #{flag}\n\n"
-      STDERR.puts parser
-      exit 1
+      abort "Missing option for #{flag}\n\n#{parser}"
     end
   end
 
@@ -80,8 +74,7 @@ module Procodile
     if (app_id = ENV["PROCODILE_APP_ID"]?)
       ap.set_app_id_and_find_root_and_procfile(app_id.to_i)
     elsif ap.app_options.empty?
-      STDERR.puts "Error: Could not find Procfile in #{FileUtils.pwd}/Procfile".colorize.red
-      exit 1
+      abort "Error: Could not find Procfile in #{FileUtils.pwd}/Procfile".colorize.red
     else
       puts "There are multiple applications configured in #{global_config_path}"
       puts "Choose an application:".colorize.light_gray.on_magenta
@@ -101,8 +94,7 @@ module Procodile
         if ap.app_options[app_id]?
           ap.set_app_id_and_find_root_and_procfile(app_id)
         else
-          puts "Invalid app number: #{app_id + 1}"
-          exit 1
+          abort "Invalid app number: #{app_id + 1}"
         end
       end
     end
@@ -135,7 +127,6 @@ module Procodile
 
     cli.dispatch(command)
   rescue ex : Error
-    STDERR.puts "Error: #{ex.message}".colorize.red
-    exit 1
+    abort "Error: #{ex.message}".colorize.red
   end
 end

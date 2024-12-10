@@ -56,9 +56,7 @@ module Procodile
 
               next if supervisor_running?
 
-              puts "Supervisor has stopped"
-
-              exit 0
+              abort "Supervisor has stopped", status: 0
             end
           end
         else

@@ -43,7 +43,8 @@ tends to be prone to failure, use it with caution."
                 if old_instance.description == new_instance.description
                   puts "#{"Restarted".colorize.magenta} #{old_instance.description}"
                 else
-                  puts "#{"Restarted".colorize.magenta} #{old_instance.description} -> #{new_instance.description}"
+                  puts "#{"Restarted".colorize.magenta} #{old_instance.description} \
+-> #{new_instance.description}"
                 end
               elsif old_instance
                 puts "#{"Stopped".colorize.red} #{old_instance.description}"
