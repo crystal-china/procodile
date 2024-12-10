@@ -28,7 +28,8 @@ module Procodile
     #
     def start : Nil
       if stopping?
-        Procodile.log(@process.log_color, description, "Process is stopped/stopping therefore cannot be started again.")
+        Procodile.log(@process.log_color, description, "Process is stopped/stopping \
+therefore cannot be started again.")
         return false
       end
 
@@ -144,9 +145,11 @@ module Procodile
           ::Process.signal(restart_mode.as(Signal), @pid.not_nil!)
 
           @tag = @supervisor.tag if @supervisor.tag
-          Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} signal to process #{@pid}")
+          Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} \
+signal to process #{@pid}")
         else
-          Procodile.log(@process.log_color, description, "Process not running already. Starting it.")
+          Procodile.log(@process.log_color, description, "Process not running already. \
+Starting it.")
           on_stop
           new_instance = @process.create_instance(@supervisor)
           new_instance.port = self.port
@@ -200,7 +203,8 @@ module Procodile
 
       if @supervisor.allow_respawning?
         if can_respawn?
-          Procodile.log(@process.log_color, description, "Process has stopped. Respawning...")
+          Procodile.log(@process.log_color, description, "Process has stopped. \
+Respawning...")
           start
           add_respawn
         elsif respawns >= @process.max_respawns
@@ -208,13 +212,15 @@ module Procodile
             @process.log_color,
             description,
             "Warning:".colorize.light_gray.on_red.to_s +
-            " this process has been respawned #{respawns} times and keeps dying.".colorize.red.to_s
+            " this process has been respawned #{respawns} times and \
+keeps dying.".colorize.red.to_s
           )
 
           Procodile.log(
             @process.log_color,
             description,
-            "It will not be respawned automatically any longer and will no longer be managed.".colorize.red.to_s
+            "It will not be respawned automatically any longer and will no longer \
+be managed.".colorize.red.to_s
           )
 
           @failed_at = Time.local
@@ -222,7 +228,8 @@ module Procodile
           tidy
         end
       else
-        Procodile.log(@process.log_color, description, "Process has stopped. Respawning not available.")
+        Procodile.log(@process.log_color, description, "Process has stopped. \
+Respawning not available.")
 
         @failed_at = Time.local
 

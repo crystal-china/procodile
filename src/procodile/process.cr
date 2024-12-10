@@ -137,7 +137,10 @@ module Procodile
     #
     # Generate an array of new instances for this process (based on its quantity)
     #
-    def generate_instances(supervisor : Supervisor, quantity : Int32 = self.quantity) : Array(Instance)
+    def generate_instances(
+      supervisor : Supervisor,
+      quantity : Int32 = self.quantity
+    ) : Array(Instance)
       Array.new(quantity) { create_instance(supervisor) }
     end
 

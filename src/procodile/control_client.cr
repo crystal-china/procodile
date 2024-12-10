@@ -3,7 +3,8 @@ module Procodile
     alias SocketResponse = Array(Instance::Config) |
                            Array(Tuple(Instance::Config?, Instance::Config?)) |
                            NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)) |
-                           ControlClient::ReplyOfStatusCommand | Bool
+                           ControlClient::ReplyOfStatusCommand |
+                           Bool
 
     def self.run(sock_path : String, command : String, **options) : SocketResponse
       socket = self.new(sock_path)
@@ -29,7 +30,9 @@ module Procodile
           when "restart"
             Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
           when "check_concurrency"
-            NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)).from_json(reply)
+            NamedTuple(
+              started: Array(Instance::Config),
+              stopped: Array(Instance::Config)).from_json(reply)
           when "status"
             ControlClient::ReplyOfStatusCommand.from_json(reply)
           else # e.g. reload command

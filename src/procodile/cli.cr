@@ -77,7 +77,8 @@ module Procodile
       end
 
       if !Dir[File.join(config.pid_root, "*")].empty?
-        raise Error.new "The PID directory (#{config.pid_root}) is not empty. Cannot start unless things are clean."
+        raise Error.new "The PID directory (#{config.pid_root}) is not empty. \
+Cannot start unless things are clean."
       end
 
       # Set $PROGRAM_NAME in linux

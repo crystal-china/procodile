@@ -57,7 +57,11 @@ module Procodile
       find_root_and_procfile_from_options(@global_options) if ambiguous?
     end
 
-    private def find_root_and_procfile(pwd : String, given_root : String?, given_procfile : String?) : Nil
+    private def find_root_and_procfile(
+      pwd : String,
+      given_root : String?,
+      given_procfile : String?
+    ) : Nil
       case
       when given_root && given_procfile
         # The user has provided both the root and procfile, we can use these

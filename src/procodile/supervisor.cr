@@ -122,7 +122,9 @@ module Procodile
       @run_options.foreground?
     end
 
-    def restart(options : Supervisor::Options = Supervisor::Options.new) : Array(Array(Instance | Nil))
+    def restart(
+      options : Supervisor::Options = Supervisor::Options.new
+    ) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Instance?)
@@ -191,11 +193,13 @@ module Procodile
         Procodile.log nil, "system", "Process concurrency looks good"
       else
         if result[:started].present?
-          Procodile.log nil, "system", "Concurrency check started #{result[:started].map(&.description).join(", ")}"
+          Procodile.log nil, "system", "Concurrency check \
+started #{result[:started].map(&.description).join(", ")}"
         end
 
         if result[:stopped].present?
-          Procodile.log nil, "system", "Concurrency check stopped #{result[:stopped].map(&.description).join(", ")}"
+          Procodile.log nil, "system", "Concurrency check \
+stopped #{result[:stopped].map(&.description).join(", ")}"
         end
       end
 
@@ -325,7 +329,11 @@ module Procodile
               line, buffer[reader] = buffer[reader].split("\n", 2)
 
               if (instance = @readers[reader])
-                Procodile.log instance.process.log_color, instance.description, "#{"=>".colorize(instance.process.log_color)} #{line}"
+                Procodile.log(
+                  instance.process.log_color,
+                  instance.description,
+                  "#{"=>".colorize(instance.process.log_color)} #{line}"
+                )
               else
                 Procodile.log nil, "unknown", buffer[reader]
               end

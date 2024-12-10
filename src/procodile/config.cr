@@ -16,10 +16,15 @@ module Procodile
 
     getter options : Config::Option { load_options_from_file }
     getter local_options : Config::Option { load_local_options_from_file }
-    getter process_options : Hash(String, Procodile::Process::Option) { options.processes || {} of String => Procodile::Process::Option }
-    getter local_process_options : Hash(String, Procodile::Process::Option) { local_options.processes || {} of String => Procodile::Process::Option }
-    getter app_name : String { local_options.app_name || options.app_name || "Procodile" }
-
+    getter process_options : Hash(String, Procodile::Process::Option) do
+      options.processes || {} of String => Procodile::Process::Option
+    end
+    getter local_process_options : Hash(String, Procodile::Process::Option) do
+      local_options.processes || {} of String => Procodile::Process::Option
+    end
+    getter app_name : String do
+      local_options.app_name || options.app_name || "Procodile"
+    end
     getter loaded_at : Time?
     getter root : String
     getter environment_variables : Hash(String, String) do
@@ -44,7 +49,9 @@ module Procodile
 
       FileUtils.mkdir_p(pid_root)
 
-      @processes = process_list.each_with_index.each_with_object({} of String => Procodile::Process) do |(h, index), hash|
+      @processes = process_list.each_with_index.each_with_object(
+        {} of String => Procodile::Process
+      ) do |(h, index), hash|
         name = h[0]
         command = h[1]
 
@@ -89,7 +96,8 @@ module Procodile
           if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)
-            Procodile.log nil, "system", "#{process_name} has been removed in the Procfile. It will be removed when it is stopped."
+            Procodile.log nil, "system", "#{process_name} has been removed in the \
+Procfile. It will be removed when it is stopped."
           end
         end
       end
@@ -158,7 +166,11 @@ module Procodile
       "#{procfile_path}.local"
     end
 
-    private def create_process(name : String, command : String, log_color : Colorize::ColorANSI) : Procodile::Process
+    private def create_process(
+      name : String,
+      command : String,
+      log_color : Colorize::ColorANSI
+    ) : Procodile::Process
       process = Procodile::Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color
       process
