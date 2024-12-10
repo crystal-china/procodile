@@ -98,7 +98,9 @@ module Procodile
       end
     end
 
-    private def find_root_and_procfile_from_options(options : Config::GlobalOption | Array(Config::GlobalOption)) : Nil
+    private def find_root_and_procfile_from_options(
+      options : Config::GlobalOption | Array(Config::GlobalOption)
+    ) : Nil
       case options
       when Config::GlobalOption
         # Use the current hash
