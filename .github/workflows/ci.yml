@@ -11,20 +11,27 @@ jobs:
           path: ~/.cache/shards
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
           restore-keys: ${{ runner.os }}-shards-
+
       - name: Download source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
+
       - name: Install shards
-        run: shards check || shards install
+        run: shards check || shards install --without-development
+
       - name: Check formatting
         run: crystal tool format --check
       - name: Run Ameba
         run: bin/ameba
+        
       - name: Run tests
         run: crystal spec --order=random --error-on-warnings
+        
       - name: Build docs
         run: crystal docs
+        
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:

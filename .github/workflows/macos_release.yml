@@ -2,8 +2,6 @@ on:
   push:
     tags:
       - "v*.*.*"
-    # branches:
-    #   - master
 
 jobs:
   build:
@@ -15,31 +13,40 @@ jobs:
           path: ~/.cache/shards
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
           restore-keys: ${{ runner.os }}-shards-
+
       - name: Download source
         uses: actions/checkout@v4
+
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
+
       - name: Install shards
         run: shards check || shards install --without-development
+
       - name: Check formatting
         run: crystal tool format --check
+
       - name: Run tests
-        run: crystal spec --order=random
-      - name: package information
+        run: crystal spec --order=random --error-on-warnings
+
+      - name: Collect package information
         run: |
           echo "BINARY_NAME=bin/$(cat shard.yml |grep targets -A1|tail -n1 |sed 's#[ :]##g')" >> $GITHUB_ENV
           echo "PKG_ARCH=x86_64" >> $GITHUB_ENV
           echo "PLATFORM=apple-darwin.tar.gz" >> $GITHUB_ENV
           echo "BUILD_ARGS=" >> $GITHUB_ENV
-      - name: set asset name
+
+      - name: Set asset name
         run: |
           echo "ASSERT_NAME=${{env.BINARY_NAME}}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
-      - name: release binary
+
+      - name: Build release binary
         id: release
         run: |
           echo "ASSERT_NAME=${{env.ASSERT_NAME}}" >> $GITHUB_OUTPUT
-          shards build --production --release --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast ${{env.BUILD_ARGS}}
+          shards build --production --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast ${{env.BUILD_ARGS}}
           tar zcvf ${{env.ASSERT_NAME}} ${{env.BINARY_NAME}} LICENSE
+
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
