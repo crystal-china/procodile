@@ -14,7 +14,8 @@ module Procodile
         end
 
         if desired_command.empty?
-          raise Error.new "You need to specify a command to run (e.g. procodile run -- rake db:migrate)"
+          raise Error.new "You need to specify a command to run \
+(e.g. procodile run -- rake db:migrate)"
         else
           environment = @config.environment_variables
 

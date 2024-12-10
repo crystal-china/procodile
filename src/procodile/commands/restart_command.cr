@@ -3,11 +3,19 @@ module Procodile
     module RestartCommand
       macro included
         options :restart do |opts, cli|
-          opts.on("-p", "--processes a,b,c", "Only restart the listed processes or process types") do |processes|
+          opts.on(
+            "-p",
+            "--processes a,b,c",
+            "Only restart the listed processes or process types"
+          ) do |processes|
             cli.options.processes = processes
           end
 
-          opts.on("-t", "--tag TAGNAME", "Tag all started processes with the given tag") do |tag|
+          opts.on(
+            "-t",
+            "--tag TAGNAME",
+            "Tag all started processes with the given tag"
+          ) do |tag|
             cli.options.tag = tag
           end
         end
@@ -26,7 +34,8 @@ module Procodile
             puts "There are no processes to restart."
           else
             if instance_configs.first.to_a.compact[0].foreground?
-              puts "WARNING: Using the restart command in foreground mode tends to be prone to failure, use it with caution."
+              puts "WARNING: Using the restart command in foreground mode \
+tends to be prone to failure, use it with caution."
             end
 
             instance_configs.each do |old_instance, new_instance|

@@ -3,7 +3,8 @@ module Procodile
     alias SocketResponse = Array(Instance::Config) |
                            Array(Tuple(Instance::Config?, Instance::Config?)) |
                            NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)) |
-                           ReplyOfStatusCommand | Bool
+                           ControlClient::ReplyOfStatusCommand |
+                           Bool
 
     def self.run(sock_path : String, command : String, **options) : SocketResponse
       socket = self.new(sock_path)
@@ -29,9 +30,11 @@ module Procodile
           when "restart"
             Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
           when "check_concurrency"
-            NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)).from_json(reply)
+            NamedTuple(
+              started: Array(Instance::Config),
+              stopped: Array(Instance::Config)).from_json(reply)
           when "status"
-            ReplyOfStatusCommand.from_json(reply)
+            ControlClient::ReplyOfStatusCommand.from_json(reply)
           else # e.g. reload command
             true
           end
@@ -46,56 +49,78 @@ module Procodile
     def disconnect : Nil
       @socket.try &.close
     end
+  end
 
-    # Reply of `procodile status`
-    struct ReplyOfStatusCommand
-      include JSON::Serializable
+  struct ControlClient::ProcessStatus
+    include JSON::Serializable
 
-      getter version, messages, root, app_name, supervisor, instances,
-        processes, environment_variables, procfile_path, options_path,
-        local_options_path, sock_path, supervisor_pid_path, pid_root,
-        loaded_at, log_root
+    getter name : String
+    getter log_color : Colorize::ColorANSI
+    getter quantity : Int32
+    getter max_respawns : Int32
+    getter respawn_window : Int32
+    getter command : String
+    getter restart_mode : Signal | String | Nil
+    getter log_path : String?
+    getter removed : Bool
+    getter proxy_port : Int32?
+    getter proxy_address : String?
 
-      def initialize(
-        @version : String,
-        @messages : Array(Supervisor::Message),
-        @root : String,
-        @app_name : String,
-        @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
-        @instances : Hash(String, Array(Instance::Config)),
-        @processes : Array(ProcessStatus),
-        @environment_variables : Hash(String, String),
-        @procfile_path : String,
-        @options_path : String,
-        @local_options_path : String,
-        @sock_path : String,
-        @supervisor_pid_path : String,
-        @pid_root : String,
-        @loaded_at : Int64?,
-        @log_root : String?,
-      )
-      end
+    def initialize(
+      @name : String,
+      @log_color : Colorize::ColorANSI,
+      @quantity : Int32,
+      @max_respawns : Int32,
+      @respawn_window : Int32,
+      @command : String,
+      @restart_mode : Signal | String | Nil,
+      @log_path : String?,
+      @removed : Bool,
+      @proxy_port : Int32?,
+      @proxy_address : String?,
+    )
     end
+  end
 
-    struct ProcessStatus
-      include JSON::Serializable
+  # Reply of `procodile status`
+  struct ControlClient::ReplyOfStatusCommand
+    include JSON::Serializable
 
-      getter name, log_color, quantity, max_respawns, respawn_window, command, restart_mode, log_path, removed, proxy_port, proxy_address
+    getter version : String
+    getter messages : Array(Supervisor::Message)
+    getter root : String
+    getter app_name : String
+    getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
+    getter instances : Hash(String, Array(Instance::Config))
+    getter processes : Array(ControlClient::ProcessStatus)
+    getter environment_variables : Hash(String, String)
+    getter procfile_path : String
+    getter options_path : String
+    getter local_options_path : String
+    getter sock_path : String
+    getter supervisor_pid_path : String
+    getter pid_root : String
+    getter loaded_at : Int64?
+    getter log_root : String?
 
-      def initialize(
-        @name : String,
-        @log_color : Colorize::ColorANSI,
-        @quantity : Int32,
-        @max_respawns : Int32,
-        @respawn_window : Int32,
-        @command : String,
-        @restart_mode : Signal | String | Nil,
-        @log_path : String?,
-        @removed : Bool,
-        @proxy_port : Int32?,
-        @proxy_address : String?,
-      )
-      end
+    def initialize(
+      @version : String,
+      @messages : Array(Supervisor::Message),
+      @root : String,
+      @app_name : String,
+      @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
+      @instances : Hash(String, Array(Instance::Config)),
+      @processes : Array(ControlClient::ProcessStatus),
+      @environment_variables : Hash(String, String),
+      @procfile_path : String,
+      @options_path : String,
+      @local_options_path : String,
+      @sock_path : String,
+      @supervisor_pid_path : String,
+      @pid_root : String,
+      @loaded_at : Int64?,
+      @log_root : String?,
+    )
     end
   end
 end

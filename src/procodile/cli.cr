@@ -19,11 +19,10 @@ module Procodile
       {:status, "Show the current status of processes"},
       {:console, "Open a console within the environment"},
     ]
-    property options, config
+    property config : Config
+    property options : Options = Options.new
 
-    def self.commands : Hash(String, Command)
-      @@commands ||= {} of String => Command
-    end
+    class_getter commands : Hash(String, Command) { {} of String => Command }
 
     @@options = {} of Symbol => Proc(OptionParser, CLI, Nil)
 
@@ -33,10 +32,7 @@ module Procodile
         include {{ (name.camelcase + "Command").id }}
       {% end %}
 
-        def initialize
-          @options = Options.new
-          @config = uninitialized Config
-
+        def initialize(@config : Config)
           {% for e in COMMANDS %}
             {% name = e[0] %}
             {% description = e[1] %}
@@ -81,7 +77,8 @@ module Procodile
       end
 
       if !Dir[File.join(config.pid_root, "*")].empty?
-        raise Error.new "The PID directory (#{config.pid_root}) is not empty. Cannot start unless things are clean."
+        raise Error.new "The PID directory (#{config.pid_root}) is not empty. \
+Cannot start unless things are clean."
       end
 
       # Set $PROGRAM_NAME in linux
@@ -163,13 +160,16 @@ module Procodile
     end
 
     struct Command
-      getter name, description, options, callable
+      getter name : String
+      getter description : String
+      getter options : Proc(OptionParser, CLI, Nil)
+      getter callable : Proc(Nil)
 
       def initialize(
         @name : String,
         @description : String,
         @options : Proc(OptionParser, CLI, Nil),
-        @callable : Proc(Nil),
+        @callable : Proc(Nil)
       )
       end
     end

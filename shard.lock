@@ -2,7 +2,7 @@ version: 2.0
 shards:
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
-    version: 1.6.3
+    version: 1.6.4
 
   markd:
     git: https://github.com/icyleaf/markd.git
@@ -14,5 +14,5 @@ shards:
 
   source-typer:
     git: https://github.com/vici37/cr-source-typer.git
-    version: 0.2.2+git.commit.33369e56d975a5a92de302b6727c3aceffea48c0
+    version: 0.2.5+git.commit.496c1ddefbff96e202416a85dd7c1e14e3442457
 

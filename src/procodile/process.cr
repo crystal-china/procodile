@@ -3,13 +3,15 @@ require "./instance"
 module Procodile
   class Process
     @@mutex = Mutex.new
-
-    @log_color : Colorize::ColorANSI = Colorize::ColorANSI::Default
     @instance_index : Int32 = 0
-    @removed : Bool = false
 
-    getter config, name
-    property command, options, log_color, removed
+    getter config : Config
+    getter name : String
+
+    property command : String
+    property options : Procodile::Process::Option
+    property log_color : Colorize::ColorANSI = Colorize::ColorANSI::Default
+    property removed : Bool = false
 
     delegate allocate_port_from, proxy_port, to: @options
 
@@ -17,7 +19,7 @@ module Procodile
       @config : Config,
       @name : String,
       @command : String,
-      @options : Option = Option.new,
+      @options : Procodile::Process::Option = Procodile::Process::Option.new,
     )
     end
 
@@ -135,7 +137,10 @@ module Procodile
     #
     # Generate an array of new instances for this process (based on its quantity)
     #
-    def generate_instances(supervisor : Supervisor, quantity : Int32 = self.quantity) : Array(Instance)
+    def generate_instances(
+      supervisor : Supervisor,
+      quantity : Int32 = self.quantity
+    ) : Array(Instance)
       Array.new(quantity) { create_instance(supervisor) }
     end
 
@@ -191,62 +196,62 @@ module Procodile
         @instance_index += 1
       end
     end
+  end
+end
 
-    struct Option
-      include YAML::Serializable
+struct Procodile::Process::Option
+  include YAML::Serializable
 
-      # How many instances of this process should be started
-      property quantity : Int32?
+  # How many instances of this process should be started
+  property quantity : Int32?
 
-      # Defines how this process should be restarted
-      #
-      # start-term = start new instances and send term to children
-      # Signal::USR1 = just send a usr1 signal to the current instance
-      # Signal::USR2 = just send a usr2 signal to the current instance
-      # term-start = stop the old instances, when no longer running, start a new one
-      property restart_mode : Signal | String | Nil
+  # Defines how this process should be restarted
+  #
+  # start-term = start new instances and send term to children
+  # Signal::USR1 = just send a usr1 signal to the current instance
+  # Signal::USR2 = just send a usr2 signal to the current instance
+  # term-start = stop the old instances, when no longer running, start a new one
+  property restart_mode : Signal | String | Nil
 
-      # The maximum number of times this process can be respawned in the given period
-      property max_respawns : Int32?
+  # The maximum number of times this process can be respawned in the given period
+  property max_respawns : Int32?
 
-      # The respawn window. One hour by default.
-      property respawn_window : Int32?
-      property log_path : String?
-      property log_file_name : String?
+  # The respawn window. One hour by default.
+  property respawn_window : Int32?
+  property log_path : String?
+  property log_file_name : String?
 
-      # Return the signal to send to terminate the process
-      property term_signal : Signal?
+  # Return the signal to send to terminate the process
+  property term_signal : Signal?
 
-      # Return the first port that ports should be allocated from for this process
-      property allocate_port_from : Int32?
+  # Return the first port that ports should be allocated from for this process
+  property allocate_port_from : Int32?
 
-      # Return the port for the proxy to listen on for this process type
-      property proxy_port : Int32?
+  # Return the port for the proxy to listen on for this process type
+  property proxy_port : Int32?
 
-      # property proxy_address : String?
-      property proxy_address : String?
+  # property proxy_address : String?
+  property proxy_address : String?
 
-      # Return the network protocol for this process
-      property network_protocol : String?
+  # Return the network protocol for this process
+  property network_protocol : String?
 
-      property env = {} of String => String
+  property env : Hash(String, String) = {} of String => String
 
-      def initialize
-      end
+  def initialize
+  end
 
-      def merge(other : self?) : self
-        new_process_option = self
+  def merge(other : self?) : self
+    new_process_option = self
 
-        {% for i in @type.instance_vars %}
-          {% if i.name != "env" %}
-            new_process_option.{{i.name}} = other.{{i.name}} if other.{{i.name}}
-          {% end %}
-        {% end %}
+    {% for i in @type.instance_vars %}
+      {% if i.name != "env" %}
+        new_process_option.{{i.name}} = other.{{i.name}} if other.{{i.name}}
+      {% end %}
+    {% end %}
 
-        new_process_option.env = new_process_option.env.merge(other.env) if other.env
+    new_process_option.env = new_process_option.env.merge(other.env) if other.env
 
-        new_process_option
-      end
-    end
+    new_process_option
   end
 end

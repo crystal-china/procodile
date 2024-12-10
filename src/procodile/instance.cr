@@ -6,13 +6,14 @@ module Procodile
     @stopping_at : Time?
     @started_at : Time?
     @failed_at : Time?
-    @port : Int32?
-    @tag : String?
-    @pid : Int64?
 
-    property pid, process, port
-    getter id, tag
-    getter? stopped
+    property port : Int32?
+    property process : Procodile::Process
+    property pid : Int64?
+
+    getter tag : String?
+    getter id : Int32
+    getter? stopped : Bool
 
     # Return a description for this instance
     getter description : String { "#{@process.name}.#{@id}" }
@@ -27,7 +28,8 @@ module Procodile
     #
     def start : Nil
       if stopping?
-        Procodile.log(@process.log_color, description, "Process is stopped/stopping therefore cannot be started again.")
+        Procodile.log(@process.log_color, description, "Process is stopped/stopping \
+therefore cannot be started again.")
         return false
       end
 
@@ -143,9 +145,11 @@ module Procodile
           ::Process.signal(restart_mode.as(Signal), @pid.not_nil!)
 
           @tag = @supervisor.tag if @supervisor.tag
-          Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} signal to process #{@pid}")
+          Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} \
+signal to process #{@pid}")
         else
-          Procodile.log(@process.log_color, description, "Process not running already. Starting it.")
+          Procodile.log(@process.log_color, description, "Process not running already. \
+Starting it.")
           on_stop
           new_instance = @process.create_instance(@supervisor)
           new_instance.port = self.port
@@ -199,7 +203,8 @@ module Procodile
 
       if @supervisor.allow_respawning?
         if can_respawn?
-          Procodile.log(@process.log_color, description, "Process has stopped. Respawning...")
+          Procodile.log(@process.log_color, description, "Process has stopped. \
+Respawning...")
           start
           add_respawn
         elsif respawns >= @process.max_respawns
@@ -207,13 +212,15 @@ module Procodile
             @process.log_color,
             description,
             "Warning:".colorize.light_gray.on_red.to_s +
-            " this process has been respawned #{respawns} times and keeps dying.".colorize.red.to_s
+            " this process has been respawned #{respawns} times and \
+keeps dying.".colorize.red.to_s
           )
 
           Procodile.log(
             @process.log_color,
             description,
-            "It will not be respawned automatically any longer and will no longer be managed.".colorize.red.to_s
+            "It will not be respawned automatically any longer and will no longer \
+be managed.".colorize.red.to_s
           )
 
           @failed_at = Time.local
@@ -221,7 +228,8 @@ module Procodile
           tidy
         end
       else
-        Procodile.log(@process.log_color, description, "Process has stopped. Respawning not available.")
+        Procodile.log(@process.log_color, description, "Process has stopped. \
+Respawning not available.")
 
         @failed_at = Time.local
 
@@ -232,10 +240,10 @@ module Procodile
     #
     # Return this instance as a hash
     #
-    def to_struct : Config
+    def to_struct : Instance::Config
       started_at = @started_at
 
-      Config.new(
+      Instance::Config.new(
         description: self.description,
         pid: self.pid,
         respawns: self.respawns,
@@ -250,17 +258,17 @@ module Procodile
     #
     # Return the status of this instance
     #
-    def status : Status
+    def status : Instance::Status
       if stopped?
-        Status::Stopped
+        Instance::Status::Stopped
       elsif stopping?
-        Status::Stopping
+        Instance::Status::Stopping
       elsif running?
-        Status::Running
+        Instance::Status::Running
       elsif failed?
-        Status::Failed
+        Instance::Status::Failed
       else
-        Status::Unknown
+        Instance::Status::Unknown
       end
     end
 
@@ -438,36 +446,40 @@ module Procodile
         pid.blank? ? nil : pid.strip.to_i64
       end
     end
+  end
 
-    enum Status
-      Unknown
-      Stopped
-      Stopping
-      Running
-      Failed
-    end
+  enum Instance::Status
+    Unknown
+    Stopped
+    Stopping
+    Running
+    Failed
+  end
 
-    struct Config
-      include JSON::Serializable
+  struct Instance::Config
+    include JSON::Serializable
 
-      getter description, pid, respawns, status, running, started_at,
-        tag, port
+    getter description : String
+    getter pid : Int64?
+    getter respawns : Int32
+    getter status : Instance::Status
+    getter started_at : Int64?
+    getter tag : String?
+    getter port : Int32?
+    getter? foreground : Bool
 
-      getter? foreground
+    def initialize(
+      @description : String,
+      @pid : Int64?,
+      @respawns : Int32,
+      @status : Instance::Status,
+      @started_at : Int64?,
+      @tag : String?,
+      @port : Int32?,
 
-      def initialize(
-        @description : String,
-        @pid : Int64?,
-        @respawns : Int32,
-        @status : Instance::Status,
-        @started_at : Int64?,
-        @tag : String?,
-        @port : Int32?,
-
-        # foreground is used for supervisor, but add here for simplicity communication
-        @foreground : Bool = false,
-      )
-      end
+      # foreground is used for supervisor, but add here for simplicity communication
+      @foreground : Bool = false,
+    )
     end
   end
 end

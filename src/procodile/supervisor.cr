@@ -4,21 +4,26 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
-    @tag : String?
-    @tcp_proxy : TCPProxy?
     @started_at : Time?
 
-    getter config, run_options, tag, tcp_proxy, processes, readers, started_at
+    getter tag : String?
+    getter tcp_proxy : TCPProxy?
+    getter started_at : Time?
+    getter config : Config
+    getter run_options : Supervisor::RunOptions
+    getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
+    getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
 
-    def initialize(@config : Config, @run_options : RunOptions = RunOptions.new)
-      @processes = {} of Procodile::Process => Array(Instance)
-      @readers = {} of IO::FileDescriptor => Instance
+    def initialize(
+      @config : Config,
+      @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new
+    )
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
-      @signal_handler.register(Signal::INT) { stop(Options.new(stop_supervisor: true)) }
+      @signal_handler.register(Signal::INT) { stop(Supervisor::Options.new(stop_supervisor: true)) }
       @signal_handler.register(Signal::USR1) { restart }
       @signal_handler.register(Signal::USR2) { }
       @signal_handler.register(Signal::HUP) { reload_config }
@@ -54,12 +59,15 @@ module Procodile
 
       e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
 
-      stop(Options.new(stop_supervisor: true))
+      stop(Supervisor::Options.new(stop_supervisor: true))
     ensure
       loop { supervise; sleep 3.seconds }
     end
 
-    def start_processes(process_names : Array(String)?, options : Options = Options.new) : Array(Instance)
+    def start_processes(
+      process_names : Array(String)?,
+      options : Supervisor::Options = Supervisor::Options.new
+    ) : Array(Instance)
       @tag = options.tag
       instances_started = [] of Instance
 
@@ -77,7 +85,7 @@ module Procodile
       instances_started
     end
 
-    def stop(options : Options = Options.new) : Array(Instance)
+    def stop(options : Supervisor::Options = Supervisor::Options.new) : Array(Instance)
       if options.stop_supervisor
         @run_options.stop_when_none = true
       end
@@ -114,7 +122,9 @@ module Procodile
       @run_options.foreground?
     end
 
-    def restart(options : Options = Options.new) : Array(Array(Instance | Nil))
+    def restart(
+      options : Supervisor::Options = Supervisor::Options.new
+    ) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Instance?)
@@ -170,7 +180,9 @@ module Procodile
       @config.reload
     end
 
-    def check_concurrency(options : Options = Options.new) : Hash(Symbol, Array(Instance))
+    def check_concurrency(
+      options : Supervisor::Options = Supervisor::Options.new
+    ) : Hash(Symbol, Array(Instance))
       Procodile.log nil, "system", "Checking process concurrency"
 
       reload_config unless options.reload == false
@@ -181,11 +193,13 @@ module Procodile
         Procodile.log nil, "system", "Process concurrency looks good"
       else
         if result[:started].present?
-          Procodile.log nil, "system", "Concurrency check started #{result[:started].map(&.description).join(", ")}"
+          Procodile.log nil, "system", "Concurrency check \
+started #{result[:started].map(&.description).join(", ")}"
         end
 
         if result[:stopped].present?
-          Procodile.log nil, "system", "Concurrency check stopped #{result[:stopped].map(&.description).join(", ")}"
+          Procodile.log nil, "system", "Concurrency check \
+stopped #{result[:stopped].map(&.description).join(", ")}"
         end
       end
 
@@ -315,7 +329,11 @@ module Procodile
               line, buffer[reader] = buffer[reader].split("\n", 2)
 
               if (instance = @readers[reader])
-                Procodile.log instance.process.log_color, instance.description, "#{"=>".colorize(instance.process.log_color)} #{line}"
+                Procodile.log(
+                  instance.process.log_color,
+                  instance.description,
+                  "#{"=>".colorize(instance.process.log_color)} #{line}"
+                )
               else
                 Procodile.log nil, "unknown", buffer[reader]
               end
@@ -327,7 +345,10 @@ module Procodile
       end
     end
 
-    private def check_instance_quantities(type : CheckInstanceQuantitiesType = :both, processes : Array(String)? = nil) : Hash(Symbol, Array(Instance))
+    private def check_instance_quantities(
+      type : Supervisor::CheckInstanceQuantitiesType = :both,
+      processes : Array(String)? = nil
+    ) : Hash(Symbol, Array(Instance))
       status = {:started => [] of Instance, :stopped => [] of Instance}
 
       @processes.each do |process, instances|
@@ -432,7 +453,13 @@ module Procodile
       end
 
       include JSON::Serializable
-      getter type, process, current, desired, instance, status
+
+      getter type : Type
+      getter process : String?
+      getter current : Int32?
+      getter desired : Int32?
+      getter instance : String?
+      getter status : Instance::Status?
 
       def initialize(
         @type : Type,
@@ -453,39 +480,47 @@ module Procodile
         end
       end
     end
+  end
 
-    # Supervisor options
-    struct Options
-      getter processes, stop_supervisor, tag, reload
+  enum Supervisor::CheckInstanceQuantitiesType
+    Both
+    Started
+    Stopped
+  end
 
-      def initialize(
-        @processes : Array(String)? = nil,
-        @stop_supervisor : Bool? = nil,
-        @tag : String? = nil,
-        @reload : Bool? = nil,
-      )
-      end
+  struct Supervisor::RunOptions
+    property port_allocations : Hash(String, Int32)?
+
+    property? proxy : Bool?
+    property? foreground : Bool
+    property? force_single_log : Bool?
+    property? respawn : Bool?
+    property? stop_when_none : Bool?
+
+    def initialize(
+      @respawn : Bool?,
+      @stop_when_none : Bool?,
+      @force_single_log : Bool?,
+      @port_allocations : Hash(String, Int32)?,
+      @proxy : Bool?,
+      @foreground : Bool = false,
+    )
     end
+  end
 
-    struct RunOptions
-      property port_allocations
-      property? proxy, foreground, force_single_log, respawn, stop_when_none
+  # 这种写法允许以任意方式初始化 Supervisor::Options
+  struct Supervisor::Options
+    getter processes : Array(String)?
+    getter stop_supervisor : Bool?
+    getter tag : String?
+    getter reload : Bool?
 
-      def initialize(
-        @respawn : Bool?,
-        @stop_when_none : Bool?,
-        @force_single_log : Bool?,
-        @port_allocations : Hash(String, Int32)?,
-        @proxy : Bool?,
-        @foreground : Bool = false,
-      )
-      end
-    end
-
-    enum CheckInstanceQuantitiesType
-      Both
-      Started
-      Stopped
+    def initialize(
+      @processes : Array(String)? = nil,
+      @stop_supervisor : Bool? = nil,
+      @tag : String? = nil,
+      @reload : Bool? = nil,
+    )
     end
   end
 end

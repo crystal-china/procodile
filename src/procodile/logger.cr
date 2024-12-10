@@ -1,4 +1,6 @@
 module Procodile
+  private class_getter logger_mutex : Mutex { Mutex.new }
+
   def self.log(color : Colorize::ColorANSI?, name : String, text : String) : Nil
     color = Colorize::ColorANSI::Default if color.nil?
 
@@ -11,9 +13,5 @@ module Procodile
 
       STDOUT.flush
     end
-  end
-
-  private def self.logger_mutex : Mutex
-    @@logger_mutex ||= Mutex.new
   end
 end

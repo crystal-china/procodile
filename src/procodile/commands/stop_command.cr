@@ -3,15 +3,26 @@ module Procodile
     module StopCommand
       macro included
         options :stop do |opts, cli|
-          opts.on("-p", "--processes a,b,c", "Only stop the listed processes or process types") do |processes|
+          opts.on(
+            "-p",
+            "--processes a,b,c",
+            "Only stop the listed processes or process types"
+          ) do |processes|
             cli.options.processes = processes
           end
 
-          opts.on("-s", "--stop-supervisor", "Stop the supervisor process when all processes are stopped") do
+          opts.on(
+            "-s",
+            "--stop-supervisor",
+            "Stop the supervisor process when all processes are stopped"
+          ) do
             cli.options.stop_supervisor = true
           end
 
-          opts.on("--wait", "Wait until supervisor has stopped before exiting") do
+          opts.on(
+            "--wait",
+            "Wait until supervisor has stopped before exiting"
+          ) do
             cli.options.wait_until_supervisor_stopped = true
           end
         end

@@ -3,15 +3,25 @@ module Procodile
     module LogCommand
       macro included
         options :log do |opts, cli|
-          opts.on("-f", "Wait for additional data and display it straight away") do
+          opts.on(
+            "-f",
+            "Wait for additional data and display it straight away"
+          ) do
             cli.options.follow = true
           end
 
-          opts.on("-n LINES", "The number of previous lines to return") do |lines|
+          opts.on(
+            "-n LINES",
+            "The number of previous lines to return"
+          ) do |lines|
             cli.options.lines = lines.to_i
           end
 
-          opts.on("-p PROCESS", "--process PROCESS", "Show the log for a given process (rather than procodile)") do |process|
+          opts.on(
+            "-p PROCESS",
+            "--process PROCESS",
+            "Show the log for a given process (rather than procodile)"
+          ) do |process|
             cli.options.process = process
           end
         end

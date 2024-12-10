@@ -11,17 +11,28 @@ module Procodile
       Colorize::ColorANSI::Blue,    # 34 蓝
     ]
 
-    @process_list : Hash(String, String)?
-    @processes : Hash(String, Procodile::Process)?
-    @options : Option?
-    @local_options : Option?
-    @process_options : Hash(String, Procodile::Process::Option)?
-    @local_process_options : Hash(String, Procodile::Process::Option)?
-    @loaded_at : Time?
-    @environment_variables : Hash(String, String)?
-    @app_name : String?
+    getter process_list : Hash(String, String) { load_process_list_from_file }
+    getter processes : Hash(String, Procodile::Process) { {} of String => Procodile::Process }
 
-    getter root, loaded_at
+    getter options : Config::Option { load_options_from_file }
+    getter local_options : Config::Option { load_local_options_from_file }
+    getter process_options : Hash(String, Procodile::Process::Option) do
+      options.processes || {} of String => Procodile::Process::Option
+    end
+    getter local_process_options : Hash(String, Procodile::Process::Option) do
+      local_options.processes || {} of String => Procodile::Process::Option
+    end
+    getter app_name : String do
+      local_options.app_name || options.app_name || "Procodile"
+    end
+    getter loaded_at : Time?
+    getter root : String
+    getter environment_variables : Hash(String, String) do
+      option_env = options.env || {} of String => String
+      local_option_env = local_options.env || {} of String => String
+
+      option_env.merge(local_option_env)
+    end
 
     def initialize(@root : String, @procfile : String? = nil)
       unless File.file?(procfile_path)
@@ -38,7 +49,9 @@ module Procodile
 
       FileUtils.mkdir_p(pid_root)
 
-      @processes = process_list.each_with_index.each_with_object({} of String => Procodile::Process) do |(h, index), hash|
+      @processes = process_list.each_with_index.each_with_object(
+        {} of String => Procodile::Process
+      ) do |(h, index), hash|
         name = h[0]
         command = h[1]
 
@@ -83,7 +96,8 @@ module Procodile
           if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)
-            Procodile.log nil, "system", "#{process_name} has been removed in the Procfile. It will be removed when it is stopped."
+            Procodile.log nil, "system", "#{process_name} has been removed in the \
+Procfile. It will be removed when it is stopped."
           end
         end
       end
@@ -95,10 +109,6 @@ module Procodile
       local_options.user || options.user
     end
 
-    def app_name : String
-      @app_name ||= local_options.app_name || options.app_name || "Procodile"
-    end
-
     def console_command : String?
       local_options.console_command || options.console_command
     end
@@ -107,42 +117,11 @@ module Procodile
       local_options.exec_prefix || options.exec_prefix
     end
 
-    def processes : Hash(String, Procodile::Process)
-      @processes ||= {} of String => Procodile::Process
-    end
-
-    def process_list : Hash(String, String)
-      @process_list ||= load_process_list_from_file
-    end
-
-    def options : Option
-      @options ||= load_options_from_file
-    end
-
-    def local_options : Option
-      @local_options ||= load_local_options_from_file
-    end
-
-    def process_options : Hash(String, Procodile::Process::Option)
-      @process_options ||= options.processes || {} of String => Procodile::Process::Option
-    end
-
-    def local_process_options : Hash(String, Procodile::Process::Option)
-      @local_process_options ||= local_options.processes || {} of String => Procodile::Process::Option
-    end
-
     def options_for_process(name : String) : Procodile::Process::Option
       po = process_options[name]? || Procodile::Process::Option.new
       local_po = local_process_options[name]? || Procodile::Process::Option.new
 
       po.merge(local_po)
-    end
-
-    def environment_variables : Hash(String, String)
-      option_env = options.env || {} of String => String
-      local_option_env = local_options.env || {} of String => String
-
-      option_env.merge(local_option_env)
     end
 
     def pid_root : String?
@@ -187,7 +166,11 @@ module Procodile
       "#{procfile_path}.local"
     end
 
-    private def create_process(name : String, command : String, log_color : Colorize::ColorANSI) : Procodile::Process
+    private def create_process(
+      name : String,
+      command : String,
+      log_color : Colorize::ColorANSI
+    ) : Procodile::Process
       process = Procodile::Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color
       process
@@ -197,48 +180,48 @@ module Procodile
       Hash(String, String).from_yaml(File.read(procfile_path))
     end
 
-    private def load_options_from_file : Option
+    private def load_options_from_file : Config::Option
       if File.exists?(options_path)
-        Option.from_yaml(File.read(options_path))
+        Config::Option.from_yaml(File.read(options_path))
       else
-        Option.new
+        Config::Option.new
       end
     end
 
-    private def load_local_options_from_file : Option
+    private def load_local_options_from_file : Config::Option
       if File.exists?(local_options_path)
-        Option.from_yaml(File.read(local_options_path))
+        Config::Option.from_yaml(File.read(local_options_path))
       else
-        Option.new
+        Config::Option.new
       end
     end
+  end
 
-    struct Option
-      include YAML::Serializable
+  struct Config::Option
+    include YAML::Serializable
 
-      property app_name : String?
-      property root : String?
-      property procfile : String?
-      property pid_root : String?
-      property log_path : String?
-      property log_root : String?
-      property user : String?
-      property console_command : String?
-      property exec_prefix : String?
-      property env : Hash(String, String)?
-      property processes : Hash(String, Procodile::Process::Option)?
-      property app_id : Procodile::Process::Option?
+    property app_name : String?
+    property root : String?
+    property procfile : String?
+    property pid_root : String?
+    property log_path : String?
+    property log_root : String?
+    property user : String?
+    property console_command : String?
+    property exec_prefix : String?
+    property env : Hash(String, String)?
+    property processes : Hash(String, Procodile::Process::Option)?
+    property app_id : Procodile::Process::Option?
 
-      def initialize
-      end
+    def initialize
     end
+  end
 
-    struct GlobalOption
-      include YAML::Serializable
+  struct Config::GlobalOption
+    include YAML::Serializable
 
-      property name : String?
-      property root : String
-      property procfile : String?
-    end
+    property name : String
+    property root : String
+    property procfile : String?
   end
 end

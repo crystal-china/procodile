@@ -3,7 +3,10 @@ module Procodile
     module CheckConcurrencyCommand
       macro included
         options :check_concurrency do |opts, cli|
-          opts.on("--no-reload", "Do not reload the configuration before checking") do |processes|
+          opts.on(
+            "--no-reload",
+            "Do not reload the configuration before checking"
+          ) do |processes|
             cli.options.reload = false
           end
         end
