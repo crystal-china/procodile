@@ -1,6 +1,6 @@
 -include Makefile.local # for optional local options
 
-NAME = helloworld
+NAME = procodile
 
 COMPILER ?= crystal
 SHARDS ?= shards
@@ -9,9 +9,9 @@ SOURCES != find src -name '*.cr'
 LIB_SOURCES != find lib -name '*.cr' 2>/dev/null
 SPEC_SOURCES != find spec -name '*.cr' 2>/dev/null
 
-CRYSTAL_ENTRY != cat shard.yml |grep main: |cut -d: -f2|cut -d" " -f2
-OUTPUT_FILE != basename $(CRYSTAL_ENTRY) ".cr"
-CRYSTAL_ENTRY_PATH := $(shell pwd)/$(shell cat shard.yml |grep main: |cut -d: -f2|cut -d" " -f2)
+CRYSTAL_ENTRY_FILE != cat shard.yml |grep main: |cut -d: -f2|cut -d" " -f2
+OUTPUT_FILE != cat shard.yml |grep main: -B1 |head -n1 |awk '{print $$1}'|awk -F: '{print $$1}'
+CRYSTAL_ENTRY_PATH := $(shell pwd)/$(CRYSTAL_ENTRY_FILE)
 
 CACHE_DIR != $(COMPILER) env CRYSTAL_CACHE_DIR
 CACHE_DIR := $(CACHE_DIR)/$(subst /,-,${shell echo $(CRYSTAL_ENTRY_PATH) |cut -c2-})
@@ -33,7 +33,7 @@ all: build ## build [default]
 build: $(O) ## Build the application binary
 
 $(O): $(SOURCES) $(LIB_SOURCES) lib bin
-	$(COMPILER) build $(FLAGS) $(CRYSTAL_ENTRY) -o $(O)
+	$(COMPILER) build $(FLAGS) $(CRYSTAL_ENTRY_FILE) -o $(O)
 
 # 注意, 这些不带 .PHONY 通常都是真实文件名或目录名
 lib: ## Run shards install to install dependencies
@@ -74,7 +74,7 @@ test: ## Run test script
 
 .PHONY: release
 release: $(SOURCES) $(LIB_SOURCES) lib bin ## Build release binary
-	$(COMPILER) build $(RELEASE_FLAGS) $(CRYSTAL_ENTRY) -o $(O)
+	$(COMPILER) build $(RELEASE_FLAGS) $(CRYSTAL_ENTRY_FILE) -o $(O)
 
 bin:
 	@mkdir -p bin
