@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="generator" content="Crystal Docs 1.6.2">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.13.3">
 <meta name="crystal_docs.project_version" content="master">
 <meta name="crystal_docs.project_name" content="procodile">
 
@@ -22,9 +23,14 @@
 
 <svg class="hidden">
   <symbol id="octicon-link" viewBox="0 0 16 16">
-    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
   </symbol>
 </svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="search-box">
@@ -51,8 +57,8 @@
   <div class="types-list">
     <ul>
   
-  <li class=" " data-id="procodile/toplevel" data-name="top level namespace">
-      <a href="../../toplevel.html">Top Level Namespace</a>
+  <li class=" " data-id="procodile/Process" data-name="process">
+      <a href="../../Process.html">Process</a>
       
     </li>
   
@@ -73,6 +79,11 @@
   
   <li class=" " data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
       <a href="../../Procodile/CLI/CheckConcurrencyCommand.html">CheckConcurrencyCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/Command" data-name="procodile::cli::command">
+      <a href="../../Procodile/CLI/Command.html">Command</a>
       
     </li>
   
@@ -98,6 +109,11 @@
   
   <li class=" " data-id="procodile/Procodile/CLI/LogCommand" data-name="procodile::cli::logcommand">
       <a href="../../Procodile/CLI/LogCommand.html">LogCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/Options" data-name="procodile::cli::options">
+      <a href="../../Procodile/CLI/Options.html">Options</a>
       
     </li>
   
@@ -136,33 +152,48 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/CliCommand" data-name="procodile::clicommand">
-      <a href="../../Procodile/CliCommand.html">CliCommand</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/CliOptions" data-name="procodile::clioptions">
-      <a href="../../Procodile/CliOptions.html">CliOptions</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/Config" data-name="procodile::config">
+  <li class="parent " data-id="procodile/Procodile/Config" data-name="procodile::config">
       <a href="../../Procodile/Config.html">Config</a>
       
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/Config/GlobalOption" data-name="procodile::config::globaloption">
+      <a href="../../Procodile/Config/GlobalOption.html">GlobalOption</a>
+      
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlClient" data-name="procodile::controlclient">
+  <li class=" " data-id="procodile/Procodile/Config/Option" data-name="procodile::config::option">
+      <a href="../../Procodile/Config/Option.html">Option</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="procodile/Procodile/ControlClient" data-name="procodile::controlclient">
       <a href="../../Procodile/ControlClient.html">ControlClient</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/ControlClientProcessStatus" data-name="procodile::controlclientprocessstatus">
-      <a href="../../Procodile/ControlClientProcessStatus.html">ControlClientProcessStatus</a>
+  <li class=" " data-id="procodile/Procodile/ControlClient/ProcessStatus" data-name="procodile::controlclient::processstatus">
+      <a href="../../Procodile/ControlClient/ProcessStatus.html">ProcessStatus</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlClientReplyForStatusCommand" data-name="procodile::controlclientreplyforstatuscommand">
-      <a href="../../Procodile/ControlClientReplyForStatusCommand.html">ControlClientReplyForStatusCommand</a>
+  <li class=" " data-id="procodile/Procodile/ControlClient/ReplyOfStatusCommand" data-name="procodile::controlclient::replyofstatuscommand">
+      <a href="../../Procodile/ControlClient/ReplyOfStatusCommand.html">ReplyOfStatusCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClient/SocketResponse" data-name="procodile::controlclient::socketresponse">
+      <a href="../../Procodile/ControlClient/SocketResponse.html">SocketResponse</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -171,13 +202,18 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
+  <li class="parent " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
       <a href="../../Procodile/ControlSession.html">ControlSession</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/ControlSession/Options" data-name="procodile::controlsession::options">
+      <a href="../../Procodile/ControlSession/Options.html">Options</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlSessionData" data-name="procodile::controlsessiondata">
-      <a href="../../Procodile/ControlSessionData.html">ControlSessionData</a>
+</ul>
+
       
     </li>
   
@@ -186,38 +222,38 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
+  <li class="parent " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
       <a href="../../Procodile/Instance.html">Instance</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/InstanceConfig" data-name="procodile::instanceconfig">
-      <a href="../../Procodile/InstanceConfig.html">InstanceConfig</a>
+  <li class=" " data-id="procodile/Procodile/Instance/Config" data-name="procodile::instance::config">
+      <a href="../../Procodile/Instance/Config.html">Config</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/Message" data-name="procodile::message">
-      <a href="../../Procodile/Message.html">Message</a>
+  <li class=" " data-id="procodile/Procodile/Instance/Status" data-name="procodile::instance::status">
+      <a href="../../Procodile/Instance/Status.html">Status</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/Process" data-name="procodile::process">
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="procodile/Procodile/Process" data-name="procodile::process">
       <a href="../../Procodile/Process.html">Process</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/ProcessOption" data-name="procodile::processoption">
-      <a href="../../Procodile/ProcessOption.html">ProcessOption</a>
+  <li class=" " data-id="procodile/Procodile/Process/Option" data-name="procodile::process::option">
+      <a href="../../Procodile/Process/Option.html">Option</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ProcfileOption" data-name="procodile::procfileoption">
-      <a href="../../Procodile/ProcfileOption.html">ProcfileOption</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/RunOptions" data-name="procodile::runoptions">
-      <a href="../../Procodile/RunOptions.html">RunOptions</a>
+</ul>
+
       
     </li>
   
@@ -226,23 +262,43 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/StatusCLIOutput" data-name="procodile::statusclioutput">
-      <a href="../../Procodile/StatusCLIOutput.html">StatusCLIOutput</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/Supervisor" data-name="procodile::supervisor">
+  <li class="parent " data-id="procodile/Procodile/Supervisor" data-name="procodile::supervisor">
       <a href="../../Procodile/Supervisor.html">Supervisor</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/SupervisorMessages" data-name="procodile::supervisormessages">
-      <a href="../../Procodile/SupervisorMessages.html">SupervisorMessages</a>
+  <li class=" " data-id="procodile/Procodile/Supervisor/CheckInstanceQuantitiesType" data-name="procodile::supervisor::checkinstancequantitiestype">
+      <a href="../../Procodile/Supervisor/CheckInstanceQuantitiesType.html">CheckInstanceQuantitiesType</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/SupervisorOptions" data-name="procodile::supervisoroptions">
-      <a href="../../Procodile/SupervisorOptions.html">SupervisorOptions</a>
+  <li class="parent " data-id="procodile/Procodile/Supervisor/Message" data-name="procodile::supervisor::message">
+      <a href="../../Procodile/Supervisor/Message.html">Message</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor/Message/Type" data-name="procodile::supervisor::message::type">
+      <a href="../../Procodile/Supervisor/Message/Type.html">Type</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor/Options" data-name="procodile::supervisor::options">
+      <a href="../../Procodile/Supervisor/Options.html">Options</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor/RunOptions" data-name="procodile::supervisor::runoptions">
+      <a href="../../Procodile/Supervisor/RunOptions.html">RunOptions</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -256,11 +312,6 @@
       
     </li>
   
-  <li class=" " data-id="procodile/String" data-name="string">
-      <a href="../../String.html">String</a>
-      
-    </li>
-  
 </ul>
 
   </div>
@@ -270,7 +321,7 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> Procodile::CLI::StopCommand
+  <span class="kind">module</span> Procodile::<wbr>CLI::<wbr>StopCommand
 
 </h1>
 
@@ -315,7 +366,7 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/stop_command.cr#L3" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/stop_command.cr#L3" target="_blank">
         procodile/commands/stop_command.cr
       </a>
     
@@ -330,23 +381,6 @@
 
 
 
-  <h2>
-    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Instance Method Summary
-  </h2>
-  <ul class="list-summary">
-    
-      <li class="entry-summary">
-        <a href="#stop-instance-method" class="signature"><strong>#stop</strong></a>
-        
-      </li>
-    
-  </ul>
-
 
 
 
@@ -359,32 +393,6 @@
 
 
 
-
-  <h2>
-    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Instance Method Detail
-  </h2>
-  
-    <div class="entry-detail" id="stop-instance-method">
-      <div class="signature">
-        
-        def <strong>stop</strong>
-
-        <a class="method-permalink" href="#stop-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/stop_command.cr#L20" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
 
 
 

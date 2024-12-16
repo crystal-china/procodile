@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="generator" content="Crystal Docs 1.6.2">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.13.3">
 <meta name="crystal_docs.project_version" content="master">
 <meta name="crystal_docs.project_name" content="procodile">
 
@@ -22,9 +23,14 @@
 
 <svg class="hidden">
   <symbol id="octicon-link" viewBox="0 0 16 16">
-    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
   </symbol>
 </svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="search-box">
@@ -51,8 +57,8 @@
   <div class="types-list">
     <ul>
   
-  <li class=" " data-id="procodile/toplevel" data-name="top level namespace">
-      <a href="../toplevel.html">Top Level Namespace</a>
+  <li class=" " data-id="procodile/Process" data-name="process">
+      <a href="../Process.html">Process</a>
       
     </li>
   
@@ -73,6 +79,11 @@
   
   <li class=" " data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
       <a href="../Procodile/CLI/CheckConcurrencyCommand.html">CheckConcurrencyCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/Command" data-name="procodile::cli::command">
+      <a href="../Procodile/CLI/Command.html">Command</a>
       
     </li>
   
@@ -98,6 +109,11 @@
   
   <li class=" " data-id="procodile/Procodile/CLI/LogCommand" data-name="procodile::cli::logcommand">
       <a href="../Procodile/CLI/LogCommand.html">LogCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/CLI/Options" data-name="procodile::cli::options">
+      <a href="../Procodile/CLI/Options.html">Options</a>
       
     </li>
   
@@ -136,33 +152,48 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/CliCommand" data-name="procodile::clicommand">
-      <a href="../Procodile/CliCommand.html">CliCommand</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/CliOptions" data-name="procodile::clioptions">
-      <a href="../Procodile/CliOptions.html">CliOptions</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/Config" data-name="procodile::config">
+  <li class="parent " data-id="procodile/Procodile/Config" data-name="procodile::config">
       <a href="../Procodile/Config.html">Config</a>
       
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/Config/GlobalOption" data-name="procodile::config::globaloption">
+      <a href="../Procodile/Config/GlobalOption.html">GlobalOption</a>
+      
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlClient" data-name="procodile::controlclient">
+  <li class=" " data-id="procodile/Procodile/Config/Option" data-name="procodile::config::option">
+      <a href="../Procodile/Config/Option.html">Option</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="procodile/Procodile/ControlClient" data-name="procodile::controlclient">
       <a href="../Procodile/ControlClient.html">ControlClient</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/ControlClientProcessStatus" data-name="procodile::controlclientprocessstatus">
-      <a href="../Procodile/ControlClientProcessStatus.html">ControlClientProcessStatus</a>
+  <li class=" " data-id="procodile/Procodile/ControlClient/ProcessStatus" data-name="procodile::controlclient::processstatus">
+      <a href="../Procodile/ControlClient/ProcessStatus.html">ProcessStatus</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlClientReplyForStatusCommand" data-name="procodile::controlclientreplyforstatuscommand">
-      <a href="../Procodile/ControlClientReplyForStatusCommand.html">ControlClientReplyForStatusCommand</a>
+  <li class=" " data-id="procodile/Procodile/ControlClient/ReplyOfStatusCommand" data-name="procodile::controlclient::replyofstatuscommand">
+      <a href="../Procodile/ControlClient/ReplyOfStatusCommand.html">ReplyOfStatusCommand</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/ControlClient/SocketResponse" data-name="procodile::controlclient::socketresponse">
+      <a href="../Procodile/ControlClient/SocketResponse.html">SocketResponse</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -171,13 +202,18 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
+  <li class="parent " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
       <a href="../Procodile/ControlSession.html">ControlSession</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/ControlSession/Options" data-name="procodile::controlsession::options">
+      <a href="../Procodile/ControlSession/Options.html">Options</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ControlSessionData" data-name="procodile::controlsessiondata">
-      <a href="../Procodile/ControlSessionData.html">ControlSessionData</a>
+</ul>
+
       
     </li>
   
@@ -186,38 +222,38 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
+  <li class="parent " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
       <a href="../Procodile/Instance.html">Instance</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/InstanceConfig" data-name="procodile::instanceconfig">
-      <a href="../Procodile/InstanceConfig.html">InstanceConfig</a>
+  <li class=" " data-id="procodile/Procodile/Instance/Config" data-name="procodile::instance::config">
+      <a href="../Procodile/Instance/Config.html">Config</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/Message" data-name="procodile::message">
-      <a href="../Procodile/Message.html">Message</a>
+  <li class=" " data-id="procodile/Procodile/Instance/Status" data-name="procodile::instance::status">
+      <a href="../Procodile/Instance/Status.html">Status</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/Process" data-name="procodile::process">
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="procodile/Procodile/Process" data-name="procodile::process">
       <a href="../Procodile/Process.html">Process</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/ProcessOption" data-name="procodile::processoption">
-      <a href="../Procodile/ProcessOption.html">ProcessOption</a>
+  <li class=" " data-id="procodile/Procodile/Process/Option" data-name="procodile::process::option">
+      <a href="../Procodile/Process/Option.html">Option</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ProcfileOption" data-name="procodile::procfileoption">
-      <a href="../Procodile/ProcfileOption.html">ProcfileOption</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/RunOptions" data-name="procodile::runoptions">
-      <a href="../Procodile/RunOptions.html">RunOptions</a>
+</ul>
+
       
     </li>
   
@@ -226,23 +262,43 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/StatusCLIOutput" data-name="procodile::statusclioutput">
-      <a href="../Procodile/StatusCLIOutput.html">StatusCLIOutput</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/Supervisor" data-name="procodile::supervisor">
+  <li class="parent " data-id="procodile/Procodile/Supervisor" data-name="procodile::supervisor">
       <a href="../Procodile/Supervisor.html">Supervisor</a>
       
-    </li>
+        <ul>
   
-  <li class=" " data-id="procodile/Procodile/SupervisorMessages" data-name="procodile::supervisormessages">
-      <a href="../Procodile/SupervisorMessages.html">SupervisorMessages</a>
+  <li class=" " data-id="procodile/Procodile/Supervisor/CheckInstanceQuantitiesType" data-name="procodile::supervisor::checkinstancequantitiestype">
+      <a href="../Procodile/Supervisor/CheckInstanceQuantitiesType.html">CheckInstanceQuantitiesType</a>
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/SupervisorOptions" data-name="procodile::supervisoroptions">
-      <a href="../Procodile/SupervisorOptions.html">SupervisorOptions</a>
+  <li class="parent " data-id="procodile/Procodile/Supervisor/Message" data-name="procodile::supervisor::message">
+      <a href="../Procodile/Supervisor/Message.html">Message</a>
+      
+        <ul>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor/Message/Type" data-name="procodile::supervisor::message::type">
+      <a href="../Procodile/Supervisor/Message/Type.html">Type</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor/Options" data-name="procodile::supervisor::options">
+      <a href="../Procodile/Supervisor/Options.html">Options</a>
+      
+    </li>
+  
+  <li class=" " data-id="procodile/Procodile/Supervisor/RunOptions" data-name="procodile::supervisor::runoptions">
+      <a href="../Procodile/Supervisor/RunOptions.html">RunOptions</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -256,11 +312,6 @@
       
     </li>
   
-  <li class=" " data-id="procodile/String" data-name="string">
-      <a href="../String.html">String</a>
-      
-    </li>
-  
 </ul>
 
   </div>
@@ -270,7 +321,7 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">class</span> Procodile::CLI
+  <span class="kind">class</span> Procodile::<wbr>CLI
 
 </h1>
 
@@ -339,91 +390,91 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L7" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L7" target="_blank">
         procodile/cli.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/check_concurrency_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/check_concurrency_command.cr#L2" target="_blank">
         procodile/commands/check_concurrency_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/console_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/console_command.cr#L2" target="_blank">
         procodile/commands/console_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/exec_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/exec_command.cr#L2" target="_blank">
         procodile/commands/exec_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/help_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/help_command.cr#L2" target="_blank">
         procodile/commands/help_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/kill_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/kill_command.cr#L2" target="_blank">
         procodile/commands/kill_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/log_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/log_command.cr#L2" target="_blank">
         procodile/commands/log_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/reload_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/reload_command.cr#L2" target="_blank">
         procodile/commands/reload_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/restart_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/restart_command.cr#L2" target="_blank">
         procodile/commands/restart_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/run_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/run_command.cr#L2" target="_blank">
         procodile/commands/run_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/start_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/start_command.cr#L2" target="_blank">
         procodile/commands/start_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/status_command.cr#L5" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/status_command.cr#L2" target="_blank">
         procodile/commands/status_command.cr
       </a>
     
     <br/>
   
     
-      <a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/commands/stop_command.cr#L2" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/stop_command.cr#L2" target="_blank">
         procodile/commands/stop_command.cr
       </a>
     
@@ -483,28 +534,18 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#commands%3AHash%28String%2CCliCommand%29-class-method" class="signature"><strong>.commands</strong> : Hash(String, CliCommand)</a>
+        <a href="#commands%3AHash%28String%2CCommand%29-class-method" class="signature"><strong>.commands</strong> : Hash(String, Command)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#options%28name%2C%26block%3AProc%28OptionParser%2CProcodile%3A%3ACLI%2CNil%29%29-class-method" class="signature"><strong>.options</strong>(name, &block : Proc(OptionParser, Procodile::CLI, Nil))</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#start_supervisor%28config%3AProcodile%3A%3AConfig%2Coptions%3DProcodile%3A%3ACliOptions.new%2C%26block%3AProc%28Procodile%3A%3ASupervisor%2CNil%29%29-class-method" class="signature"><strong>.start_supervisor</strong>(config : Procodile::Config, options = <span class="t">Procodile</span><span class="t">::</span><span class="t">CliOptions</span>.new, &block : Proc(Procodile::Supervisor, Nil))</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#tidy_pids%28config%3AProcodile%3A%3AConfig%29-class-method" class="signature"><strong>.tidy_pids</strong>(config : Procodile::Config)</a>
-        
-          <div class="summary"><p>Clean up procodile.pid and procodile.sock with all unused pid files</p></div>
+        <a href="#start_supervisor%28config%3AConfig%2Coptions%3AOptions%3DOptions.new%2C%26after_start%3AProc%28Supervisor%2CNil%29%29%3ANil-class-method" class="signature"><strong>.start_supervisor</strong>(config : Config, options : Options = <span class="t">Options</span>.new, &after_start : Proc(Supervisor, Nil)) : Nil</a>
         
       </li>
     
   </ul>
+
+
 
 
 
@@ -529,17 +570,17 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#dispatch%28command%29-instance-method" class="signature"><strong>#dispatch</strong>(command)</a>
+        <a href="#dispatch%28command%3AString%29%3ANil-instance-method" class="signature"><strong>#dispatch</strong>(command : String) : Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#options%3AProcodile%3A%3ACliOptions-instance-method" class="signature"><strong>#options</strong> : Procodile::CliOptions</a>
+        <a href="#options%3AProcodile%3A%3ACLI%3A%3AOptions-instance-method" class="signature"><strong>#options</strong> : Procodile::CLI::Options</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#options%3D%28options%3AProcodile%3A%3ACliOptions%29-instance-method" class="signature"><strong>#options=</strong>(options : Procodile::CliOptions)</a>
+        <a href="#options%3D%28options%3AProcodile%3A%3ACLI%3A%3AOptions%29-instance-method" class="signature"><strong>#options=</strong>(options : Procodile::CLI::Options)</a>
         
       </li>
     
@@ -547,20 +588,12 @@
 
 
 
-
-
 <div class="methods-inherited">
   
     
 
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/ConsoleCommand.html">Procodile::CLI::ConsoleCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/ConsoleCommand.html#console-instance-method" class="tooltip">
-      <span>console</span>
-    console</a>
+
     
-  
 
 
     
@@ -572,36 +605,20 @@
   
     
 
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/StatusCommand.html">Procodile::CLI::StatusCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/StatusCommand.html#status-instance-method" class="tooltip">
-      <span>status</span>
-    status</a>
-    
-  
-
 
     
 
 
     
 
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/RestartCommand.html">Procodile::CLI::RestartCommand</a></code></h3>
+  <h3>Class methods inherited from module <code><a href="../Procodile/CLI/StatusCommand.html">Procodile::CLI::StatusCommand</a></code></h3>
   
   
-    <a href="../Procodile/CLI/RestartCommand.html#restart-instance-method" class="tooltip">
-      <span>restart</span>
-    restart</a>
+    <a href="../Procodile/CLI/StatusCommand.html#parse%28message%3ASupervisor%3A%3AMessage%29%3AString-class-method" class="tooltip">
+      <span>parse(message : Supervisor::Message) : String</span>
+    parse</a>
     
   
-
-
-    
 
 
     
@@ -610,166 +627,8 @@
   
     
 
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/LogCommand.html">Procodile::CLI::LogCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/LogCommand.html#log-instance-method" class="tooltip">
-      <span>log</span>
-    log</a>
-    
-  
-
 
     
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/CheckConcurrencyCommand.html">Procodile::CLI::CheckConcurrencyCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/CheckConcurrencyCommand.html#check_concurrency-instance-method" class="tooltip">
-      <span>check_concurrency</span>
-    check_concurrency</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/ReloadCommand.html">Procodile::CLI::ReloadCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/ReloadCommand.html#reload-instance-method" class="tooltip">
-      <span>reload</span>
-    reload</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/RunCommand.html">Procodile::CLI::RunCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/RunCommand.html#run%28command%3Dnil%29-instance-method" class="tooltip">
-      <span>run(command = <span class="n">nil</span>)</span>
-    run</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/ExecCommand.html">Procodile::CLI::ExecCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/ExecCommand.html#exec%28command%3Dnil%29-instance-method" class="tooltip">
-      <span>exec(command = <span class="n">nil</span>)</span>
-    exec</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/StopCommand.html">Procodile::CLI::StopCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/StopCommand.html#stop-instance-method" class="tooltip">
-      <span>stop</span>
-    stop</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/StartCommand.html">Procodile::CLI::StartCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/StartCommand.html#start-instance-method" class="tooltip">
-      <span>start</span>
-    start</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/KillCommand.html">Procodile::CLI::KillCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/KillCommand.html#kill-instance-method" class="tooltip">
-      <span>kill</span>
-    kill</a>
-    
-  
-
-
-    
-
-
-    
-
-
-  
-    
-
-  <h3>Instance methods inherited from module <code><a href="../Procodile/CLI/HelpCommand.html">Procodile::CLI::HelpCommand</a></code></h3>
-  
-  
-    <a href="../Procodile/CLI/HelpCommand.html#help-instance-method" class="tooltip">
-      <span>help</span>
-    help</a>
-    
-  
 
 
     
@@ -788,7 +647,130 @@
     
 
 
+    
+
+
   
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
     
 
 
@@ -822,7 +804,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L34" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L30" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -839,75 +821,40 @@
     Class Method Detail
   </h2>
   
-    <div class="entry-detail" id="commands:Hash(String,CliCommand)-class-method">
+    <div class="entry-detail" id="commands:Hash(String,Command)-class-method">
       <div class="signature">
         
-        def self.<strong>commands</strong> : Hash(<a href="../String.html">String</a>, <a href="../Procodile/CliCommand.html">CliCommand</a>)
+        def self.<strong>commands</strong> : Hash(String, <a href="../Procodile/CLI/Command.html">Command</a>)
 
-        <a class="method-permalink" href="#commands%3AHash%28String%2CCliCommand%29-class-method">#</a>
+        <a class="method-permalink" href="#commands%3AHash%28String%2CCommand%29-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L24" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L24" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="options(name,&amp;block:Proc(OptionParser,Procodile::CLI,Nil))-class-method">
+    <div class="entry-detail" id="start_supervisor(config:Config,options:Options=Options.new,&amp;after_start:Proc(Supervisor,Nil)):Nil-class-method">
       <div class="signature">
         
-        def self.<strong>options</strong>(name, &block : Proc(OptionParser, <a href="../Procodile/CLI.html">Procodile::CLI</a>, Nil))
+        def self.<strong>start_supervisor</strong>(config : <a href="../Procodile/Config.html">Config</a>, options : <a href="../Procodile/CLI/Options.html">Options</a> = <span class="t">Options</span>.new, &after_start : Proc(<a href="../Procodile/Supervisor.html">Supervisor</a>, Nil)) : Nil
 
-        <a class="method-permalink" href="#options%28name%2C%26block%3AProc%28OptionParser%2CProcodile%3A%3ACLI%2CNil%29%29-class-method">#</a>
+        <a class="method-permalink" href="#start_supervisor%28config%3AConfig%2Coptions%3AOptions%3DOptions.new%2C%26after_start%3AProc%28Supervisor%2CNil%29%29%3ANil-class-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L30" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L62" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="start_supervisor(config:Procodile::Config,options=Procodile::CliOptions.new,&amp;block:Proc(Procodile::Supervisor,Nil))-class-method">
-      <div class="signature">
-        
-        def self.<strong>start_supervisor</strong>(config : <a href="../Procodile/Config.html">Procodile::Config</a>, options = <span class="t">Procodile</span><span class="t">::</span><span class="t">CliOptions</span>.new, &block : Proc(<a href="../Procodile/Supervisor.html">Procodile::Supervisor</a>, Nil))
 
-        <a class="method-permalink" href="#start_supervisor%28config%3AProcodile%3A%3AConfig%2Coptions%3DProcodile%3A%3ACliOptions.new%2C%26block%3AProc%28Procodile%3A%3ASupervisor%2CNil%29%29-class-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L66" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="tidy_pids(config:Procodile::Config)-class-method">
-      <div class="signature">
-        
-        def self.<strong>tidy_pids</strong>(config : <a href="../Procodile/Config.html">Procodile::Config</a>)
 
-        <a class="method-permalink" href="#tidy_pids%28config%3AProcodile%3A%3AConfig%29-class-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Clean up procodile.pid and procodile.sock with all unused pid files</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L116" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
 
 
 
@@ -931,7 +878,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L22" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L22" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -947,61 +894,59 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L22" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L22" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="dispatch(command)-instance-method">
+    <div class="entry-detail" id="dispatch(command:String):Nil-instance-method">
       <div class="signature">
         
-        def <strong>dispatch</strong>(command)
+        def <strong>dispatch</strong>(command : String) : Nil
 
-        <a class="method-permalink" href="#dispatch%28command%29-instance-method">#</a>
+        <a class="method-permalink" href="#dispatch%28command%3AString%29%3ANil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L58" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L54" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="options:Procodile::CliOptions-instance-method">
+    <div class="entry-detail" id="options:Procodile::CLI::Options-instance-method">
       <div class="signature">
         
-        def <strong>options</strong> : <a href="../Procodile/CliOptions.html">Procodile::CliOptions</a>
+        def <strong>options</strong> : <a href="../Procodile/CLI/Options.html">Procodile::CLI::Options</a>
 
-        <a class="method-permalink" href="#options%3AProcodile%3A%3ACliOptions-instance-method">#</a>
+        <a class="method-permalink" href="#options%3AProcodile%3A%3ACLI%3A%3AOptions-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L22" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L22" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="options=(options:Procodile::CliOptions)-instance-method">
+    <div class="entry-detail" id="options=(options:Procodile::CLI::Options)-instance-method">
       <div class="signature">
         
-        def <strong>options=</strong>(options : <a href="../Procodile/CliOptions.html">Procodile::CliOptions</a>)
+        def <strong>options=</strong>(options : <a href="../Procodile/CLI/Options.html">Procodile::CLI::Options</a>)
 
-        <a class="method-permalink" href="#options%3D%28options%3AProcodile%3A%3ACliOptions%29-instance-method">#</a>
+        <a class="method-permalink" href="#options%3D%28options%3AProcodile%3A%3ACLI%3A%3AOptions%29-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile_cr/blob/fb080234a8f1f9c7fd966693ec11b70cf8472817/src/procodile/cli.cr#L22" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/cli.cr#L22" target="_blank">View source</a>]
         
       </div>
     </div>
   
-
-
 
 
 </div>

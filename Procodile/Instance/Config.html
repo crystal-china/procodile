@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::CLI::CheckConcurrencyCommand - procodile master</title>
+  <title>Procodile::Instance::Config - procodile master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../";
   </script>
@@ -72,12 +72,12 @@
       
     </li>
   
-  <li class="parent open current" data-id="procodile/Procodile/CLI" data-name="procodile::cli">
+  <li class="parent " data-id="procodile/Procodile/CLI" data-name="procodile::cli">
       <a href="../../Procodile/CLI.html">CLI</a>
       
         <ul>
   
-  <li class=" current" data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
+  <li class=" " data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
       <a href="../../Procodile/CLI/CheckConcurrencyCommand.html">CheckConcurrencyCommand</a>
       
     </li>
@@ -222,12 +222,12 @@
       
     </li>
   
-  <li class="parent " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
+  <li class="parent open current" data-id="procodile/Procodile/Instance" data-name="procodile::instance">
       <a href="../../Procodile/Instance.html">Instance</a>
       
         <ul>
   
-  <li class=" " data-id="procodile/Procodile/Instance/Config" data-name="procodile::instance::config">
+  <li class=" current" data-id="procodile/Procodile/Instance/Config" data-name="procodile::instance::config">
       <a href="../../Procodile/Instance/Config.html">Config</a>
       
     </li>
@@ -321,16 +321,12 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> Procodile::<wbr>CLI::<wbr>CheckConcurrencyCommand
+  <span class="kind">struct</span> Procodile::<wbr>Instance::<wbr>Config
 
 </h1>
 
 
-
-
-
-
-
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../Procodile/Instance/Config.html">Procodile::Instance::Config</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass">Object</li></ul>
 
 
 
@@ -340,18 +336,24 @@
 
 
   <h2>
-    <a id="direct-including-types" class="anchor" href="#direct-including-types">
+    <a id="included-modules" class="anchor" href="#included-modules">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>
-    Direct including types
+    Included Modules
   </h2>
   <ul class="other-types-list">
     
-      <li class="other-type"><a href="../../Procodile/CLI.html">Procodile::CLI</a></li>
+      <li class="other-type">JSON::Serializable</li>
     
   </ul>
+
+
+
+
+
+
 
 
 
@@ -366,8 +368,8 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/check_concurrency_command.cr#L3" target="_blank">
-        procodile/commands/check_concurrency_command.cr
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L450" target="_blank">
+        procodile/instance.cr
       </a>
     
     <br/>
@@ -377,24 +379,351 @@
 
 
 
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28description%3AString%2Cpid%3AInt64%7CNil%2Crespawns%3AInt32%2Cstatus%3AInstance%3A%3AStatus%2Cstarted_at%3AInt64%7CNil%2Ctag%3AString%7CNil%2Cport%3AInt32%7CNil%2Cforeground%3ABool%3Dfalse%29-class-method" class="signature"><strong>.new</strong>(description : String, pid : Int64 | Nil, respawns : Int32, status : Instance::Status, started_at : Int64 | Nil, tag : String | Nil, port : Int32 | Nil, foreground : Bool = <span class="n">false</span>)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28pull%3AJSON%3A%3APullParser%29-class-method" class="signature"><strong>.new</strong>(pull : JSON::PullParser)</a>
+        
+      </li>
+    
+  </ul>
 
 
 
 
 
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#description%3AString-instance-method" class="signature"><strong>#description</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#foreground%3F%3ABool-instance-method" class="signature"><strong>#foreground?</strong> : Bool</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#pid%3AInt64%3F-instance-method" class="signature"><strong>#pid</strong> : Int64?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#port%3AInt32%3F-instance-method" class="signature"><strong>#port</strong> : Int32?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#respawns%3AInt32-instance-method" class="signature"><strong>#respawns</strong> : Int32</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#running-instance-method" class="signature"><strong>#running</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#started_at%3AInt64%3F-instance-method" class="signature"><strong>#started_at</strong> : Int64?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#status%3AProcodile%3A%3AInstance%3A%3AStatus-instance-method" class="signature"><strong>#status</strong> : Procodile::Instance::Status</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tag%3AString%3F-instance-method" class="signature"><strong>#tag</strong> : String?</a>
+        
+      </li>
+    
+  </ul>
 
 
 
 <div class="methods-inherited">
   
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
 </div>
 
 
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(description:String,pid:Int64|Nil,respawns:Int32,status:Instance::Status,started_at:Int64|Nil,tag:String|Nil,port:Int32|Nil,foreground:Bool=false)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(description : String, pid : Int64 | Nil, respawns : Int32, status : <a href="../../Procodile/Instance/Status.html">Instance::Status</a>, started_at : Int64 | Nil, tag : String | Nil, port : Int32 | Nil, foreground : Bool = <span class="n">false</span>)
+
+        <a class="method-permalink" href="#new%28description%3AString%2Cpid%3AInt64%7CNil%2Crespawns%3AInt32%2Cstatus%3AInstance%3A%3AStatus%2Cstarted_at%3AInt64%7CNil%2Ctag%3AString%7CNil%2Cport%3AInt32%7CNil%2Cforeground%3ABool%3Dfalse%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L458" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(pull:JSON::PullParser)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(pull : JSON::PullParser)
+
+        <a class="method-permalink" href="#new%28pull%3AJSON%3A%3APullParser%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L451" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
 
 
 
 
 
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="description:String-instance-method">
+      <div class="signature">
+        
+        def <strong>description</strong> : String
+
+        <a class="method-permalink" href="#description%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="foreground?:Bool-instance-method">
+      <div class="signature">
+        
+        def <strong>foreground?</strong> : Bool
+
+        <a class="method-permalink" href="#foreground%3F%3ABool-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L456" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="pid:Int64?-instance-method">
+      <div class="signature">
+        
+        def <strong>pid</strong> : Int64?
+
+        <a class="method-permalink" href="#pid%3AInt64%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="port:Int32?-instance-method">
+      <div class="signature">
+        
+        def <strong>port</strong> : Int32?
+
+        <a class="method-permalink" href="#port%3AInt32%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="respawns:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>respawns</strong> : Int32
+
+        <a class="method-permalink" href="#respawns%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="running-instance-method">
+      <div class="signature">
+        
+        def <strong>running</strong>
+
+        <a class="method-permalink" href="#running-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="started_at:Int64?-instance-method">
+      <div class="signature">
+        
+        def <strong>started_at</strong> : Int64?
+
+        <a class="method-permalink" href="#started_at%3AInt64%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="status:Procodile::Instance::Status-instance-method">
+      <div class="signature">
+        
+        def <strong>status</strong> : <a href="../../Procodile/Instance/Status.html">Procodile::Instance::Status</a>
+
+        <a class="method-permalink" href="#status%3AProcodile%3A%3AInstance%3A%3AStatus-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tag:String?-instance-method">
+      <div class="signature">
+        
+        def <strong>tag</strong> : String?
+
+        <a class="method-permalink" href="#tag%3AString%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/instance.cr#L453" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
 
 
 </div>

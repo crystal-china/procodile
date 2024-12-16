@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::CLI::CheckConcurrencyCommand - procodile master</title>
+  <title>Procodile::ControlSession::Options - procodile master</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../";
   </script>
@@ -72,12 +72,12 @@
       
     </li>
   
-  <li class="parent open current" data-id="procodile/Procodile/CLI" data-name="procodile::cli">
+  <li class="parent " data-id="procodile/Procodile/CLI" data-name="procodile::cli">
       <a href="../../Procodile/CLI.html">CLI</a>
       
         <ul>
   
-  <li class=" current" data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
+  <li class=" " data-id="procodile/Procodile/CLI/CheckConcurrencyCommand" data-name="procodile::cli::checkconcurrencycommand">
       <a href="../../Procodile/CLI/CheckConcurrencyCommand.html">CheckConcurrencyCommand</a>
       
     </li>
@@ -202,12 +202,12 @@
       
     </li>
   
-  <li class="parent " data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
+  <li class="parent open current" data-id="procodile/Procodile/ControlSession" data-name="procodile::controlsession">
       <a href="../../Procodile/ControlSession.html">ControlSession</a>
       
         <ul>
   
-  <li class=" " data-id="procodile/Procodile/ControlSession/Options" data-name="procodile::controlsession::options">
+  <li class=" current" data-id="procodile/Procodile/ControlSession/Options" data-name="procodile::controlsession::options">
       <a href="../../Procodile/ControlSession/Options.html">Options</a>
       
     </li>
@@ -321,37 +321,50 @@
 <div class="main-content">
 <h1 class="type-name">
 
-  <span class="kind">module</span> Procodile::<wbr>CLI::<wbr>CheckConcurrencyCommand
+  <span class="kind">struct</span> Procodile::<wbr>ControlSession::<wbr>Options
 
 </h1>
 
 
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../Procodile/ControlSession/Options.html">Procodile::ControlSession::Options</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass">Object</li></ul>
 
 
 
 
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
 
-
-
-
+  <p>Control session options</p>
 
 
 
 
 
   <h2>
-    <a id="direct-including-types" class="anchor" href="#direct-including-types">
+    <a id="included-modules" class="anchor" href="#included-modules">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
   </svg>
 </a>
-    Direct including types
+    Included Modules
   </h2>
   <ul class="other-types-list">
     
-      <li class="other-type"><a href="../../Procodile/CLI.html">Procodile::CLI</a></li>
+      <li class="other-type">JSON::Serializable</li>
     
   </ul>
+
+
+
+
+
+
 
 
 
@@ -366,8 +379,8 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/commands/check_concurrency_command.cr#L3" target="_blank">
-        procodile/commands/check_concurrency_command.cr
+      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L127" target="_blank">
+        procodile/control_session.cr
       </a>
     
     <br/>
@@ -377,24 +390,267 @@
 
 
 
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28pull%3AJSON%3A%3APullParser%29-class-method" class="signature"><strong>.new</strong>(pull : JSON::PullParser)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#new%28processes%3AArray%28String%29%7CNil%3D%5B%5DofString%2Ctag%3AString%7CNil%3Dnil%2Cport_allocations%3AHash%28String%2CInt32%29%7CNil%3Dnil%2Creload%3ABool%7CNil%3Dnil%2Cstop_supervisor%3ABool%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(processes : Array(String) | Nil = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, tag : String | Nil = <span class="n">nil</span>, port_allocations : Hash(String, Int32) | Nil = <span class="n">nil</span>, reload : Bool | Nil = <span class="n">nil</span>, stop_supervisor : Bool | Nil = <span class="n">nil</span>)</a>
+        
+      </li>
+    
+  </ul>
 
 
 
 
 
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#port_allocations%3AHash%28String%2CInt32%29%3F-instance-method" class="signature"><strong>#port_allocations</strong> : Hash(String, Int32)?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#processes%3AArray%28String%29%3F-instance-method" class="signature"><strong>#processes</strong> : Array(String)?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#reload%3ABool%3F-instance-method" class="signature"><strong>#reload</strong> : Bool?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stop_supervisor%3ABool%3F-instance-method" class="signature"><strong>#stop_supervisor</strong> : Bool?</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tag%3AString%3F-instance-method" class="signature"><strong>#tag</strong> : String?</a>
+        
+      </li>
+    
+  </ul>
 
 
 
 <div class="methods-inherited">
   
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
 </div>
 
 
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(pull:JSON::PullParser)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(pull : JSON::PullParser)
+
+        <a class="method-permalink" href="#new%28pull%3AJSON%3A%3APullParser%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L128" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(processes:Array(String)|Nil=[]ofString,tag:String|Nil=nil,port_allocations:Hash(String,Int32)|Nil=nil,reload:Bool|Nil=nil,stop_supervisor:Bool|Nil=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(processes : Array(String) | Nil = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, tag : String | Nil = <span class="n">nil</span>, port_allocations : Hash(String, Int32) | Nil = <span class="n">nil</span>, reload : Bool | Nil = <span class="n">nil</span>, stop_supervisor : Bool | Nil = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28processes%3AArray%28String%29%7CNil%3D%5B%5DofString%2Ctag%3AString%7CNil%3Dnil%2Cport_allocations%3AHash%28String%2CInt32%29%7CNil%3Dnil%2Creload%3ABool%7CNil%3Dnil%2Cstop_supervisor%3ABool%7CNil%3Dnil%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L132" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
 
 
 
 
 
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="port_allocations:Hash(String,Int32)?-instance-method">
+      <div class="signature">
+        
+        def <strong>port_allocations</strong> : Hash(String, Int32)?
+
+        <a class="method-permalink" href="#port_allocations%3AHash%28String%2CInt32%29%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="processes:Array(String)?-instance-method">
+      <div class="signature">
+        
+        def <strong>processes</strong> : Array(String)?
+
+        <a class="method-permalink" href="#processes%3AArray%28String%29%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="reload:Bool?-instance-method">
+      <div class="signature">
+        
+        def <strong>reload</strong> : Bool?
+
+        <a class="method-permalink" href="#reload%3ABool%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stop_supervisor:Bool?-instance-method">
+      <div class="signature">
+        
+        def <strong>stop_supervisor</strong> : Bool?
+
+        <a class="method-permalink" href="#stop_supervisor%3ABool%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tag:String?-instance-method">
+      <div class="signature">
+        
+        def <strong>tag</strong> : String?
+
+        <a class="method-permalink" href="#tag%3AString%3F-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_session.cr#L130" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
 
 
 </div>
