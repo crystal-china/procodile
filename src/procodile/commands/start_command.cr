@@ -93,53 +93,51 @@ module Procodile
       end
 
       private def start : Nil
-        if supervisor_running?
-          if @options.foreground?
-            raise Error.new "Cannot be started in the foreground because supervisor already running"
+        if !supervisor_running?
+          raise Error.new "Supervisor is not running and cannot be started \
+because --no-supervisor is set" if @options.start_supervisor? == false
+
+          # The supervisor isn't actually running. We need to start it before
+          # processes can be begin being processed
+          self.class.start_supervisor(@config, @options) do |supervisor|
+            supervisor.start_processes(
+              process_names_from_cli_option,
+              Supervisor::Options.new(tag: @options.tag)
+            ) unless @options.start_processes? == false
           end
 
-          if @options.respawn?
-            raise Error.new "Cannot disable respawning because supervisor is already running"
-          end
+          return
+        end
 
-          if @options.stop_when_none?
-            raise Error.new "Cannot stop supervisor when none running because supervisor is already running"
-          end
+        if @options.foreground?
+          raise Error.new "Cannot be started in the foreground because supervisor already running"
+        end
 
-          if @options.proxy?
-            raise Error.new "Cannot enable the proxy when the supervisor is running"
-          end
+        if @options.respawn?
+          raise Error.new "Cannot disable respawning because supervisor is already running"
+        end
 
-          instance_configs = ControlClient.run(
-            @config.sock_path,
-            "start_processes",
-            processes: process_names_from_cli_option,
-            tag: @options.tag,
-            port_allocations: @options.port_allocations,
-          ).as Array(Instance::Config)
+        if @options.stop_when_none?
+          raise Error.new "Cannot stop supervisor when none running because supervisor is already running"
+        end
 
-          if instance_configs.empty?
-            puts "No processes to start."
-          else
-            instance_configs.each do |instance_config|
-              puts "#{"Started".colorize.green} #{instance_config.description} (PID: #{instance_config.pid})"
-            end
-          end
+        if @options.proxy?
+          raise Error.new "Cannot enable the proxy when the supervisor is running"
+        end
+
+        instance_configs = ControlClient.run(
+          @config.sock_path,
+          "start_processes",
+          processes: process_names_from_cli_option,
+          tag: @options.tag,
+          port_allocations: @options.port_allocations,
+        ).as Array(Instance::Config)
+
+        if instance_configs.empty?
+          puts "No processes to start."
         else
-          # The supervisor isn't actually running. We need to start it before processes can be
-          # begin being processed
-          if @options.start_supervisor? == false
-            raise Error.new "Supervisor is not running and cannot be started \
-because --no-supervisor is set"
-          else
-            self.class.start_supervisor(@config, @options) do |supervisor|
-              unless @options.start_processes? == false
-                supervisor.start_processes(
-                  process_names_from_cli_option,
-                  Supervisor::Options.new(tag: @options.tag)
-                )
-              end
-            end
+          instance_configs.each do |instance_config|
+            puts "#{"Started".colorize.green} #{instance_config.description} (PID: #{instance_config.pid})"
           end
         end
       end
