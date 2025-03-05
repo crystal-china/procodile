@@ -169,7 +169,7 @@ Procfile. It will be removed when it is stopped."
     private def create_process(
       name : String,
       command : String,
-      log_color : Colorize::ColorANSI
+      log_color : Colorize::ColorANSI,
     ) : Procodile::Process
       process = Procodile::Process.new(self, name, command, options_for_process(name))
       process.log_color = log_color

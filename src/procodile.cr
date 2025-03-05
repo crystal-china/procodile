@@ -1,4 +1,5 @@
 require "./requires"
+require "./procodile/config"
 require "./procodile/app_determination"
 require "./procodile/cli"
 

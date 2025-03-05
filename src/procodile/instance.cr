@@ -30,84 +30,86 @@ module Procodile
       if stopping?
         Procodile.log(@process.log_color, description, "Process is stopped/stopping \
 therefore cannot be started again.")
-        return false
+
+        return
       end
 
       update_pid
 
       if running?
         Procodile.log(@process.log_color, description, "Already running with PID #{@pid}")
-        nil
-      else
-        port_allocations = @supervisor.run_options.port_allocations
 
-        if port_allocations && (chosen_port = port_allocations[@process.name]?)
-          if chosen_port == 0
-            allocate_port
-          else
-            @port = chosen_port
-            Procodile.log(@process.log_color, description, "Assigned #{chosen_port} to process")
-          end
-        elsif @process.proxy? && @supervisor.tcp_proxy
-          # Allocate a port randomly if a proxy is needed
-          allocate_port
-        elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
-          # Allocate ports to this process sequentially from the starting port
-          process = @supervisor.processes[@process]?
-          allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
-
-          until @port
-            unless allocated_ports.includes?(proposed_port)
-              @port = proposed_port
-            end
-            proposed_port += 1
-          end
-        end
-
-        if self.process.log_path && @supervisor.run_options.force_single_log? != true
-          FileUtils.mkdir_p(File.dirname(self.process.log_path))
-          log_destination = File.open(self.process.log_path, "a")
-          io = nil
-        else
-          reader, writer = IO.pipe
-          log_destination = writer
-          io = reader
-        end
-
-        @tag = @supervisor.tag.dup if @supervisor.tag
-
-        Dir.cd(@process.config.root)
-
-        commands = @process.command.split(" ")
-
-        process = ::Process.new(
-          command: commands[0],
-          args: commands[1..],
-          env: environment_variables,
-          output: log_destination,
-          error: log_destination
-        )
-
-        spawn { process.wait }
-
-        @pid = process.pid
-
-        log_destination.close
-
-        File.write(pid_file_path, "#{@pid}\n")
-
-        @supervisor.add_instance(self, io)
-
-        tag = @tag ? " (tagged with #{@tag})" : ""
-
-        Procodile.log(@process.log_color, description, "Started with PID #{@pid}#{tag}")
-
-        if self.process.log_path && io.nil?
-          Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
-        end
-
-        @started_at = Time.local
+        return
       end
+
+      port_allocations = @supervisor.run_options.port_allocations
+
+      if port_allocations && (chosen_port = port_allocations[@process.name]?)
+        if chosen_port == 0
+          allocate_port
+        else
+          @port = chosen_port
+          Procodile.log(@process.log_color, description, "Assigned #{chosen_port} to process")
+        end
+      elsif @process.proxy? && @supervisor.tcp_proxy
+        # Allocate a port randomly if a proxy is needed
+        allocate_port
+      elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
+        # Allocate ports to this process sequentially from the starting port
+        process = @supervisor.processes[@process]?
+        allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
+
+        until @port
+          unless allocated_ports.includes?(proposed_port)
+            @port = proposed_port
+          end
+          proposed_port += 1
+        end
+      end
+
+      if self.process.log_path && @supervisor.run_options.force_single_log? != true
+        FileUtils.mkdir_p(File.dirname(self.process.log_path))
+        log_destination = File.open(self.process.log_path, "a")
+        io = nil
+      else
+        reader, writer = IO.pipe
+        log_destination = writer
+        io = reader
+      end
+
+      @tag = @supervisor.tag.dup if @supervisor.tag
+
+      Dir.cd(@process.config.root)
+
+      commands = @process.command.split(" ")
+
+      process = ::Process.new(
+        command: commands[0],
+        args: commands[1..],
+        env: environment_variables,
+        output: log_destination,
+        error: log_destination
+      )
+
+      spawn { process.wait }
+
+      @pid = process.pid
+
+      log_destination.close
+
+      File.write(pid_file_path, "#{@pid}\n")
+
+      @supervisor.add_instance(self, io)
+
+      tag = @tag ? " (tagged with #{@tag})" : ""
+
+      Procodile.log(@process.log_color, description, "Started with PID #{@pid}#{tag}")
+
+      if self.process.log_path && io.nil?
+        Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
+      end
+
+      @started_at = Time.local
     end
 
     #

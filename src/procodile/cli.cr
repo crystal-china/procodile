@@ -1,4 +1,3 @@
-require "./config"
 require "./control_client"
 require "./commands/*"
 require "./core_ext/process"
@@ -169,7 +168,7 @@ Cannot start unless things are clean."
         @name : String,
         @description : String,
         @options : Proc(OptionParser, CLI, Nil),
-        @callable : Proc(Nil)
+        @callable : Proc(Nil),
       )
       end
     end

@@ -139,7 +139,7 @@ module Procodile
     #
     def generate_instances(
       supervisor : Supervisor,
-      quantity : Int32 = self.quantity
+      quantity : Int32 = self.quantity,
     ) : Array(Instance)
       Array.new(quantity) { create_instance(supervisor) }
     end

@@ -16,7 +16,7 @@ module Procodile
 
     def initialize(
       @config : Config,
-      @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new
+      @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new,
     )
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
@@ -66,7 +66,7 @@ module Procodile
 
     def start_processes(
       process_names : Array(String)?,
-      options : Supervisor::Options = Supervisor::Options.new
+      options : Supervisor::Options = Supervisor::Options.new,
     ) : Array(Instance)
       @tag = options.tag
       instances_started = [] of Instance
@@ -123,7 +123,7 @@ module Procodile
     end
 
     def restart(
-      options : Supervisor::Options = Supervisor::Options.new
+      options : Supervisor::Options = Supervisor::Options.new,
     ) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       @tag = options.tag
@@ -181,7 +181,7 @@ module Procodile
     end
 
     def check_concurrency(
-      options : Supervisor::Options = Supervisor::Options.new
+      options : Supervisor::Options = Supervisor::Options.new,
     ) : Hash(Symbol, Array(Instance))
       Procodile.log nil, "system", "Checking process concurrency"
 
@@ -347,7 +347,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def check_instance_quantities(
       type : Supervisor::CheckInstanceQuantitiesType = :both,
-      processes : Array(String)? = nil
+      processes : Array(String)? = nil,
     ) : Hash(Symbol, Array(Instance))
       status = {:started => [] of Instance, :stopped => [] of Instance}
 

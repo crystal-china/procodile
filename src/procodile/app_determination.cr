@@ -60,7 +60,7 @@ module Procodile
     private def find_root_and_procfile(
       pwd : String,
       given_root : String?,
-      given_procfile : String?
+      given_procfile : String?,
     ) : Nil
       case
       when given_root && given_procfile
@@ -103,7 +103,7 @@ module Procodile
     end
 
     private def find_root_and_procfile_from_options(
-      options : Config::GlobalOption | Array(Config::GlobalOption)
+      options : Config::GlobalOption | Array(Config::GlobalOption),
     ) : Nil
       case options
       when Config::GlobalOption
