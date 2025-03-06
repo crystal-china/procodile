@@ -59,10 +59,8 @@ therefore cannot be started again.")
         process = @supervisor.processes[@process]?
         allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
 
-        until @port
-          unless allocated_ports.includes?(proposed_port)
-            @port = proposed_port
-          end
+        while !@port
+          @port = proposed_port unless allocated_ports.includes?(proposed_port)
           proposed_port += 1
         end
       end
