@@ -52,8 +52,10 @@ processes:
     allocate_port_from: 28502
 HEREDOC
 
+header 'Running spec'
+crystal spec
 header 'Building ...'
-header "Ensure print \`(15) Successful' to pass through the test."
+header "Make sure print \`(15) Successful' to pass the test."
 which shards && [ -f shard.yml ] && shards build
 bin/procodile
 bin/procodile kill && sleep 3  # ensure kill before test.
