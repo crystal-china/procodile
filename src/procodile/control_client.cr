@@ -35,7 +35,7 @@ module Procodile
               stopped: Array(Instance::Config)).from_json(reply)
           when "status"
             ControlClient::ReplyOfStatusCommand.from_json(reply)
-          else # e.g. reload command
+          else # e.g. stop, reload command
             true
           end
         else

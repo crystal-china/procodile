@@ -29,38 +29,35 @@ module Procodile
       end
 
       private def stop : Nil
-        if supervisor_running?
-          instances = ControlClient.run(
-            @config.sock_path,
-            "stop",
-            processes: process_names_from_cli_option,
-            stop_supervisor: @options.stop_supervisor?,
-          ).as(Array(Instance::Config))
+        raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
-          if instances.empty?
-            puts "No processes were stopped."
-          else
-            instances.each do |instance|
-              puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
-            end
-          end
+        instances = ControlClient.run(
+          @config.sock_path,
+          "stop",
+          processes: process_names_from_cli_option,
+          stop_supervisor: @options.stop_supervisor?,
+        ).as(Array(Instance::Config))
 
-          if @options.stop_supervisor?
-            puts "Supervisor will be stopped when processes are stopped."
-          end
-
-          if @options.wait_until_supervisor_stopped?
-            puts "Waiting for supervisor to stop..."
-            loop do
-              sleep 1.second
-
-              next if supervisor_running?
-
-              abort "Supervisor has stopped", status: 0
-            end
-          end
+        if instances.empty?
+          puts "No processes were stopped."
         else
-          raise Error.new "Procodile supervisor isn't running"
+          instances.each do |instance|
+            puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
+          end
+        end
+
+        puts "Supervisor will be stopped when processes are stopped." if @options.stop_supervisor?
+
+        if @options.wait_until_supervisor_stopped?
+          puts "Waiting for supervisor to stop..."
+
+          loop do
+            sleep 1.second
+
+            next if supervisor_running?
+
+            abort "Supervisor has stopped", status: 0
+          end
         end
       end
     end

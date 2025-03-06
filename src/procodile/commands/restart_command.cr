@@ -22,41 +22,39 @@ module Procodile
       end
 
       private def restart : Nil
-        if supervisor_running?
-          instance_configs = ControlClient.run(
-            @config.sock_path,
-            "restart",
-            processes: process_names_from_cli_option,
-            tag: @options.tag,
-          ).as Array(Tuple(Instance::Config?, Instance::Config?))
+        raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
-          if instance_configs.empty?
-            puts "There are no processes to restart."
-          else
-            if instance_configs.first.to_a.compact[0].foreground?
-              puts "WARNING: Using the restart command in foreground mode \
-tends to be prone to failure, use it with caution."
-            end
+        instance_configs = ControlClient.run(
+          @config.sock_path,
+          "restart",
+          processes: process_names_from_cli_option,
+          tag: @options.tag,
+        ).as Array(Tuple(Instance::Config?, Instance::Config?))
 
-            instance_configs.each do |old_instance, new_instance|
-              if old_instance && new_instance
-                if old_instance.description == new_instance.description
-                  puts "#{"Restarted".colorize.magenta} #{old_instance.description}"
-                else
-                  puts "#{"Restarted".colorize.magenta} #{old_instance.description} \
--> #{new_instance.description}"
-                end
-              elsif old_instance
-                puts "#{"Stopped".colorize.red} #{old_instance.description}"
-              elsif new_instance
-                puts "#{"Started".colorize.green} #{new_instance.description}"
-              end
-
-              STDOUT.flush
-            end
-          end
+        if instance_configs.empty?
+          puts "There are no processes to restart."
         else
-          raise Error.new "Procodile supervisor isn't running"
+          if instance_configs.first.to_a.compact[0].foreground?
+            puts "WARNING: Using the restart command in foreground mode \
+tends to be prone to failure, use it with caution."
+          end
+
+          instance_configs.each do |old_instance, new_instance|
+            if old_instance && new_instance
+              if old_instance.description == new_instance.description
+                puts "#{"Restarted".colorize.magenta} #{old_instance.description}"
+              else
+                puts "#{"Restarted".colorize.magenta} #{old_instance.description} \
+-> #{new_instance.description}"
+              end
+            elsif old_instance
+              puts "#{"Stopped".colorize.red} #{old_instance.description}"
+            elsif new_instance
+              puts "#{"Started".colorize.green} #{new_instance.description}"
+            end
+
+            STDOUT.flush
+          end
         end
       end
     end

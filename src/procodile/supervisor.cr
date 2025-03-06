@@ -86,9 +86,7 @@ module Procodile
     end
 
     def stop(options : Supervisor::Options = Supervisor::Options.new) : Array(Instance)
-      if options.stop_supervisor
-        @run_options.stop_when_none = true
-      end
+      @run_options.stop_when_none = true if options.stop_supervisor
 
       reload_config
 
