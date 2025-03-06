@@ -53,8 +53,8 @@ processes:
 HEREDOC
 
 header 'Building ...'
-header 'Ensure print (15) Successful to pass through the test.'
-which shards && [ -f shards.yml ] && shards build
+header "Ensure print \`(15) Successful' to pass through the test."
+which shards && [ -f shard.yml ] && shards build
 bin/procodile
 bin/procodile kill && sleep 3  # ensure kill before test.
 header '(1) Checking procodile start ...'
