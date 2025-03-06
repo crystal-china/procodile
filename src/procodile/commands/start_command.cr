@@ -99,7 +99,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
 
           # The supervisor isn't actually running. We need to start it before
           # processes can be begin being processed
-          self.class.start_supervisor(@config, @options) do |supervisor|
+          Supervisor.start(@config, @options) do |supervisor|
             supervisor.start_processes(
               process_names_from_cli_option,
               Supervisor::Options.new(tag: @options.tag)
