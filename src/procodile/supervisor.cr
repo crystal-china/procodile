@@ -407,8 +407,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def process_names_to_instances(names : Array(String)) : Array(Instance)
       names.each_with_object([] of Instance) do |name, array|
-        if name =~ /\A(.*)\.(\d+)\z/
-          # app1.1
+        if name =~ /\A(.*)\.(\d+)\z/ # app1.1
           process_name, id = $1, $2
 
           @processes.each do |process, instances|

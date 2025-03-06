@@ -90,9 +90,9 @@ module Procodile
           end
         end
 
-        removed_processes = processes.keys - process_list.keys
+        removed_processes_name = processes.keys - process_list.keys
 
-        removed_processes.each do |process_name|
+        removed_processes_name.each do |process_name|
           if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)

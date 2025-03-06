@@ -27,36 +27,37 @@ module Procodile
       end
 
       private def status : Nil
-        if supervisor_running?
-          status = ControlClient.run(
-            @config.sock_path, "status"
-          ).as ControlClient::ReplyOfStatusCommand
-
-          case @options
-          when .json?
-            puts status.to_json
-          when .json_pretty?
-            puts status
-            nil
-          when .simple?
-            if status.messages.empty?
-              message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
-
-              puts "OK || #{message.join(", ")}"
-            else
-              message = status.messages.join(", ")
-              puts "Issues || #{message}"
-            end
-          else
-            print_header(status)
-            print_processes(status)
-          end
-        else
+        if !supervisor_running?
           if @options.simple?
             puts "NotRunning || Procodile supervisor isn't running"
+
+            return
           else
             raise Error.new "Procodile supervisor isn't running"
           end
+        end
+
+        status = ControlClient.run(
+          @config.sock_path, "status"
+        ).as ControlClient::ReplyOfStatusCommand
+
+        case @options
+        when .json?
+          puts status.to_json
+        when .json_pretty?
+          puts status
+        when .simple?
+          if status.messages.empty?
+            message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
+
+            puts "OK || #{message.join(", ")}"
+          else
+            message = status.messages.join(", ")
+            puts "Issues || #{message}"
+          end
+        else
+          print_header(status)
+          print_processes(status)
         end
       end
 
@@ -133,9 +134,6 @@ module Procodile
         else
           timestamp.to_s("%d/%m/%Y")
         end
-      end
-
-      def self.parse(message : Supervisor::Message) : String
       end
     end
   end
