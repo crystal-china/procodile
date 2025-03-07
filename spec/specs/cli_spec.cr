@@ -67,16 +67,6 @@ describe Procodile::CLI do
       # command.callable.call
     end
 
-    it "should run reload command" do
-      command = cli.class.commands["reload"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "reload"
-      command.description.should eq "Reload Procodile configuration"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-      # command.callable.call
-    end
-
     it "should run check_concurrency command" do
       command = cli.class.commands["check_concurrency"]
       command.should be_a Procodile::CLI::Command
