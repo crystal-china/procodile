@@ -7,7 +7,6 @@ module Procodile
     @started_at : Time?
 
     getter tag : String?
-    getter tcp_proxy : TCPProxy?
     getter started_at : Time?
     getter config : Config
     getter run_options : Supervisor::RunOptions
@@ -42,12 +41,6 @@ module Procodile
       end
 
       ControlServer.start(self)
-
-      if @run_options.proxy?
-        Procodile.log nil, "system", "Proxy is enabled"
-
-        @tcp_proxy = TCPProxy.start(self)
-      end
 
       after_start.call(self) # invoke supervisor.start_processes
 
@@ -394,10 +387,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def remove_removed_processes : Nil
       @processes.reject! do |process, instances|
         if process.removed && instances.empty?
-          if (tcp_proxy = @tcp_proxy)
-            tcp_proxy.remove_process(process)
-          end
-
           true
         else
           false
