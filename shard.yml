@@ -14,6 +14,8 @@ development_dependencies:
     github: crystal-ameba/ameba
   source-typer:
     github: Vici37/cr-source-typer
+  tail:
+    github: j8r/tail.cr
 
 crystal: 1.14.0
 

@@ -4,6 +4,10 @@ shards:
     git: https://github.com/crystal-ameba/ameba.git
     version: 1.6.4
 
+  inotify:
+    git: https://github.com/petoem/inotify.cr.git
+    version: 1.0.3+git.commit.ddc795fd4d65633d4173b8103e6484c45399ebf4
+
   markd:
     git: https://github.com/icyleaf/markd.git
     version: 0.5.0
@@ -15,4 +19,8 @@ shards:
   source-typer:
     git: https://github.com/vici37/cr-source-typer.git
     version: 0.2.5+git.commit.496c1ddefbff96e202416a85dd7c1e14e3442457
+
+  tail:
+    git: https://github.com/j8r/tail.cr.git
+    version: 0.3.1
 
