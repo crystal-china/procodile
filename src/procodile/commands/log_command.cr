@@ -28,10 +28,6 @@ module Procodile
       end
 
       private def log : Nil
-        opts = [] of String
-        opts << "-f" if options.follow?
-        opts << "-n #{options.lines}" if options.lines
-
         if (process_opts = options.process)
           if (process = @config.processes[process_opts])
             log_path = process.log_path
@@ -43,7 +39,15 @@ module Procodile
         end
 
         if File.exists?(log_path)
-          ::Process.exec("tail #{opts.join(' ')} #{log_path}", shell: true)
+          Tail::File.open(log_path) do |tail_file|
+            if options.follow?
+              tail_file.follow { |str| puts str }
+            elsif (line_count = options.lines)
+              tail_file.last_lines(line_count)
+            else
+              tail_file.last_lines
+            end
+          end
         else
           raise Error.new "No file found at #{log_path}"
         end
