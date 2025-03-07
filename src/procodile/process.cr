@@ -1,3 +1,4 @@
+require "./control_client"
 require "./instance"
 
 module Procodile

@@ -1,3 +1,4 @@
+require "./start_supervisor"
 require "./supervisor"
 
 module Procodile

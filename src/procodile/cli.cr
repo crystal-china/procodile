@@ -1,7 +1,7 @@
-require "./start_supervisor"
-require "./control_client"
-require "./commands/*"
 require "./core_ext/process"
+require "./app_determination"
+require "./config"
+require "./commands/*"
 
 module Procodile
   class CLI
