@@ -9,13 +9,15 @@ targets:
   procodile:
     main: src/procodile.cr
 
+dependencies:
+  tail:
+    github: j8r/tail.cr
+
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
   source-typer:
     github: Vici37/cr-source-typer
-  tail:
-    github: j8r/tail.cr
 
 crystal: 1.14.0
 

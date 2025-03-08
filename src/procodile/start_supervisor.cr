@@ -72,7 +72,7 @@ Cannot start unless things are clean."
       end
     end
 
-    private def self.set_process_title(title)
+    private def self.set_process_title(title : String) : Nil
       # Set $PROGRAM_NAME in linux
       File.write("/proc/self/comm", title)
     end

@@ -18,7 +18,7 @@ shards:
 
   source-typer:
     git: https://github.com/vici37/cr-source-typer.git
-    version: 0.2.5+git.commit.496c1ddefbff96e202416a85dd7c1e14e3442457
+    version: 0.3.0+git.commit.b71b2b32cfae04bddcbd5d5dc22681acea51dbb9
 
   tail:
     git: https://github.com/j8r/tail.cr.git
