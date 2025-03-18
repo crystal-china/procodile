@@ -177,6 +177,13 @@ Procfile. It will be removed when it is stopped."
     end
 
     private def load_process_list_from_file : Hash(String, String)
+      content = File.read(procfile_path)
+
+      if content.blank?
+        raise Error.new "It looks like your Procfile doesn't have any contents.
+Did you forget to add commands, or was it empty by mistake?"
+      end
+
       Hash(String, String).from_yaml(File.read(procfile_path))
     end
 
