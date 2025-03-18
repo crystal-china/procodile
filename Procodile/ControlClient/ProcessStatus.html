@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Crystal Docs 1.14.0">
-<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_version" content="1.1.0">
 <meta name="crystal_docs.project_name" content="procodile">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::ControlClient::ProcessStatus - procodile master</title>
+  <title>Procodile::ControlClient::ProcessStatus - procodile 1.1.0</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        master
+        1.1.0
       </span>
     </div>
   </div>
@@ -114,11 +114,6 @@
   
   <li class=" " data-id="procodile/Procodile/CLI/Options" data-name="procodile::cli::options">
       <a href="../../Procodile/CLI/Options.html">Options</a>
-      
-    </li>
-  
-  <li class=" " data-id="procodile/Procodile/CLI/ReloadCommand" data-name="procodile::cli::reloadcommand">
-      <a href="../../Procodile/CLI/ReloadCommand.html">ReloadCommand</a>
       
     </li>
   
@@ -302,11 +297,6 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/TCPProxy" data-name="procodile::tcpproxy">
-      <a href="../../Procodile/TCPProxy.html">TCPProxy</a>
-      
-    </li>
-  
 </ul>
 
       
@@ -368,7 +358,7 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L80" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L54" target="_blank">
         procodile/control_client.cr
       </a>
     
@@ -428,7 +418,7 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#log_path%3AString%3F-instance-method" class="signature"><strong>#log_path</strong> : String?</a>
+        <a href="#log_path%3AString%7CNil-instance-method" class="signature"><strong>#log_path</strong> : String | Nil</a>
         
       </li>
     
@@ -443,12 +433,12 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#proxy_address%3AString%3F-instance-method" class="signature"><strong>#proxy_address</strong> : String?</a>
+        <a href="#proxy_address%3AString%7CNil-instance-method" class="signature"><strong>#proxy_address</strong> : String | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#proxy_port%3AInt32%3F-instance-method" class="signature"><strong>#proxy_port</strong> : Int32?</a>
+        <a href="#proxy_port%3AInt32%7CNil-instance-method" class="signature"><strong>#proxy_port</strong> : Int32 | Nil</a>
         
       </li>
     
@@ -458,7 +448,7 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#removed%3ABool-instance-method" class="signature"><strong>#removed</strong> : Bool</a>
+        <a href="#removed%3F%3ABool-instance-method" class="signature"><strong>#removed?</strong> : Bool</a>
         
       </li>
     
@@ -553,7 +543,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L85" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L69" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -569,7 +559,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L81" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L55" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -601,7 +591,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L62" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -617,23 +607,23 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L58" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="log_path:String?-instance-method">
+    <div class="entry-detail" id="log_path:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>log_path</strong> : String?
+        def <strong>log_path</strong> : String | Nil
 
-        <a class="method-permalink" href="#log_path%3AString%3F-instance-method">#</a>
+        <a class="method-permalink" href="#log_path%3AString%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L64" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -649,7 +639,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L60" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -665,39 +655,39 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L57" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="proxy_address:String?-instance-method">
+    <div class="entry-detail" id="proxy_address:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>proxy_address</strong> : String?
+        def <strong>proxy_address</strong> : String | Nil
 
-        <a class="method-permalink" href="#proxy_address%3AString%3F-instance-method">#</a>
+        <a class="method-permalink" href="#proxy_address%3AString%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L67" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="proxy_port:Int32?-instance-method">
+    <div class="entry-detail" id="proxy_port:Int32|Nil-instance-method">
       <div class="signature">
         
-        def <strong>proxy_port</strong> : Int32?
+        def <strong>proxy_port</strong> : Int32 | Nil
 
-        <a class="method-permalink" href="#proxy_port%3AInt32%3F-instance-method">#</a>
+        <a class="method-permalink" href="#proxy_port%3AInt32%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L66" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -713,23 +703,23 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L59" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="removed:Bool-instance-method">
+    <div class="entry-detail" id="removed?:Bool-instance-method">
       <div class="signature">
         
-        def <strong>removed</strong> : Bool
+        def <strong>removed?</strong> : Bool
 
-        <a class="method-permalink" href="#removed%3ABool-instance-method">#</a>
+        <a class="method-permalink" href="#removed%3F%3ABool-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L65" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -745,7 +735,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L61" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -761,7 +751,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/db95ffbe6f1761c2a83e2c09732ad4317bf074fd/src/procodile/control_client.cr#L83" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v1.1.0/src/procodile/control_client.cr#L63" target="_blank">View source</a>]
         
       </div>
     </div>
