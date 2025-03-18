@@ -12,7 +12,7 @@ module Procodile
     property command : String
     property options : Procodile::Process::Option
     property log_color : Colorize::ColorANSI = Colorize::ColorANSI::Default
-    property removed : Bool = false
+    property? removed : Bool = false
 
     delegate allocate_port_from, proxy_port, to: @options
 
@@ -171,7 +171,7 @@ module Procodile
         command: self.command,
         restart_mode: self.restart_mode,
         log_path: self.log_path,
-        removed: self.removed ? true : false,
+        removed: self.removed? ? true : false,
         proxy_port: proxy_port,
         proxy_address: proxy_address,
       )

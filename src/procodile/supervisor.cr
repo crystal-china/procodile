@@ -386,7 +386,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def remove_removed_processes : Nil
       @processes.reject! do |process, instances|
-        if process.removed && instances.empty?
+        if process.removed? && instances.empty?
           true
         else
           false
