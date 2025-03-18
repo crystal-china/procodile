@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cache shards
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.cache/shards
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
@@ -19,7 +19,7 @@ jobs:
         uses: crystal-lang/install-crystal@v1
 
       - name: Install shards
-        run: shards check || shards install --without-development
+        run: shards check || shards install
 
       - name: Check formatting
         run: crystal tool format --check
