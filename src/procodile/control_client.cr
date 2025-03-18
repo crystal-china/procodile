@@ -62,7 +62,7 @@ module Procodile
     getter command : String
     getter restart_mode : Signal | String | Nil
     getter log_path : String?
-    getter removed : Bool
+    getter? removed : Bool
     getter proxy_port : Int32?
     getter proxy_address : String?
 
