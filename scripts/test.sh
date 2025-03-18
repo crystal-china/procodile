@@ -53,7 +53,7 @@ processes:
 HEREDOC
 
 header 'Running spec'
-crystal spec
+crystal spec --order=random --error-on-warnings
 header 'Building ...'
 header "Make sure print \`(15) Successful' to pass the test."
 which shards && [ -f shard.yml ] && shards build
