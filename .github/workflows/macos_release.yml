@@ -20,11 +20,11 @@ jobs:
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
 
-      - name: Install shards
-        run: shards check || shards install --without-development
-
       - name: Check formatting
         run: crystal tool format --check
+
+      - name: Install shards
+        run: shards check || shards install --without-development
 
       - name: Run tests
         run: crystal spec --order=random --error-on-warnings

@@ -19,11 +19,11 @@ jobs:
       - name: Download source
         uses: actions/checkout@v4
 
-      - name: Install shards
-        run: shards check || shards install --without-development
-
       - name: Check formatting
         run: crystal tool format --check
+
+      - name: Install shards
+        run: shards check || shards install --without-development
 
       - name: Disable git safe repository checks
         run: git config --global --add safe.directory '*'
