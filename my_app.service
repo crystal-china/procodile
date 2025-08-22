@@ -1,0 +1,14 @@
+[Unit]
+Description=myapp Service
+After=syslog.target network-online.target
+[Service]
+Type=simple
+Restart=always
+LimitCORE=infinity
+LimitNOFILE=infinity
+LimitNPROC=infinity
+Environment="PATH=${PATH}:/usr/local/bin"
+WorkingDirectory=/apps/my_app
+ExecStart=procodile start
+[Install]
+WantedBy=multi-user.target
