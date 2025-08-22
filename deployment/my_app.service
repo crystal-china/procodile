@@ -3,6 +3,7 @@ Description=myapp Service
 After=syslog.target network-online.target
 [Service]
 Type=simple
+# User=someuser
 Restart=always
 LimitCORE=infinity
 LimitNOFILE=infinity
