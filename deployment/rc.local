@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+alias my_app='procodile -r /apps/my_app'
+
+my_app start
+
+# Or, if need run as a another user
+# su -lc 'procodile -r /apps/my_app start' another_user
