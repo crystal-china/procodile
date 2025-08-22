@@ -65,7 +65,7 @@ describe Procodile::Config do
 
   context "an application without a Procfile" do
     it "should raise an error" do
-      expect_raises(Procodile::Error, /Procfile not found at/) do
+      expect_raises(Procodile::Error, /Could not find Procfile in/) do
         Procodile::Config.new(File.join(APPS_ROOT, "empty"))
       end
     end
