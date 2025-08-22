@@ -36,7 +36,7 @@ module Procodile
 
     def initialize(@root : String, @procfile : String? = nil)
       unless File.file?(procfile_path)
-        raise Error.new("Procfile not found at #{procfile_path}")
+        raise Error.new("Could not find Procfile in #{procfile_path}")
       end
 
       # We need to check to see if the local or options

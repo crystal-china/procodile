@@ -52,6 +52,9 @@ module Procodile
     end
   end
 
+  # Need parse here for passing correct root and procofile into the AppDetermination
+  opt.parse
+
   # Get the global configuration file data
   global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
 
@@ -106,6 +109,7 @@ module Procodile
       option_proc.call(opt, cli)
     end
 
+    # Need parse again because `option_proc` change the opt for sub-command
     opt.parse
 
     #
