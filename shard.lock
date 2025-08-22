@@ -14,11 +14,11 @@ shards:
 
   reply:
     git: https://github.com/i3oris/reply.git
-    version: 0.3.1+git.commit.db423dae3dd34c6ba5e36174653a0c109117a167
+    version: 0.4.0
 
   source-typer:
     git: https://github.com/vici37/cr-source-typer.git
-    version: 0.3.0+git.commit.b71b2b32cfae04bddcbd5d5dc22681acea51dbb9
+    version: 0.3.5+git.commit.022b9d33e424826c5b20ab20b6cb4dd2f3b96db3
 
   tail:
     git: https://github.com/j8r/tail.cr.git
