@@ -23,8 +23,9 @@ module Procodile
   ORIGINAL_ARGV = ARGV.join(" ")
   command = ARGV[0]? || "help"
   options = {} of Symbol => String
+  cli = CLI.new
 
-  opt = OptionParser.new do |parser|
+  OptionParser.new do |parser|
     parser.banner = "Usage: procodile #{command} [options]"
 
     parser.on("-r", "--root PATH", "The path to the root of your application") do |root|
@@ -43,6 +44,10 @@ module Procodile
       abort VERSION, status: 0
     end
 
+    if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
+      option_proc.call(parser, cli)
+    end
+
     parser.invalid_option do |flag|
       abort "Invalid option: #{flag}.\n\n#{parser}"
     end
@@ -50,10 +55,7 @@ module Procodile
     parser.missing_option do |flag|
       abort "Missing option for #{flag}\n\n#{parser}"
     end
-  end
-
-  # Need parse here for passing correct root and procofile into the AppDetermination
-  opt.parse
+  end.parse
 
   # Get the global configuration file data
   global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
@@ -103,21 +105,14 @@ module Procodile
   end
 
   begin
-    cli = CLI.new(config: Config.new(ap.root || "", ap.procfile))
-
-    if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
-      option_proc.call(opt, cli)
-    end
-
-    # Need parse again because `option_proc` change the opt for sub-command
-    opt.parse
-
     #
     # For fix https://github.com/adamcooke/procodile/issues/30
     # Duplicate on this line is necessory for get new parsed ARGV.
     command = ARGV[0]? || "help"
 
     if command != "help"
+      cli.config = Config.new(ap.root || "", ap.procfile)
+
       if cli.config.user && ENV["USER"] != cli.config.user
         STDERR.puts "Procodile must be run as #{cli.config.user}. Re-executing as #{cli.config.user}...".colorize.red
 

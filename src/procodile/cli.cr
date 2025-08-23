@@ -31,7 +31,8 @@ module Procodile
         include {{ (name.camelcase + "Command").id }}
       {% end %}
 
-        def initialize(@config : Config)
+        def initialize
+          @config = uninitialized Config
           {% for e in COMMANDS %}
             {% name = e[0] %}
             {% description = e[1] %}

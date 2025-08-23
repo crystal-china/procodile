@@ -4,7 +4,7 @@ require "../../src/procodile/cli"
 describe Procodile::CLI do
   context "an application with a Procfile" do
     config = Procodile::Config.new(root: File.join(APPS_ROOT, "full"))
-    cli = Procodile::CLI.new(config)
+    cli = Procodile::CLI.new
     cli.config = config
 
     it "should run help command" do
