@@ -10,6 +10,6 @@ LimitNOFILE=infinity
 LimitNPROC=infinity
 Environment="PATH=${PATH}:/usr/local/bin"
 WorkingDirectory=/apps/my_app
-ExecStart=procodile start
+ExecStart=procodile start -f
 [Install]
 WantedBy=multi-user.target
