@@ -89,6 +89,7 @@ module Procodile
 
       return false unless ::Process.exists?(pid.to_i64)
 
+      # 当前实现，这个检测其实是非必须的。
       control_socket_ready?
     end
 
