@@ -55,13 +55,42 @@ module Procodile
       end
     end
 
-    private def supervisor_running? : Bool
-      if File.exists?(@config.supervisor_pid_path)
-        file_pid = File.read(@config.supervisor_pid_path).strip
-        file_pid.empty? ? false : ::Process.exists?(file_pid.to_i64)
-      else
-        false
+    # 新增：检查 control socket 是否可连接（带短暂等待，避免启动竞态）
+    private def control_socket_ready?(timeout : Time::Span = 300.milliseconds, interval : Time::Span = 25.milliseconds) : Bool
+      sock_path = @config.sock_path
+      deadline = Time.instant + timeout
+
+      while Time.instant < deadline
+        begin
+          # 文件不存在就没必要 connect
+          return false unless File.exists?(sock_path)
+
+          UNIXSocket.new(sock_path).close
+          return true
+        rescue ex : File::Error
+        # 文件刚出现/消失，继续等一下
+        rescue ex : Socket::ConnectError
+          # 文件存在但 server 还没 listen 完，继续等一下
+        end
+
+        sleep interval
       end
+
+      false
+    end
+
+    private def supervisor_running? : Bool
+      pid_path = @config.supervisor_pid_path
+
+      return false unless File.exists?(pid_path)
+
+      pid = File.read(pid_path).strip
+
+      return false if pid.blank?
+
+      return false unless ::Process.exists?(pid.to_i64)
+
+      control_socket_ready?
     end
 
     private def process_names_from_cli_option : Array(String)?
@@ -94,11 +123,11 @@ module Procodile
       getter callable : Proc(Nil)
 
       def initialize(
-        @name : String,
-        @description : String,
-        @options : Proc(OptionParser, CLI, Nil),
-        @callable : Proc(Nil),
-      )
+           @name : String,
+           @description : String,
+           @options : Proc(OptionParser, CLI, Nil),
+           @callable : Proc(Nil),
+         )
       end
     end
 
