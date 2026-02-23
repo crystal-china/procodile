@@ -1,3 +1,5 @@
+require "./start_supervisor_daemon"
+
 module Procodile
   class Supervisor
     def self.start(
@@ -28,26 +30,14 @@ Cannot start unless things are clean."
 
       set_process_title("[procodile] #{config.app_name} (#{config.root})")
 
-      if options.foreground?
+      if options.foreground? || Procodile::Daemon.child?
         File.write(config.supervisor_pid_path, ::Process.pid)
 
         Supervisor.new(config, run_options).start(after_start)
       else
         FileUtils.rm_rf(File.join(config.pid_root, "*.pid"))
 
-        process = ::Process.fork do
-          log_path = File.open(config.log_path, "a")
-          STDOUT.reopen(log_path); STDOUT.sync = true
-          STDERR.reopen(log_path); STDERR.sync = true
-
-          Supervisor.new(config, run_options).start(after_start)
-        end
-
-        spawn { process.wait }
-
-        pid = process.pid
-        File.write(config.supervisor_pid_path, pid)
-
+        pid = Procodile::Daemon.daemonize!(config)
         puts "Started Procodile supervisor with PID #{pid}"
       end
     end
