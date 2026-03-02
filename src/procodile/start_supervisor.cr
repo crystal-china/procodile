@@ -3,10 +3,10 @@ require "./start_supervisor_daemon"
 module Procodile
   class Supervisor
     def self.start(
-      config : Config,
-      options : CLI::Options = CLI::Options.new,
-      &after_start : Proc(Supervisor, Nil)
-    ) : Nil
+         config : Config,
+         options : CLI::Options = CLI::Options.new,
+         &after_start : Proc(Supervisor, Nil)
+       ) : Nil
       run_options = Supervisor::RunOptions.new(
         respawn: options.respawn?,
         stop_when_none: options.stop_when_none?,
@@ -63,8 +63,24 @@ Cannot start unless things are clean."
     end
 
     private def self.set_process_title(title : String) : Nil
-      # Set $PROGRAM_NAME in linux
-      File.write("/proc/self/comm", title)
+      # Set process title in platform-specific ways.
+      {% if flag?(:linux) %}
+        begin
+          File.write("/proc/self/comm", title)
+        rescue ex : File::Error
+          Procodile.log nil, "system", "Failed to set process title: #{ex.message}"
+        end
+      {% elsif flag?(:darwin) %}
+        LibProcTitle.setproctitle("%s", title)
+      {% else %}
+        Procodile.log nil, "system", "Setting process title is not supported on this platform"
+      {% end %}
     end
   end
+
+  {% if flag?(:darwin) %}
+    lib LibProcTitle
+      fun setproctitle(fmt : LibC::Char*, ...) : Int32
+    end
+  {% end %}
 end
