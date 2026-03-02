@@ -352,7 +352,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
 
           stopped_instances.each(&.stop)
-          status[:stopped] = stopped_instances
+          status[:stopped].concat(stopped_instances)
         end
 
         if (type.both? || type.started?) && instances.size < process.quantity
