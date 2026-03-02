@@ -74,13 +74,10 @@ therefore cannot be started again.")
 
       @tag = @supervisor.tag.dup if @supervisor.tag
 
-      Dir.cd(@process.config.root)
-
-      commands = @process.command.split(" ")
-
       process = ::Process.new(
-        command: commands[0],
-        args: commands[1..],
+        command: @process.command,
+        shell: true,
+        chdir: @process.config.root,
         env: environment_variables,
         output: log_destination,
         error: log_destination
