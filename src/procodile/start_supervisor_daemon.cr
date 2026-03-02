@@ -16,6 +16,7 @@ module Procodile
     # Returns the child's PID. Also does a tiny sanity check that the PID exists.
     def self.daemonize!(config : Config) : Int64
       exe = ::Process.executable_path
+
       raise Error.new("Cannot daemonize: Process.executable_path is nil") unless exe
 
       log_path = File.open(config.log_path, "a")
@@ -27,6 +28,9 @@ module Procodile
         error: log_path,
         env: {ENV_KEY => "1"}
       )
+
+      # Close the fd in the parent, sub-process will continue write log.
+      log_path.close
 
       child.pid
     end
