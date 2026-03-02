@@ -14,7 +14,7 @@ module Procodile
 
     # Spawn a daemon child (same executable, same argv), redirecting output to log.
     # Returns the child's PID. Also does a tiny sanity check that the PID exists.
-    def self.daemonize!(config : Config) : Nil
+    def self.daemonize!(config : Config) : Int64
       exe = ::Process.executable_path
       raise Error.new("Cannot daemonize: Process.executable_path is nil") unless exe
 
