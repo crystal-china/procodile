@@ -278,7 +278,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def watch_for_output : Nil
       spawn do
         loop do
-          @signal_handler.pipe[:reader].gets
+          break if @signal_handler.pipe[:reader].read_byte.nil?
           @signal_handler.handle
 
           @signal_handler_chan.send nil
@@ -427,7 +427,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
       @readers[io] = instance
 
-      @signal_handler.notice
+      @signal_handler.wakeup
     end
 
     # Supervisor message

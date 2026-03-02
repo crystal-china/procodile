@@ -6,9 +6,6 @@
 
 module Procodile
   class SignalHandler
-    # 保存用户发送的信号.
-    QUEUE = [] of Signal
-
     # 允许的信号
     SIGNALS = {
       Signal::TERM,
@@ -19,17 +16,25 @@ module Procodile
     }
 
     getter pipe : Hash(Symbol, IO::FileDescriptor)
+    @pending : Hash(Signal, Atomic(Bool))
 
     def initialize
       @handlers = {} of Signal => Array(Proc(Nil))
       reader, writer = IO.pipe
       @pipe = {:reader => reader, :writer => writer}
 
-      SIGNALS.each do |sig|
+      @pending = SIGNALS.each_with_object({} of Signal => Atomic(Bool)) do |sig, hash|
+        pending = Atomic(Bool).new(false)
+
         sig.trap do
-          QUEUE << sig
-          notice
+          # 1. trap 回调里不做重活，只做“记账 + 唤醒”。
+          # 2. 主循环（supervisor）被唤醒后，调用 handle 真正执行逻辑。
+          # 3. 每种信号只维护一个“待处理标记”（Atomic(Bool)），不是队列。
+          pending.set(true, :relaxed) # 设为 true 表示该信号待处理
+          wakeup
         end
+
+        hash[sig] = pending
       end
     end
 
@@ -42,15 +47,21 @@ module Procodile
       @handlers[signal] << block
     end
 
-    def notice : Nil
-      @pipe[:writer].puts(".")
+    def wakeup : Nil
+      # 向 @pipe[:writer] 写一个字节，唤醒 watch_for_output 那边被 read block 的主循环
+      @pipe[:writer].write_byte(1_u8)
+    rescue IO::Error
+      # Ignore wake-up failures during shutdown.
     end
 
     # 运行拦截的信号对应的处理函数
     def handle : Nil
-      if (signal = QUEUE.shift?)
+      SIGNALS.each do |signal|
+        next unless @pending[signal].swap(false, :acquire)
+
         Procodile.log nil, "system", "Supervisor received #{signal} signal"
-        @handlers[signal].try &.each(&.call)
+
+        @handlers[signal].try &.each &.call
       end
     end
   end
