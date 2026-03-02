@@ -184,7 +184,7 @@ Procfile. It will be removed when it is stopped."
 Did you forget to add commands, or was it empty by mistake?"
       end
 
-      Hash(String, String).from_yaml(File.read(procfile_path))
+      Hash(String, String).from_yaml(content)
     end
 
     private def load_options_from_file : Config::Option
