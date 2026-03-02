@@ -278,8 +278,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def watch_for_output : Nil
       spawn do
         loop do
-          break if @signal_handler.pipe[:reader].read_byte.nil?
-          @signal_handler.handle
+          byte = @signal_handler.pipe[:reader].read_byte
+
+          break if byte.nil?
+
+          @signal_handler.handle(byte)
 
           @signal_handler_chan.send nil
         end
