@@ -16,8 +16,8 @@ dependencies:
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
-  source-typer:
-    github: Vici37/cr-source-typer
+  # source-typer:
+  #   github: Vici37/cr-source-typer
 
 crystal: 1.19.0
 

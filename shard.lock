@@ -6,19 +6,7 @@ shards:
 
   inotify:
     git: https://github.com/petoem/inotify.cr.git
-    version: 1.0.3+git.commit.ddc795fd4d65633d4173b8103e6484c45399ebf4
-
-  markd:
-    git: https://github.com/icyleaf/markd.git
-    version: 0.5.0
-
-  reply:
-    git: https://github.com/i3oris/reply.git
-    version: 0.4.0
-
-  source-typer:
-    git: https://github.com/vici37/cr-source-typer.git
-    version: 0.3.5+git.commit.022b9d33e424826c5b20ab20b6cb4dd2f3b96db3
+    version: 1.2.0+git.commit.77b9c80f97247982754bab5fa72cbdadc61961df
 
   tail:
     git: https://github.com/j8r/tail.cr.git
