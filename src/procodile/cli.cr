@@ -67,7 +67,7 @@ module Procodile
           UNIXSocket.new(sock_path).close
           return true
         rescue ex : File::Error
-        # 文件刚出现/消失，继续等一下
+          # 文件刚出现/消失，继续等一下
         rescue ex : Socket::ConnectError
           # 文件存在但 server 还没 listen 完，继续等一下
         end
@@ -123,11 +123,11 @@ module Procodile
       getter callable : Proc(Nil)
 
       def initialize(
-           @name : String,
-           @description : String,
-           @options : Proc(OptionParser, CLI, Nil),
-           @callable : Proc(Nil),
-         )
+        @name : String,
+        @description : String,
+        @options : Proc(OptionParser, CLI, Nil),
+        @callable : Proc(Nil),
+      )
       end
     end
 

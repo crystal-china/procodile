@@ -3,10 +3,10 @@ require "./start_supervisor_daemon"
 module Procodile
   class Supervisor
     def self.start(
-         config : Config,
-         options : CLI::Options = CLI::Options.new,
-         &after_start : Proc(Supervisor, Nil)
-       ) : Nil
+      config : Config,
+      options : CLI::Options = CLI::Options.new,
+      &after_start : Proc(Supervisor, Nil)
+    ) : Nil
       run_options = Supervisor::RunOptions.new(
         respawn: options.respawn?,
         stop_when_none: options.stop_when_none?,

@@ -11,11 +11,11 @@ module Procodile
     # 信号处理回调最稳的实践是：只做极简、可重入、无复杂状态访问的动作，
     # 因此，这里引入 signal code
     enum SignalCode : UInt8
-      Term   = 1_u8
-      Usr1   = 2_u8
-      Usr2   = 3_u8
-      Int    = 4_u8
-      Hup    = 5_u8
+      Term = 1_u8
+      Usr1 = 2_u8
+      Usr2 = 3_u8
+      Int  = 4_u8
+      Hup  = 5_u8
 
       def signal : Signal
         case self
