@@ -43,9 +43,11 @@ module Procodile
 
       ControlServer.start(self)
 
-      after_start.call(self) # invoke supervisor.start_processes
-
+      # 先监听
       watch_for_output
+
+      # 再启动进程
+      after_start.call(self) # invoke supervisor.start_processes
 
       @started_at = Time.local
     rescue e
