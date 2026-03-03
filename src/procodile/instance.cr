@@ -28,8 +28,11 @@ module Procodile
     #
     def start : Nil
       if stopping?
-        Procodile.log(@process.log_color, description, "Process is stopped/stopping \
-therefore cannot be started again.")
+        Procodile.log(
+          description,
+          "Process is stopped/stopping therefore cannot be started again",
+          @process.log_color
+        )
 
         return
       end
@@ -37,7 +40,7 @@ therefore cannot be started again.")
       update_pid
 
       if running?
-        Procodile.log(@process.log_color, description, "Already running with PID #{@pid}")
+        Procodile.log(description, "Already running with PID #{@pid}", @process.log_color)
 
         return
       end
@@ -49,7 +52,7 @@ therefore cannot be started again.")
           allocate_port
         else
           @port = chosen_port
-          Procodile.log(@process.log_color, description, "Assigned #{chosen_port} to process")
+          Procodile.log(description, "Assigned #{chosen_port} to process", @process.log_color)
         end
       elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
         # Allocate ports to this process sequentially from the starting port
@@ -95,10 +98,14 @@ therefore cannot be started again.")
 
       tag = @tag ? " (tagged with #{@tag})" : ""
 
-      Procodile.log(@process.log_color, description, "Started with PID #{@pid}#{tag}")
+      Procodile.log(description, "Started with PID #{@pid}#{tag}", @process.log_color)
 
       if self.process.log_path && io.nil?
-        Procodile.log(@process.log_color, description, "Logging to #{self.process.log_path}")
+        Procodile.log(
+          description,
+          "Logging to #{self.process.log_path}",
+          @process.log_color
+        )
       end
 
       @started_at = Time.local
@@ -114,11 +121,15 @@ therefore cannot be started again.")
       update_pid
 
       if running?
-        Procodile.log(@process.log_color, description, "Sending #{@process.term_signal} to #{@pid}")
+        Procodile.log(
+          description,
+          "Sending #{@process.term_signal} to #{@pid}",
+          @process.log_color
+        )
 
         ::Process.signal(@process.term_signal, @pid.not_nil!)
       else
-        Procodile.log(@process.log_color, description, "Process already stopped")
+        Procodile.log(description, "Process already stopped", @process.log_color)
       end
     end
 
@@ -129,7 +140,11 @@ therefore cannot be started again.")
     def restart(wg : WaitGroup) : self?
       restart_mode = @process.restart_mode
 
-      Procodile.log(@process.log_color, description, "Restarting using #{restart_mode} mode")
+      Procodile.log(
+        description,
+        "Restarting using #{restart_mode} mode",
+        @process.log_color
+      )
 
       update_pid
 
@@ -139,11 +154,17 @@ therefore cannot be started again.")
           ::Process.signal(restart_mode.as(Signal), @pid.not_nil!)
 
           @tag = @supervisor.tag if @supervisor.tag
-          Procodile.log(@process.log_color, description, "Sent #{restart_mode.to_s.upcase} \
-signal to process #{@pid}")
+          Procodile.log(
+            description,
+            "Sent #{restart_mode.to_s.upcase} signal to process #{@pid}",
+            @process.log_color
+          )
         else
-          Procodile.log(@process.log_color, description, "Process not running already. \
-Starting it.")
+          Procodile.log(
+            description,
+            "Process not running already, Starting it",
+            @process.log_color
+          )
           on_stop
           new_instance = @process.create_instance(@supervisor)
           new_instance.port = self.port
@@ -197,24 +218,25 @@ Starting it.")
 
       if @supervisor.allow_respawning?
         if can_respawn?
-          Procodile.log(@process.log_color, description, "Process has stopped. \
-Respawning...")
+          Procodile.log(
+            description,
+            "Process has stopped, Respawning...",
+            @process.log_color
+          )
           start
           add_respawn
         elsif respawns >= @process.max_respawns
           Procodile.log(
-            @process.log_color,
             description,
             "Warning:".colorize.light_gray.on_red.to_s +
-            " this process has been respawned #{respawns} times and \
-keeps dying.".colorize.red.to_s
+            " this process has been respawned #{respawns} times and keeps dying".colorize.red.to_s,
+            @process.log_color
           )
 
           Procodile.log(
-            @process.log_color,
             description,
-            "It will not be respawned automatically any longer and will no longer \
-be managed.".colorize.red.to_s
+            "It will not be respawned automatically any longer and will no longer be managed".colorize.red.to_s,
+            @process.log_color
           )
 
           @failed_at = Time.local
@@ -222,8 +244,11 @@ be managed.".colorize.red.to_s
           tidy
         end
       else
-        Procodile.log(@process.log_color, description, "Process has stopped. \
-Respawning not available.")
+        Procodile.log(
+          description,
+          "Process has stopped, Respawning not available",
+          @process.log_color
+        )
 
         @failed_at = Time.local
 
@@ -323,7 +348,11 @@ Respawning not available.")
         possible_port = rand(20000..29999)
 
         if self.port_available?(possible_port)
-          Procodile.log(@process.log_color, description, "Allocated port as #{possible_port}")
+          Procodile.log(
+            description,
+            "Allocated port as #{possible_port}",
+            @process.log_color
+          )
           @port = possible_port
         elsif attempts >= max_attempts
           raise Error.new "Couldn't allocate port for #{@process.name}"
@@ -357,7 +386,7 @@ Respawning not available.")
     #
     private def tidy : Nil
       FileUtils.rm_rf(self.pid_file_path)
-      Procodile.log(@process.log_color, description, "Removed PID file")
+      Procodile.log(description, "Removed PID file", @process.log_color)
     end
 
     #
@@ -417,7 +446,11 @@ Respawning not available.")
         @pid = pid_from_file
         @started_at = File.info(self.pid_file_path).modification_time
 
-        Procodile.log(@process.log_color, description, "PID file changed. Updated pid to #{@pid}")
+        Procodile.log(
+          description,
+          "PID file changed, Updated pid to #{@pid}",
+          @process.log_color
+        )
         true
       else
         false

@@ -114,7 +114,7 @@ module Procodile
           begin
             callable[command].call(options)
           rescue e : Error
-            Procodile.log nil, "control", "Error: #{e.message}".colorize.red.to_s
+            Procodile.log "control", "Error: #{e.message}".colorize.red.to_s
             "500 #{e.message}"
           end
         else

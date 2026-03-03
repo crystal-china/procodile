@@ -1,7 +1,7 @@
 module Procodile
   private class_getter logger_mutex : Mutex { Mutex.new }
 
-  def self.log(color : Colorize::ColorANSI?, name : String, text : String) : Nil
+  def self.log(name : String, text : String, color : Colorize::ColorANSI? = nil) : Nil
     color = Colorize::ColorANSI::Default if color.nil?
 
     logger_mutex.synchronize do

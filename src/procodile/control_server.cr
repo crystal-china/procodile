@@ -16,7 +16,7 @@ module Procodile
       sock_path = @supervisor.config.sock_path
       server = UNIXServer.new(sock_path)
 
-      Procodile.log nil, "control", "Listening at #{sock_path}"
+      Procodile.log "control", "Listening at #{sock_path}"
 
       while (client = server.accept)
         session = ControlSession.new(@supervisor, client)

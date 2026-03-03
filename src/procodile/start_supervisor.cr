@@ -68,12 +68,12 @@ Cannot start unless things are clean."
         begin
           File.write("/proc/self/comm", title)
         rescue ex : File::Error
-          Procodile.log nil, "system", "Failed to set process title: #{ex.message}"
+          Procodile.log "system", "Failed to set process title: #{ex.message}"
         end
       {% elsif flag?(:darwin) %}
         LibProcTitle.setproctitle("%s", title)
       {% else %}
-        Procodile.log nil, "system", "Setting process title is not supported on this platform"
+        Procodile.log "system", "Setting process title is not supported on this platform"
       {% end %}
     end
   end

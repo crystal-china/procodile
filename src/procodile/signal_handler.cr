@@ -75,7 +75,7 @@ module Procodile
 
       signal = SignalCode.from_value(byte).signal
 
-      Procodile.log nil, "system", "Supervisor received #{signal} signal"
+      Procodile.log "system", "Supervisor received #{signal} signal"
 
       @handlers[signal].try &.each &.call
     end

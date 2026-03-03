@@ -34,10 +34,10 @@ module Procodile
         if instance_configs.empty?
           puts "There are no processes to restart."
         else
-#           if instance_configs.first.to_a.compact[0].foreground?
-#             puts "Caution: When using the restart command in foreground mode, \
-# tends to be prone to failure, use it with caution."
-#           end
+          #           if instance_configs.first.to_a.compact[0].foreground?
+          #             puts "Caution: When using the restart command in foreground mode, \
+          # tends to be prone to failure, use it with caution."
+          #           end
 
           instance_configs.each do |old_instance, new_instance|
             if old_instance && new_instance

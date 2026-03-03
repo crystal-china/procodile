@@ -80,12 +80,12 @@ module Procodile
             # This command is already in our list. Add it.
             if process.command != command
               process.command = command
-              Procodile.log nil, "system", "#{name} command has changed. Updated."
+              Procodile.log "system", "#{name} command has changed. Updated."
             end
 
             process.options = options_for_process(name)
           else
-            Procodile.log nil, "system", "#{name} has been added to the Procfile. Adding it."
+            Procodile.log "system", "#{name} has been added to the Procfile. Adding it."
             processes[name] = create_process(name, command, COLORS[processes.size.divmod(COLORS.size)[1]])
           end
         end
@@ -96,7 +96,7 @@ module Procodile
           if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)
-            Procodile.log nil, "system", "#{process_name} has been removed in the \
+            Procodile.log "system", "#{process_name} has been removed in the \
 Procfile. It will be removed when it is stopped."
           end
         end

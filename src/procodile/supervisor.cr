@@ -34,11 +34,11 @@ module Procodile
     end
 
     def start(after_start : Proc(Supervisor, Nil)) : Nil
-      Procodile.log nil, "system", "Procodile supervisor started with PID #{::Process.pid}"
-      Procodile.log nil, "system", "Application root is #{@config.root}"
+      Procodile.log "system", "Procodile supervisor started with PID #{::Process.pid}"
+      Procodile.log "system", "Application root is #{@config.root}"
 
       if @run_options.respawn? == false
-        Procodile.log nil, "system", "Automatic respawning is disabled"
+        Procodile.log "system", "Automatic respawning is disabled"
       end
 
       ControlServer.start(self)
@@ -51,9 +51,9 @@ module Procodile
 
       @started_at = Time.local
     rescue e
-      Procodile.log nil, "system", "Error: #{e.class} (#{e.message})"
+      Procodile.log "system", "Error: #{e.class} (#{e.message})"
 
-      e.backtrace.each { |bt| Procodile.log nil, "system", "=> #{bt})" }
+      e.backtrace.each { |bt| Procodile.log "system", "=> #{bt})" }
 
       stop(Supervisor::Options.new(stop_supervisor: true))
     ensure
@@ -90,7 +90,7 @@ module Procodile
       instances_stopped = [] of Instance
 
       if processes.nil?
-        Procodile.log nil, "system", "Stopping all #{@config.app_name} processes"
+        Procodile.log "system", "Stopping all #{@config.app_name} processes"
 
         @processes.each do |_, instances|
           instances.each do |instance|
@@ -101,7 +101,7 @@ module Procodile
       else
         instances = process_names_to_instances(processes)
 
-        Procodile.log nil, "system", "Stopping #{instances.size} process(es)"
+        Procodile.log "system", "Stopping #{instances.size} process(es)"
 
         instances.each do |instance|
           instance.stop
@@ -129,11 +129,11 @@ module Procodile
       if processes.nil?
         instances = @processes.values.flatten
 
-        Procodile.log nil, "system", "Restarting all #{@config.app_name} processes"
+        Procodile.log "system", "Restarting all #{@config.app_name} processes"
       else
         instances = process_names_to_instances(processes)
 
-        Procodile.log nil, "system", "Restarting #{instances.size} process(es)"
+        Procodile.log "system", "Restarting #{instances.size} process(es)"
       end
 
       # Stop any processes that are no longer wanted at this point
@@ -161,7 +161,7 @@ module Procodile
     end
 
     def stop_supervisor : Nil
-      Procodile.log nil, "system", "Stopping Procodile supervisor"
+      Procodile.log "system", "Stopping Procodile supervisor"
 
       FileUtils.rm_rf(File.join(@config.pid_root, "procodile.pid"))
 
@@ -169,7 +169,7 @@ module Procodile
     end
 
     def reload_config : Nil
-      Procodile.log nil, "system", "Reloading configuration"
+      Procodile.log "system", "Reloading configuration"
 
       @config.reload
     end
@@ -177,22 +177,22 @@ module Procodile
     def check_concurrency(
       options : Supervisor::Options = Supervisor::Options.new,
     ) : Hash(Symbol, Array(Instance))
-      Procodile.log nil, "system", "Checking process concurrency"
+      Procodile.log "system", "Checking process concurrency"
 
       reload_config unless options.reload == false
 
       result = check_instance_quantities
 
       if result[:started].empty? && result[:stopped].empty?
-        Procodile.log nil, "system", "Process concurrency looks good"
+        Procodile.log "system", "Process concurrency looks good"
       else
         if result[:started].present?
-          Procodile.log nil, "system", "Concurrency check \
+          Procodile.log "system", "Concurrency check \
 started #{result[:started].map(&.description).join(", ")}"
         end
 
         if result[:stopped].present?
-          Procodile.log nil, "system", "Concurrency check \
+          Procodile.log "system", "Concurrency check \
 stopped #{result[:stopped].map(&.description).join(", ")}"
         end
       end
@@ -272,7 +272,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
       # If the processes go away, we can stop the supervisor now
       if @run_options.stop_when_none? && all_instances_stopped?
-        Procodile.log nil, "system", "All processes have stopped"
+        Procodile.log "system", "All processes have stopped"
 
         stop_supervisor
       end
@@ -308,7 +308,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       # After run restart command, @readers need to be update.
       # Ruby version @readers is wrapped by a loop, so can workaround this.
       # Crystal version need rerun this method again after restart.
-      
+
       # Restart may add readers, so this method can be called multiple times.
       # Ensure one worker per reader to avoid duplicate consumers/fiber leaks.
       @readers.keys.each do |reader|
@@ -334,18 +334,18 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       while (line = reader.gets(chomp: true))
         if (instance = @readers[reader]?)
           Procodile.log(
-            instance.process.log_color,
             instance.description,
-            "#{"=>".colorize(instance.process.log_color)} #{line}"
+            "#{"=>".colorize(instance.process.log_color)} #{line}",
+            instance.process.log_color
           )
         else
-          Procodile.log nil, "unknown", line
+          Procodile.log "unknown", line
         end
 
         @log_listener_chan.send nil
       end
     rescue ex : IO::Error
-      Procodile.log nil, "system", "Log reader closed: #{ex.message}"
+      Procodile.log "system", "Log reader closed: #{ex.message}"
     ensure
       @readers.delete(reader)
       @log_reader_workers.delete(reader)
@@ -365,7 +365,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           quantity_to_stop = instances.size - process.quantity
           stopped_instances = instances.first(quantity_to_stop)
 
-          Procodile.log nil, "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
+          Procodile.log "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
 
           stopped_instances.each(&.stop)
           status[:stopped].concat(stopped_instances)
@@ -375,7 +375,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           quantity_needed = process.quantity - instances.size
           started_instances = process.generate_instances(self, quantity_needed)
 
-          Procodile.log nil, "system", "Starting #{quantity_needed} more #{process.name} process(es)"
+          Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
 
           started_instances.each(&.start)
 
