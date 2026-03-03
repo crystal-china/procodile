@@ -302,7 +302,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     private def log_listener_reader : Nil
-      buffer = {} of IO::FileDescriptor => String
       # After run restart command, @readers need to be update.
       # Ruby version @readers is wrapped by a loop, so can workaround this.
       # Crystal version need rerun this method again after restart.
@@ -311,26 +310,21 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           loop do
             Fiber.yield
 
-            if (str = reader.gets(chomp: true)).nil?
+            str = reader.gets(chomp: true)
+
+            if str.nil?
               sleep 0.1.seconds
               next
             end
 
-            buffer[reader] ||= ""
-            buffer[reader] += "#{str}\n"
-
-            while buffer[reader].index("\n")
-              line, buffer[reader] = buffer[reader].split("\n", 2)
-
-              if (instance = @readers[reader])
-                Procodile.log(
-                  instance.process.log_color,
-                  instance.description,
-                  "#{"=>".colorize(instance.process.log_color)} #{line}"
-                )
-              else
-                Procodile.log nil, "unknown", buffer[reader]
-              end
+            if (instance = @readers[reader]?)
+              Procodile.log(
+                instance.process.log_color,
+                instance.description,
+                "#{"=>".colorize(instance.process.log_color)} #{str}"
+              )
+            else
+              Procodile.log nil, "unknown", str
             end
 
             @log_listener_chan.send nil
