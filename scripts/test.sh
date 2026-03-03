@@ -165,3 +165,9 @@ bin/procodile kill && sleep 3
 bin/procodile -r spec/apps/basic/ kill
 
 header '(15) Successful'
+
+cat <<HEREDOC > Procfile
+app1: sh ${ROOT}/scripts/foo.sh
+app2: sh ${ROOT}/scripts/foo.sh
+app3: sh ${ROOT}/scripts/foo.sh
+HEREDOC
