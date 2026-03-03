@@ -12,6 +12,7 @@ module Procodile
     getter run_options : Supervisor::RunOptions
     getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
     getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
+    @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     def initialize(
       @config : Config,
@@ -305,32 +306,48 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       # After run restart command, @readers need to be update.
       # Ruby version @readers is wrapped by a loop, so can workaround this.
       # Crystal version need rerun this method again after restart.
+      
+      # Restart may add readers, so this method can be called multiple times.
+      # Ensure one worker per reader to avoid duplicate consumers/fiber leaks.
       @readers.keys.each do |reader|
-        spawn do
-          loop do
-            Fiber.yield
+        next if @log_reader_workers[reader]?
 
-            str = reader.gets(chomp: true)
-
-            if str.nil?
-              sleep 0.1.seconds
-              next
-            end
-
-            if (instance = @readers[reader]?)
-              Procodile.log(
-                instance.process.log_color,
-                instance.description,
-                "#{"=>".colorize(instance.process.log_color)} #{str}"
-              )
-            else
-              Procodile.log nil, "unknown", str
-            end
-
-            @log_listener_chan.send nil
-          end
-        end
+        @log_reader_workers[reader] = true
+        spawn watch_log_reader(reader)
       end
+    end
+
+    private def watch_log_reader(reader : IO::FileDescriptor) : Nil
+      # 改成 while 的原因:
+
+      # 1. while (line = reader.gets)
+      # - 当没有数据时会阻塞等待。
+      # - 当 FD 关闭/EOF 时返回 nil，循环自然退出，进入 ensure 清理。
+      # - 不会出现“永远 sleep 0.1 秒轮询”的空转。
+      # 2. 移除 Fiber.yield
+      # - gets 阻塞时，调度器会自动切换其他 fiber，所以不需要手动 yield。
+      # 3. 移除 sleep 0.1
+      # - 这是旧版为了避免忙等的“轮询退让”。
+      # - 现在用阻塞读，没有忙等，也就不需要 sleep。
+      while (line = reader.gets(chomp: true))
+        if (instance = @readers[reader]?)
+          Procodile.log(
+            instance.process.log_color,
+            instance.description,
+            "#{"=>".colorize(instance.process.log_color)} #{line}"
+          )
+        else
+          Procodile.log nil, "unknown", line
+        end
+
+        @log_listener_chan.send nil
+      end
+    rescue ex : IO::Error
+      Procodile.log nil, "system", "Log reader closed: #{ex.message}"
+    ensure
+      @readers.delete(reader)
+      @log_reader_workers.delete(reader)
+      reader.close rescue nil
     end
 
     private def check_instance_quantities(
@@ -425,6 +442,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @readers[io] = instance
 
       @signal_handler.wakeup
+
+      log_listener_reader
     end
 
     # Supervisor message
