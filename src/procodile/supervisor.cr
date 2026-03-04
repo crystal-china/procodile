@@ -277,7 +277,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     private def watch_for_output : Nil
-      watch_for_signal_events
+      spawn watch_for_signal_events
 
       log_listener_reader
 
@@ -293,16 +293,14 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     private def watch_for_signal_events : Nil
-      spawn do
-        loop do
-          byte = @signal_handler.pipe[:reader].read_byte
+      loop do
+        byte = @signal_handler.pipe[:reader].read_byte
 
-          break if byte.nil?
+        break if byte.nil?
 
-          @signal_handler.handle(byte)
+        @signal_handler.handle(byte)
 
-          @signal_handler_chan.send nil
-        end
+        @signal_handler_chan.send nil
       end
     end
 
