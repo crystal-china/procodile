@@ -155,8 +155,6 @@ module Procodile
       # 这个代码仍旧有机会造成 UNIXSever 立即退出，但是没有任何 backtrace, 原因未知
       wg.wait
 
-      log_listener_reader
-
       instances_restarted
     end
 
