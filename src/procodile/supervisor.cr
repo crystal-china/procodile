@@ -277,17 +277,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     private def watch_for_output : Nil
-      spawn do
-        loop do
-          byte = @signal_handler.pipe[:reader].read_byte
-
-          break if byte.nil?
-
-          @signal_handler.handle(byte)
-
-          @signal_handler_chan.send nil
-        end
-      end
+      watch_for_signal_events
 
       log_listener_reader
 
@@ -298,6 +288,20 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           when @log_listener_chan.receive
           when timeout 30.seconds
           end
+        end
+      end
+    end
+
+    private def watch_for_signal_events : Nil
+      spawn do
+        loop do
+          byte = @signal_handler.pipe[:reader].read_byte
+
+          break if byte.nil?
+
+          @signal_handler.handle(byte)
+
+          @signal_handler_chan.send nil
         end
       end
     end
