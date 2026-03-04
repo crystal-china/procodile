@@ -1,5 +1,6 @@
 require "./start_supervisor"
 require "./supervisor"
+require "./tcp_proxy"
 
 module Procodile
   class Instance
@@ -54,6 +55,9 @@ module Procodile
           @port = chosen_port
           Procodile.log(description, "Assigned #{chosen_port} to process", @process.log_color)
         end
+      elsif @process.proxy? && @supervisor.tcp_proxy
+        # Allocate a port randomly if a proxy is needed
+        allocate_port
       elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
         # Allocate ports to this process sequentially from the starting port
         process = @supervisor.processes[@process]?
