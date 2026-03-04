@@ -180,14 +180,12 @@ module Procodile
 
         new_instance
       when "term-start"
-        wg.add
-
         stop
 
         new_instance = @process.create_instance(@supervisor)
         new_instance.port = self.port
 
-        spawn do
+        wg.spawn do
           while running?
             sleep 0.5.seconds
           end
@@ -195,8 +193,6 @@ module Procodile
           @supervisor.remove_instance(self)
 
           new_instance.start
-        ensure
-          wg.done
         end
 
         new_instance
