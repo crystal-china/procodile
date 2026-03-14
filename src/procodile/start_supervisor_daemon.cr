@@ -23,7 +23,7 @@ module Procodile
 
       child = ::Process.new(
         exe,
-        ARGV.dup,
+        Procodile::ORIGINAL_ARGV.dup,
         output: log_path,
         error: log_path,
         env: {ENV_KEY => "1"}

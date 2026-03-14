@@ -20,40 +20,43 @@ module Procodile
     File.join(root, "bin", "procodile")
   end
 
-  ORIGINAL_ARGV = ARGV.join(" ")
+  # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
+  # ORIGINAL_ARGV 这份快照也不变
+  ORIGINAL_ARGV = ARGV.dup
   command = ARGV[0]? || "help"
   options = {} of Symbol => String
   cli = CLI.new
 
-  OptionParser.new do |parser|
-    parser.banner = "Usage: procodile #{command} [options]"
+  OptionParser.new do |opt|
+    opt.banner = "Usage: procodile #{command} [options]"
 
-    parser.on("-r", "--root PATH", "The path to the root of your application") do |root|
+    opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
       options[:root] = root
     end
 
-    parser.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
+    opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
       options[:procfile] = path
     end
 
-    parser.on("-h", "--help", "Show this help message and exit") do
-      abort parser, status: 0
+    opt.on("-h", "--help", "Show this help message and exit") do
+      abort opt, status: 0
     end
 
-    parser.on("-v", "--version", "Show version") do
+    opt.on("-v", "--version", "Show version") do
       abort VERSION, status: 0
     end
 
+    opt.invalid_option do |flag|
+      abort "Invalid option: #{flag}.\n\n#{opt}"
+    end
+
+    opt.missing_option do |flag|
+      abort "Missing option for #{flag}\n\n#{opt}"
+    end
+
+    # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
     if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
-      option_proc.call(parser, cli)
-    end
-
-    parser.invalid_option do |flag|
-      abort "Invalid option: #{flag}.\n\n#{parser}"
-    end
-
-    parser.missing_option do |flag|
-      abort "Missing option for #{flag}\n\n#{parser}"
+      option_proc.call(opt, cli)
     end
   end.parse
 
@@ -106,8 +109,9 @@ module Procodile
 
   begin
     #
-    # For fix https://github.com/adamcooke/procodile/issues/30
-    # Duplicate on this line is necessory for get new parsed ARGV.
+    # OptionParser 会修改 ARGV，仅保留非选项参数, 例如: start
+    # 这也支持 procodile -r new_root start 这种全局参数写在前面的方式。
+    # fixed https://github.com/adamcooke/procodile/issues/30
     command = ARGV[0]? || "help"
 
     if command != "help"
@@ -117,7 +121,7 @@ module Procodile
         STDERR.puts "Procodile must be run as #{cli.config.user}. Re-executing as #{cli.config.user}...".colorize.red
 
         ::Process.exec(
-          command: "sudo -H -u #{cli.config.user} -- #{$0} #{ORIGINAL_ARGV}",
+          command: "sudo -H -u #{cli.config.user} -- #{$0} #{ORIGINAL_ARGV.join(" ")}",
           shell: true
         )
       end
