@@ -16,9 +16,9 @@ module Procodile
     @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     def initialize(
-         @config : Config,
-         @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new,
-       )
+      @config : Config,
+      @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new,
+    )
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
@@ -68,9 +68,9 @@ module Procodile
     end
 
     def start_processes(
-         process_names : Array(String)?,
-                              options : Supervisor::Options = Supervisor::Options.new,
-       ) : Array(Instance)
+      process_names : Array(String)?,
+      options : Supervisor::Options = Supervisor::Options.new,
+    ) : Array(Instance)
       @tag = options.tag
       instances_started = [] of Instance
 
@@ -124,8 +124,8 @@ module Procodile
     end
 
     def restart(
-         options : Supervisor::Options = Supervisor::Options.new,
-       ) : Array(Array(Instance | Nil))
+      options : Supervisor::Options = Supervisor::Options.new,
+    ) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Instance?)
@@ -168,6 +168,8 @@ module Procodile
     def stop_supervisor : Nil
       Procodile.log "system", "Stopping Procodile supervisor"
 
+      @tcp_proxy.try &.stop
+
       FileUtils.rm_rf(File.join(@config.pid_root, "procodile.pid"))
 
       exit 0
@@ -177,11 +179,12 @@ module Procodile
       Procodile.log "system", "Reloading configuration"
 
       @config.reload
+      @tcp_proxy.try &.sync_processes(@config.processes.values)
     end
 
     def check_concurrency(
-         options : Supervisor::Options = Supervisor::Options.new,
-       ) : Hash(Symbol, Array(Instance))
+      options : Supervisor::Options = Supervisor::Options.new,
+    ) : Hash(Symbol, Array(Instance))
       Procodile.log "system", "Checking process concurrency"
 
       reload_config unless options.reload == false
@@ -360,9 +363,9 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     private def check_instance_quantities(
-                 type : Supervisor::CheckInstanceQuantitiesType = :both,
-                 processes : Array(String)? = nil,
-               ) : Hash(Symbol, Array(Instance))
+      type : Supervisor::CheckInstanceQuantitiesType = :both,
+      processes : Array(String)? = nil,
+    ) : Hash(Symbol, Array(Instance))
       status = {:started => [] of Instance, :stopped => [] of Instance}
 
       @processes.each do |process, instances|
@@ -477,13 +480,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       getter status : Instance::Status?
 
       def initialize(
-           @type : Type,
-           @process : String? = nil,
-           @current : Int32? = nil,
-           @desired : Int32? = nil,
-           @instance : String? = nil,
-           @status : Instance::Status? = nil,
-         )
+        @type : Type,
+        @process : String? = nil,
+        @current : Int32? = nil,
+        @desired : Int32? = nil,
+        @instance : String? = nil,
+        @status : Instance::Status? = nil,
+      )
       end
 
       def to_s(io : IO) : Nil
@@ -513,13 +516,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     property? stop_when_none : Bool?
 
     def initialize(
-         @respawn : Bool?,
-         @stop_when_none : Bool?,
-         @force_single_log : Bool?,
-         @port_allocations : Hash(String, Int32)?,
-                                 @proxy : Bool?,
-         @foreground : Bool = false,
-       )
+      @respawn : Bool?,
+      @stop_when_none : Bool?,
+      @force_single_log : Bool?,
+      @port_allocations : Hash(String, Int32)?,
+      @proxy : Bool?,
+      @foreground : Bool = false,
+    )
     end
   end
 
@@ -531,11 +534,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     getter reload : Bool?
 
     def initialize(
-         @processes : Array(String)? = nil,
-         @stop_supervisor : Bool? = nil,
-         @tag : String? = nil,
-         @reload : Bool? = nil,
-       )
+      @processes : Array(String)? = nil,
+      @stop_supervisor : Bool? = nil,
+      @tag : String? = nil,
+      @reload : Bool? = nil,
+    )
     end
   end
 end
