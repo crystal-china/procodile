@@ -23,12 +23,21 @@ module Procodile
   # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
   # ORIGINAL_ARGV 这份快照也不变
   ORIGINAL_ARGV = ARGV.dup
-  command = ARGV[0]? || "help"
   options = {} of Symbol => String
   cli = CLI.new
+  command = cli.class.commands.keys.find(&.in? ARGV)
 
-  OptionParser.new do |opt|
-    opt.banner = "Usage: procodile #{command} [options]"
+  OptionParser.parse do |opt|
+    opt.banner = "Usage: procodile #{command || "command"} [options]"
+
+    # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
+    if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
+      option_proc.call(opt, cli)
+    end
+
+    opt.separator
+    opt.separator("Global options: (Can be used before or after the sub commands)")
+    opt.separator
 
     opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
       options[:root] = root
@@ -47,18 +56,13 @@ module Procodile
     end
 
     opt.invalid_option do |flag|
-      abort "Invalid option: #{flag}.\n\n#{opt}"
+      # abort "Invalid option: #{flag}.\n\n#{opt}"
     end
 
     opt.missing_option do |flag|
       abort "Missing option for #{flag}\n\n#{opt}"
     end
-
-    # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
-    if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
-      option_proc.call(opt, cli)
-    end
-  end.parse
+  end
 
   # Get the global configuration file data
   global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
@@ -108,13 +112,7 @@ module Procodile
   end
 
   begin
-    #
-    # OptionParser 会修改 ARGV，仅保留非选项参数, 例如: start
-    # 这也支持 procodile -r new_root start 这种全局参数写在前面的方式。
-    # fixed https://github.com/adamcooke/procodile/issues/30
-    command = ARGV[0]? || "help"
-
-    if command != "help"
+    if command && command != "help"
       cli.config = Config.new(ap.root || "", ap.procfile)
 
       if cli.config.user && ENV["USER"] != cli.config.user
@@ -127,7 +125,7 @@ module Procodile
       end
     end
 
-    cli.dispatch(command)
+    cli.dispatch(command || "help")
   rescue ex : Error
     abort "Error: #{ex.message}".colorize.red
   end
