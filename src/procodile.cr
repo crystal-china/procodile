@@ -12,6 +12,10 @@ module Procodile
   class Error < Exception
   end
 
+  def self.wrong_command_msg(command)
+    "Invalid command \`#{command}', run `procodile help' for supported commands.".colorize.red
+  end
+
   private def self.root : String
     File.expand_path("..", __DIR__)
   end
@@ -25,19 +29,40 @@ module Procodile
   ORIGINAL_ARGV = ARGV.dup
   options = {} of Symbol => String
   cli = CLI.new
-  command = cli.class.commands.keys.find(&.in? ARGV)
+  probe_argv = ORIGINAL_ARGV.dup
+
+
+  OptionParser.parse(probe_argv) do |opt|
+    opt.on("-r", "--root PATH", "The path to the root of your application") { }
+    opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }
+    opt.on("-h", "--help", "Show this help message and exit") { }
+    opt.on("-v", "--version", "Show version") { }
+    # 默认行为是，存在 invalid option （- 开头的）会炸，例如，当我传递一个子命令选项
+    # 但是我这里并没有编写 opt 处理它
+    opt.invalid_option { }
+
+    opt.unknown_args do |args|
+      probe_argv = args
+    end
+  end
+
+  command = probe_argv[0]?
+  run_command = cli.class.commands[command]? ? command : "help"
 
   OptionParser.parse do |opt|
-    opt.banner = "Usage: procodile #{command || "command"} [options]"
-
     # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
     if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
       option_proc.call(opt, cli)
     end
 
+    if run_command == "help"
+      opt.banner = "Usage: procodile command [options]"
+    else
+      opt.banner = "Usage: procodile #{command} [options]\n"
+    end
+
     opt.separator
-    opt.separator("Global options: (Can be used before or after the sub commands)")
-    opt.separator
+    opt.separator("Global options: (Can be used before or after the sub commands)\n")
 
     opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
       options[:root] = root
@@ -48,15 +73,16 @@ module Procodile
     end
 
     opt.on("-h", "--help", "Show this help message and exit") do
-      abort opt, status: 0
+      STDERR.puts opt
+      exit 0 if run_command != "help"
     end
 
-    opt.on("-v", "--version", "Show version") do
+    opt.on("-v", "--version", "Show version\n") do
       abort VERSION, status: 0
     end
 
     opt.invalid_option do |flag|
-      # abort "Invalid option: #{flag}.\n\n#{opt}"
+      abort "Invalid option: #{flag}\n\n#{opt}"
     end
 
     opt.missing_option do |flag|
