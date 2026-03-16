@@ -62,9 +62,9 @@ module Procodile
             cli.options.stop_when_none = true
           end
 
-          # opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
-          #   cli.options.proxy = true
-          # end
+          opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
+            cli.options.proxy = true
+          end
 
           opts.on(
             "--ports PROCESSES",
