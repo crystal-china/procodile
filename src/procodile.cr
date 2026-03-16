@@ -12,10 +12,6 @@ module Procodile
   class Error < Exception
   end
 
-  def self.wrong_command_msg(command)
-    "Invalid command \`#{command}', run `procodile help' for supported commands.".colorize.red
-  end
-
   private def self.root : String
     File.expand_path("..", __DIR__)
   end
@@ -47,18 +43,19 @@ module Procodile
   end
 
   command = probe_argv[0]?
-  run_command = cli.class.commands[command]? ? command : "help"
+  valid_command = cli.class.commands[command]?
+  # actual_run_command = cli.class.commands[command]? ? command : "help"
 
   OptionParser.parse do |opt|
     # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
-    if cli.class.commands[command]? && (option_proc = cli.class.commands[command].options)
+    if valid_command && (option_proc = valid_command.options)
       option_proc.call(opt, cli)
     end
 
-    if run_command == "help"
-      opt.banner = "Usage: procodile command [options]"
-    else
+    if valid_command
       opt.banner = "Usage: procodile #{command} [options]\n"
+    else
+      opt.banner = "Usage: procodile command [options]"
     end
 
     opt.separator
@@ -74,7 +71,8 @@ module Procodile
 
     opt.on("-h", "--help", "Show this help message and exit") do
       STDERR.puts opt
-      exit 0 if run_command != "help"
+
+      exit 0 if valid_command
     end
 
     opt.on("-v", "--version", "Show version\n") do
@@ -138,7 +136,7 @@ module Procodile
   end
 
   begin
-    if command && command != "help"
+    if valid_command && valid_command != "help"
       cli.config = Config.new(ap.root || "", ap.procfile)
 
       if cli.config.user && ENV["USER"] != cli.config.user
