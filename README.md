@@ -1,3 +1,6 @@
+# This is a full feature fork of original (Ruby version) procodile rewritten use Crystal!
+
+
 # Procodile 🐊
 
 Running & deploying Ruby apps to places like [Viaduct](https://viaduct.io) & Heroku is really easy but running processes on actual servers is less fun. Procodile aims to take some the stress out of running your Ruby/Rails apps and give you some of the useful process management features you get from the takes of the PaaS providers.
