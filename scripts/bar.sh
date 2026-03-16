@@ -3,7 +3,7 @@
 set -eu
 
 while true; do
-    echo "$(date) - Hello, World!" 1>&2
+    echo "$(date) - Hello, bar" 1>&2
     echo $foo
     echo $bar
     echo $PORT

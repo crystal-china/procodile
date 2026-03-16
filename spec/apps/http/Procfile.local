@@ -1,0 +1,8 @@
+app_name: http
+
+processes:
+  http:
+    quantity: 2
+    allocate_port_from: 7381
+    proxy_port: 3829
+    proxy_address: 0.0.0.0

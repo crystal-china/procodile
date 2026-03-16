@@ -102,7 +102,11 @@ module Procodile
 
       tag = @tag ? " (tagged with #{@tag})" : ""
 
-      Procodile.log(description, "Started with PID #{@pid}#{tag}", @process.log_color)
+      Procodile.log(
+        description,
+        "Started with PID #{@pid}#{tag}",
+        @process.log_color
+      )
 
       if self.process.log_path && io.nil?
         Procodile.log(
