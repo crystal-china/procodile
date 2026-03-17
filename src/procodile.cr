@@ -139,12 +139,16 @@ module Procodile
     if valid_command && valid_command != "help"
       cli.config = Config.new(ap.root || "", ap.procfile)
 
-      if cli.config.user && ENV["USER"] != cli.config.user
-        STDERR.puts "Procodile must be run as #{cli.config.user}. Re-executing as #{cli.config.user}...".colorize.red
+      user = cli.config.user
+
+      if user && user != ENV["USER"]
+        STDERR.puts "Procodile must be run as #{user}. Re-executing as #{cli.config.user}...".colorize.red
+
+        exe = ::Process.executable_path || $0
 
         ::Process.exec(
-          command: "sudo -H -u #{cli.config.user} -- #{$0} #{ORIGINAL_ARGV.join(" ")}",
-          shell: true
+          "sudo",
+          ["-H", "-u", user, "--", exe] + ORIGINAL_ARGV
         )
       end
     end

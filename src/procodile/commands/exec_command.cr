@@ -10,7 +10,7 @@ module Procodile
         desired_command = command || ARGV[1..].join(" ")
 
         if (prefix = @config.exec_prefix)
-          desired_command = "#{prefix} #{desired_command}"
+          desired_command = ([prefix, desired_command].join(" "))
         end
 
         if desired_command.empty?
@@ -27,10 +27,12 @@ module Procodile
           end
 
           begin
+            argv = ::Process.parse_arguments(desired_command)
+
             ::Process.exec(
-              command: desired_command,
+              argv[0],
+              argv[1..],
               env: environment,
-              shell: true,
               chdir: @config.root
             )
           rescue e : RuntimeError

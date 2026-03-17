@@ -81,9 +81,11 @@ module Procodile
 
       @tag = @supervisor.tag.dup if @supervisor.tag
 
+      argv = ::Process.parse_arguments(@process.command)
+
       process = ::Process.new(
-        command: @process.command,
-        shell: true,
+        argv[0],
+        argv[1..],
         chdir: @process.config.root,
         env: environment_variables,
         output: log_destination,
