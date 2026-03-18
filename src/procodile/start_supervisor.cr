@@ -71,7 +71,7 @@ Cannot start unless things are clean."
           Procodile.log "system", "Failed to set process title: #{ex.message}"
         end
       {% elsif flag?(:darwin) %}
-        LibProcTitle.setproctitle("%s", title)
+        LibC.setprogname(title)
       {% else %}
         Procodile.log "system", "Setting process title is not supported on this platform"
       {% end %}
@@ -79,8 +79,8 @@ Cannot start unless things are clean."
   end
 
   {% if flag?(:darwin) %}
-    lib LibProcTitle
-      fun setproctitle(fmt : LibC::Char*, ...) : Int32
+    lib LibC
+      fun setprogname(progname : UInt8*) : Void
     end
   {% end %}
 end
