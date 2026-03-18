@@ -74,7 +74,7 @@ YAML
           response = socket.gets
           socket.close
           !response.nil?
-        rescue
+        rescue Socket::Error | IO::Error
           false
         end
       end.should be_true

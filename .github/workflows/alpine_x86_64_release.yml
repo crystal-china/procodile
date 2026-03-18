@@ -28,6 +28,9 @@ jobs:
       - name: Disable git safe repository checks
         run: git config --global --add safe.directory '*'
 
+      - name: Install test runtime dependencies
+        run: apk add --no-cache ruby
+
       - name: Run tests
         run: crystal spec --order=random --error-on-warnings
 
