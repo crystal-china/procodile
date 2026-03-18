@@ -27,7 +27,6 @@ module Procodile
   cli = CLI.new
   probe_argv = ORIGINAL_ARGV.dup
 
-
   OptionParser.parse(probe_argv) do |opt|
     opt.on("-r", "--root PATH", "The path to the root of your application") { }
     opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }

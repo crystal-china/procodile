@@ -51,7 +51,7 @@ module Procodile
       if self.class.commands.has_key?(command)
         self.class.commands[command].callable.call
       else
-        raise Error.new("Invalid command \`#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
+        raise Error.new("Invalid command `#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
       end
     end
 
