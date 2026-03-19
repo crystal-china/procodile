@@ -8,6 +8,10 @@ shards:
     git: https://github.com/petoem/inotify.cr.git
     version: 1.2.0+git.commit.77b9c80f97247982754bab5fa72cbdadc61961df
 
+  lucky_env:
+    git: https://github.com/luckyframework/lucky_env.git
+    version: 0.3.0
+
   tail:
     git: https://github.com/j8r/tail.cr.git
     version: 0.3.1
