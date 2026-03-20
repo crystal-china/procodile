@@ -508,6 +508,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
   struct Supervisor::RunOptions
     property port_allocations : Hash(String, Int32)?
+    property env_file : String?
 
     property? proxy : Bool?
     property? foreground : Bool
@@ -520,6 +521,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @stop_when_none : Bool?,
       @force_single_log : Bool?,
       @port_allocations : Hash(String, Int32)?,
+      @env_file : String?,
       @proxy : Bool?,
       @foreground : Bool = false,
     )

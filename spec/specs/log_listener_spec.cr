@@ -8,6 +8,7 @@ describe "log listener lifecycle" do
       stop_when_none: nil,
       force_single_log: nil,
       port_allocations: nil,
+      env_file: nil,
       proxy: nil,
       foreground: false
     )

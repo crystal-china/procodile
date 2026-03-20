@@ -89,6 +89,14 @@ module Procodile
             cli.options.stop_when_none = true
             cli.options.proxy = true
           end
+
+          opts.on(
+            "-e [ENV_FILE]",
+            "--env [ENV_FILE]",
+            "Read from env file, default: (.env)"
+          ) do |env_file|
+            cli.options.env_file = env_file || ".env"
+          end
         end
       end
 

@@ -25,7 +25,7 @@ loop do
     body =
       if path == "/ping"
         [
-          "pong",
+          ENV['PONG'],
           "path=#{path}",
           "x-forwarded-for=#{headers['X-Forwarded-For']}",
           "x-real-ip=#{headers['X-Real-IP']}",

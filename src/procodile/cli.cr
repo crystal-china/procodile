@@ -147,6 +147,7 @@ module Procodile
       property? stop_supervisor : Bool?
       property? wait_until_supervisor_stopped : Bool?
       property? reload : Bool?
+      property env_file : String?
       property tag : String?
       property port_allocations : Hash(String, Int32)?
       property processes : String? # A String split by comma.

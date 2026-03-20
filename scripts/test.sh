@@ -71,7 +71,7 @@ bin/procodile -r spec/apps/http kill && sleep 3
 header '(1) Checking procodile start ...'
 bin/procodile start && sleep 3
 header '(1.1) Checking procodile -r spec/apps/http/ start ...'
-bin/procodile -r spec/apps/http start --proxy && sleep 3
+bin/procodile -r spec/apps/http start --proxy -e .env && sleep 3
 header '(2) Checking procodile status --simple ...'
 bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
 bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
