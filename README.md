@@ -1,4 +1,4 @@
-# This is a full feature fork of original (Ruby version) procodile rewritten use Crystal!
+# This is a full feature fork of original (Ruby version) [procodile](https://github.com/adamcooke/procodile) rewritten use Crystal!
 
 
 # Procodile 🐊
@@ -10,8 +10,6 @@ Procodile is a bit like [Foreman](https://github.com/ddollar/foreman) but things
 Procodile works out of the box with your existing `Procfile`.
 
 * [Watch a quick screencast](https://vimeo.com/188041935)
-* [Read documentation](https://github.com/adamcooke/procodile/wiki)
-* [View on RubyGems](https://rubygems.org/gems/procodile)
-* [Check the CHANGELOG](https://github.com/adamcooke/procodile/blob/master/CHANGELOG.md)
+* [Read documentation](https://github.com/crystal-china/procodile/wiki)
 
-![Screenshot](https://share.adam.ac/16/cAZRKUM7.png)
+![Screenshot](procodile.png)
