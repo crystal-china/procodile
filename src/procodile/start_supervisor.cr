@@ -13,6 +13,7 @@ module Procodile
         proxy: options.proxy?,
         force_single_log: options.foreground?,
         port_allocations: options.port_allocations,
+        env_file: options.env_file,
         foreground: !!options.foreground?
       )
 

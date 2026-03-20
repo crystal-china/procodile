@@ -1,6 +1,7 @@
 require "./start_supervisor"
 require "./supervisor"
 require "./tcp_proxy"
+require "lucky_env"
 
 module Procodile
   class Instance
@@ -433,11 +434,20 @@ module Procodile
     # Return an array of environment variables that should be set
     #
     private def environment_variables : Hash(String, String)
-      vars = @process.environment_variables.merge({
+      vars = @process.environment_variables
+
+      if (env_file = @supervisor.run_options.env_file)
+        path = Path.new(env_file)
+        file = path.absolute? ? env_file : File.join(@process.config.root, env_file)
+        vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
+      end
+
+      vars = vars.merge({
         "PROC_NAME" => self.description,
         "PID_FILE"  => self.pid_file_path,
         "APP_ROOT"  => @process.config.root,
       })
+
       vars["PORT"] = @port.to_s if @port
 
       vars

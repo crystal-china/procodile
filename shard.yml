@@ -12,6 +12,8 @@ targets:
 dependencies:
   tail:
     github: j8r/tail.cr
+  lucky_env:
+    github: luckyframework/lucky_env
 
 development_dependencies:
   ameba:
