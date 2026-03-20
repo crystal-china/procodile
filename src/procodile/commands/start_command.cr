@@ -95,7 +95,7 @@ module Procodile
             "--env [ENV_FILE]",
             "Read from env file, default: (.env)"
           ) do |env_file|
-            cli.options.env_file = env_file || ".env"
+            cli.options.env_file = env_file.presence || ".env"
           end
         end
       end
