@@ -1,7 +1,6 @@
-# This is a full feature fork of original (Ruby version) [procodile](https://github.com/adamcooke/procodile) rewritten use Crystal!
-
-
 # Procodile 🐊
+
+## Procodile is a full-featured fork of the original [procodile (Ruby)](https://github.com/adamcooke/procodile), rewritten in Crystal and extended with additional features. All credit goes to the original author.
 
 Running & deploying Ruby apps to places like [Viaduct](https://viaduct.io) & Heroku is really easy but running processes on actual servers is less fun. Procodile aims to take some the stress out of running your Ruby/Rails apps and give you some of the useful process management features you get from the takes of the PaaS providers.
 
