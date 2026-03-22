@@ -14,6 +14,8 @@ dependencies:
     github: j8r/tail.cr
   lucky_env:
     github: luckyframework/lucky_env
+  cron_scheduler:
+    github: kostya/cron_scheduler
 
 development_dependencies:
   ameba:
