@@ -98,16 +98,19 @@ module Procodile
       _processes = @options.processes
 
       if _processes
-        processes = _processes.split(",")
+        processes = _processes.split(",").map(&.strip).reject(&.empty?).uniq!
 
         raise Error.new "No process names provided" if processes.empty?
 
-        # processes.each do |process|
-        #  process_name, _ = process.split('.', 2)
-        #  unless @config.process_list.keys.includes?(process_name.to_s)
-        #    raise Error.new "Process '#{process_name}' is not configured. You may need to reload your config."
-        #  end
-        # end
+        @config.reload
+
+        processes.each do |process|
+          process_name, _ = process.split('.', 2)
+
+          unless @config.processes.has_key?(process_name.to_s)
+            raise Error.new "Unknown process '#{process_name}'."
+          end
+        end
 
         processes
       end
