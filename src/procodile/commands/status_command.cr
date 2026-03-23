@@ -109,6 +109,10 @@ module Procodile
 
           if (schedule = process.schedule)
             puts "#{"||".colorize(process.log_color)} Schedule            #{schedule}"
+            puts "#{"||".colorize(process.log_color)} Last Started At     #{formatted_timestamp(process.last_started_at)}" if process.last_started_at
+            puts "#{"||".colorize(process.log_color)} Last Finished At    #{formatted_timestamp(process.last_finished_at)}" if process.last_finished_at
+            puts "#{"||".colorize(process.log_color)} Last Exit Status    #{process.last_exit_status}" unless process.last_exit_status.nil?
+            puts "#{"||".colorize(process.log_color)} Last Run Duration   #{formatted_duration(process.last_run_duration)}" if process.last_run_duration
           end
 
           if instances.empty?
@@ -136,7 +140,29 @@ module Procodile
         if timestamp > 1.day.ago
           timestamp.to_s("%H:%M")
         else
-          timestamp.to_s("%d/%m/%Y")
+          timestamp.to_s("%Y-%m-%d")
+        end
+      end
+
+      private def formatted_duration(duration : Float64?) : String
+        return "" if duration.nil?
+
+        total_milliseconds = (duration * 1000).round.to_i64
+        total_seconds = total_milliseconds // 1000
+
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        milliseconds = total_milliseconds % 1000
+
+        if hours > 0
+          "#{hours}h#{minutes}m#{seconds}s"
+        elsif minutes > 0
+          "#{minutes}m#{seconds}s"
+        elsif seconds > 0
+          milliseconds > 0 ? "#{seconds}.#{milliseconds.to_s.rjust(3, '0')}s" : "#{seconds}s"
+        else
+          "#{milliseconds}ms"
         end
       end
     end

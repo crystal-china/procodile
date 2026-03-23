@@ -56,6 +56,10 @@ module Procodile
 
     getter name : String
     getter schedule : String?
+    getter last_started_at : Int64?
+    getter last_finished_at : Int64?
+    getter last_exit_status : Int32?
+    getter last_run_duration : Float64?
     getter log_color : Colorize::ColorANSI
     getter quantity : Int32
     getter max_respawns : Int32
@@ -70,6 +74,10 @@ module Procodile
     def initialize(
       @name : String,
       @schedule : String?,
+      @last_started_at : Int64?,
+      @last_finished_at : Int64?,
+      @last_exit_status : Int32?,
+      @last_run_duration : Float64?,
       @log_color : Colorize::ColorANSI,
       @quantity : Int32,
       @max_respawns : Int32,

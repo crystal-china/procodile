@@ -9,6 +9,10 @@ module Procodile
     getter config : Config
     getter name : String
     property schedule : String?
+    property last_started_at : Time?
+    property last_finished_at : Time?
+    property last_exit_status : Int32?
+    property last_run_duration : Float64?
 
     property command : String
     property options : Procodile::Process::Option
@@ -171,6 +175,10 @@ module Procodile
       ControlClient::ProcessStatus.new(
         name: self.name,
         schedule: self.schedule,
+        last_started_at: @last_started_at ? @last_started_at.not_nil!.to_unix : nil,
+        last_finished_at: @last_finished_at ? @last_finished_at.not_nil!.to_unix : nil,
+        last_exit_status: @last_exit_status,
+        last_run_duration: @last_run_duration,
         log_color: self.log_color,
         quantity: self.quantity,
         max_respawns: self.max_respawns,

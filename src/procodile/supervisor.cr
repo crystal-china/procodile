@@ -5,6 +5,8 @@ require "./signal_handler"
 module Procodile
   class Supervisor
     @started_at : Time?
+    @scheduled_jobs : Hash(String, String) = {} of String => String
+    @scheduled_running : Hash(String, Bool) = {} of String => Bool
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -78,6 +80,7 @@ module Procodile
 
       @config.processes.each do |name, process|
         next if process_names && !process_names.includes?(name.to_s) # Not a process we want
+        next if process.scheduled?
         next if @processes[process]? && !@processes[process].empty?  # Process type already running
 
         instances = process.generate_instances(self)
@@ -180,6 +183,7 @@ module Procodile
 
       @config.reload
       @tcp_proxy.try &.sync_processes(@config.processes.values)
+      sync_scheduled_processes
     end
 
     def check_concurrency(
@@ -221,6 +225,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       messages = [] of Message
 
       processes.each do |process, process_instances|
+        next if process.scheduled?
+
         unless process.correct_quantity?(process_instances.size)
           messages << Message.new(
             type: :incorrect_quantity,
@@ -284,6 +290,74 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
         stop_supervisor
       end
+    end
+
+    private def sync_scheduled_processes : Nil
+      wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
+        next unless process.scheduled?
+
+        hash[name] = process.schedule.not_nil!
+      end
+
+      @scheduled_jobs.keys.each do |name|
+        next if wanted.has_key?(name)
+
+        @scheduled_jobs.delete(name)
+      end
+
+      wanted.each do |name, schedule|
+        next if @scheduled_jobs[name]? == schedule
+
+        @scheduled_jobs[name] = schedule
+        spawn watch_scheduled_process(name, schedule)
+      end
+    end
+
+    private def watch_scheduled_process(name : String, schedule : String) : Nil
+      parser = CronParser.new(schedule)
+      previous_next_time = Time.local - 1.minute
+
+      loop do
+        break unless scheduled_job_active?(name, schedule)
+
+        now = Time.local
+        next_time = parser.next(now)
+        next_time = parser.next(next_time) if next_time == previous_next_time
+        previous_next_time = next_time
+
+        sleep(next_time - now)
+
+        next unless scheduled_job_active?(name, schedule)
+
+        run_scheduled_process(name)
+      end
+    end
+
+    private def run_scheduled_process(name : String) : Nil
+      process = @config.processes[name]?
+      return unless process && process.scheduled?
+
+      if @scheduled_running[name]?
+        Procodile.log "system", "Skipping scheduled run for #{name}; previous run is still active"
+        return
+      end
+
+      @scheduled_running[name] = true
+
+      Procodile.log "system", "Running scheduled process #{name}"
+
+      process.create_instance(self).start
+    rescue ex
+      @scheduled_running.delete(name)
+      Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
+    end
+
+    private def scheduled_job_active?(name : String, schedule : String) : Bool
+      @scheduled_jobs[name]? == schedule
+    end
+
+    private def scheduled_process_finished(instance : Instance) : Nil
+      @scheduled_running.delete(instance.process.name)
     end
 
     private def watch_for_output : Nil
@@ -370,6 +444,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
       @processes.each do |process, instances|
         next if processes && !processes.includes?(process.name)
+        next if process.scheduled?
 
         if (type.both? || type.stopped?) && instances.size > process.quantity
           quantity_to_stop = instances.size - process.quantity
@@ -399,7 +474,16 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def remove_stopped_instances : Nil
       @processes.each do |_, instances|
         instances.reject! do |instance|
-          if instance.stopping? && !instance.running?
+          if instance.process.scheduled?
+            if !instance.running?
+              instance.on_scheduled_finish
+              scheduled_process_finished(instance)
+
+              true
+            else
+              false
+            end
+          elsif instance.stopping? && !instance.running?
             instance.on_stop
 
             true

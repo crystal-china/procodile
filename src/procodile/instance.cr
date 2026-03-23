@@ -7,7 +7,10 @@ module Procodile
   class Instance
     @stopping_at : Time?
     @started_at : Time?
+    @finished_at : Time?
     @failed_at : Time?
+    @last_exit_status : Int32?
+    @last_run_duration : Float64?
 
     property port : Int32?
     property process : Procodile::Process
@@ -93,7 +96,14 @@ module Procodile
         error: log_destination
       )
 
-      spawn { process.wait }
+      spawn do
+        status = process.wait
+        @last_exit_status = status.exit_code?
+
+        if started_at = @started_at
+          @last_run_duration = (Time.local - started_at).total_seconds
+        end
+      end
 
       @pid = process.pid
 
@@ -120,6 +130,8 @@ module Procodile
       end
 
       @started_at = Time.local
+      @finished_at = nil
+      @process.last_started_at = @started_at
     end
 
     #
@@ -214,6 +226,7 @@ module Procodile
     # Check the status of this process and handle as appropriate.
     #
     def check : Nil
+      return if @process.scheduled?
       return if failed?
 
       # Everything is OK. The process is running.
@@ -268,6 +281,7 @@ module Procodile
     #
     def to_struct : Instance::Config
       started_at = @started_at
+      last_finished_at = @finished_at
 
       Instance::Config.new(
         description: self.description,
@@ -275,6 +289,9 @@ module Procodile
         respawns: self.respawns,
         status: self.status,
         started_at: started_at ? started_at.to_unix : nil,
+        last_finished_at: last_finished_at ? last_finished_at.to_unix : nil,
+        last_exit_status: @last_exit_status,
+        last_run_duration: @last_run_duration,
         tag: self.tag,
         port: @port,
         foreground: @supervisor.run_use_foreground?
@@ -339,6 +356,18 @@ module Procodile
     def on_stop : Nil
       @started_at = nil
       @stopped = true
+
+      tidy
+    end
+
+    def on_scheduled_finish : Nil
+      @finished_at = Time.local
+      @pid = nil
+      @stopping_at = nil
+      @failed_at = nil
+      @process.last_finished_at = @finished_at
+      @process.last_exit_status = @last_exit_status
+      @process.last_run_duration = @last_run_duration
 
       tidy
     end
@@ -507,6 +536,9 @@ module Procodile
     getter respawns : Int32
     getter status : Instance::Status
     getter started_at : Int64?
+    getter last_finished_at : Int64?
+    getter last_exit_status : Int32?
+    getter last_run_duration : Float64?
     getter tag : String?
     getter port : Int32?
     getter? foreground : Bool
@@ -517,6 +549,9 @@ module Procodile
       @respawns : Int32,
       @status : Instance::Status,
       @started_at : Int64?,
+      @last_finished_at : Int64?,
+      @last_exit_status : Int32?,
+      @last_run_duration : Float64?,
       @tag : String?,
       @port : Int32?,
 
