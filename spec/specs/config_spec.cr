@@ -220,4 +220,48 @@ processes:
       File.write(config.options_path, saved_options_content)
     end
   end
+
+  context "scheduled process separators" do
+    it "accepts __at__ and __AT__" do
+      app_root = File.join("/tmp", "procodile-schedule-separators-#{Random.rand(1_000_000)}")
+      FileUtils.mkdir_p(app_root)
+
+      begin
+        File.write(
+          File.join(app_root, "Procfile"),
+          <<-YAML
+"job1__at__*/5 * * * * *": echo lower
+"job2__AT__*/10 * * * * *": echo upper
+YAML
+        )
+
+        config = Procodile::Config.new(root: app_root)
+
+        config.processes["job1"].schedule.should eq "*/5 * * * * *"
+        config.processes["job2"].schedule.should eq "*/10 * * * * *"
+      ensure
+        FileUtils.rm_rf(app_root)
+      end
+    end
+
+    it "does not treat mixed-case __aT__ as a schedule separator" do
+      app_root = File.join("/tmp", "procodile-schedule-mixed-case-#{Random.rand(1_000_000)}")
+      FileUtils.mkdir_p(app_root)
+
+      begin
+        File.write(
+          File.join(app_root, "Procfile"),
+          %Q("job__aT__*/5 * * * * *": echo mixed\n)
+        )
+
+        config = Procodile::Config.new(root: app_root)
+
+        config.processes.has_key?("job").should be_false
+        config.processes.has_key?("job__aT__*/5 * * * * *").should be_true
+        config.processes["job__aT__*/5 * * * * *"].schedule.should be_nil
+      ensure
+        FileUtils.rm_rf(app_root)
+      end
+    end
+  end
 end
