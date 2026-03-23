@@ -262,7 +262,7 @@ Did you forget to add commands, or was it empty by mistake?"
       return unless process_options
 
       process_options.each_key do |name|
-        unless process_list.has_key?(name)
+        if !process_list.has_key?(name)
           raise Error.new("Unknown process '#{name}' in #{source_path}.")
         end
       end
