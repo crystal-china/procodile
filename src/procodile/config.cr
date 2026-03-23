@@ -216,7 +216,7 @@ Did you forget to add commands, or was it empty by mistake?"
       raw_entries.each do |raw_name, command|
         name, schedule = parse_process_name_and_schedule(raw_name)
 
-        if commands.has_key?(name)
+        if commands.keys.any? { |key| key.compare(name, case_insensitive: true) == 0 }
           raise Error.new("Duplicate process name '#{name}' in Procfile")
         end
 
