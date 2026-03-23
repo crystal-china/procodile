@@ -595,18 +595,19 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     property env_file : String?
 
     property? proxy : Bool?
-    property? foreground : Bool
     property? force_single_log : Bool?
     property? respawn : Bool?
     property? stop_when_none : Bool?
 
+    property? foreground : Bool
+
     def initialize(
-      @respawn : Bool?,
-      @stop_when_none : Bool?,
-      @force_single_log : Bool?,
-      @port_allocations : Hash(String, Int32)?,
-      @env_file : String?,
-      @proxy : Bool?,
+      @port_allocations : Hash(String, Int32)? = nil,
+      @env_file : String? = nil,
+      @proxy : Bool? = nil,
+      @force_single_log : Bool? = nil,
+      @respawn : Bool? = nil,
+      @stop_when_none : Bool? = nil,
       @foreground : Bool = false,
     )
     end
