@@ -1,5 +1,30 @@
 require "../spec_helper"
 
+private def wait_for_control_socket(sock_path : String) : Bool
+  wait_until(5.seconds, 50.milliseconds) do
+    begin
+      UNIXSocket.new(sock_path).close
+      true
+    rescue Socket::Error | File::Error
+      false
+    end
+  end
+end
+
+private def run_status_command(app_root : String) : String
+  output = IO::Memory.new
+  status = Process.run(
+    "crystal",
+    ["run", "src/procodile.cr", "--", "-r", app_root, "status"],
+    output: output,
+    error: output,
+    env: {"CRYSTAL_CACHE_DIR" => "/tmp/crystal-cache"}
+  )
+
+  status.success?.should be_true
+  output.to_s
+end
+
 describe "scheduled processes" do
   it "runs on schedule, records last run details, and skips overlap" do
     app_root = File.join("/tmp", "procodile-scheduled-#{Random.rand(1_000_000)}")
@@ -73,8 +98,53 @@ RUBY
     end
   end
 
-  it "stops future runs and start_processes reenables schedule without running immediately" do
-    app_root = File.join("/tmp", "procodile-scheduled-stop-#{Random.rand(1_000_000)}")
+  it "prints scheduled processes without daemon-only status fields" do
+    app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-status-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "scheduled_task.rb"),
+      <<-'RUBY'
+File.open("schedule.out", "a") do |file|
+  file.puts "tick"
+end
+RUBY
+    )
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      %Q("job__at__*/5 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      File.write(config.supervisor_pid_path, Process.pid.to_s)
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).should be_empty
+
+      output = run_status_command(app_root)
+
+      output.should contain("|| job")
+      output.should contain("Schedule            */5 * * * * *")
+      output.should contain("No scheduled runs in progress.")
+      output.should_not contain("Quantity            ")
+      output.should_not contain("Respawning          ")
+      output.should_not contain("Restart mode        ")
+      output.should_not contain("Address/Port        ")
+    ensure
+      File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      supervisor.reload_config
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
+  it "stops future runs through the control socket and start_processes reenables schedule without running immediately" do
+    app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-stop-#{Random.rand(1_000_000)}")
     FileUtils.mkdir_p(File.join(app_root, "pids"))
 
     File.write(
@@ -96,6 +166,9 @@ RUBY
     process = config.processes["job"]
 
     begin
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
       supervisor.start_processes(nil).should be_empty
 
       output_file = File.join(app_root, "schedule.out")
@@ -104,12 +177,14 @@ RUBY
         File.exists?(output_file) && File.read_lines(output_file).size >= 1
       end.should be_true
 
-      process.last_finished_at.should_not be_nil
+      wait_until(5.seconds, 100.milliseconds) do
+        !process.last_finished_at.nil?
+      end.should be_true
 
       first_lines = File.read_lines(output_file)
       first_lines.size.should be >= 1
 
-      supervisor.stop(Procodile::Supervisor::Options.new(processes: ["job"]))
+      Procodile::ControlClient.run(config.sock_path, "stop", processes: ["job"])
 
       sleep 2.2.seconds
 
@@ -146,4 +221,55 @@ RUBY
       FileUtils.rm_rf(app_root)
     end
   end
+
+  it "does not execute immediately when restarted through the control socket" do
+    app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-restart-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "scheduled_task.rb"),
+      <<-'RUBY'
+File.open("schedule.out", "a") do |file|
+  file.puts "tick"
+end
+RUBY
+    )
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      %Q("job__at__*/1 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).should be_empty
+
+      output_file = File.join(app_root, "schedule.out")
+      wait_until(8.seconds, 100.milliseconds) do
+        File.exists?(output_file) && File.read_lines(output_file).size >= 1
+      end.should be_true
+
+      first_run_count = File.read_lines(output_file).size
+
+      Procodile::ControlClient.run(config.sock_path, "restart", processes: ["job"])
+
+      sleep 0.3.seconds
+
+      File.read_lines(output_file).size.should eq(first_run_count)
+
+      wait_until(5.seconds, 100.milliseconds) do
+        File.read_lines(output_file).size > first_run_count
+      end.should be_true
+    ensure
+      File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      supervisor.reload_config
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
 end
