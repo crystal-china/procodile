@@ -7,6 +7,7 @@ module Procodile
     @started_at : Time?
     @scheduled_jobs : Hash(String, String) = {} of String => String
     @scheduled_running : Hash(String, Bool) = {} of String => Bool
+    @disabled_scheduled_jobs : Hash(String, Bool) = {} of String => Bool
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -77,11 +78,13 @@ module Procodile
       instances_started = [] of Instance
 
       reload_config
+      enable_scheduled_processes(scheduled_processes_for(process_names))
+      sync_scheduled_processes
 
       @config.processes.each do |name, process|
         next if process_names && !process_names.includes?(name.to_s) # Not a process we want
         next if process.scheduled?
-        next if @processes[process]? && !@processes[process].empty?  # Process type already running
+        next if @processes[process]? && !@processes[process].empty? # Process type already running
 
         instances = process.generate_instances(self)
         instances.each &.start
@@ -97,6 +100,8 @@ module Procodile
       reload_config
 
       processes = options.processes
+      disable_scheduled_processes(scheduled_processes_for(processes))
+      sync_scheduled_processes
       instances_stopped = [] of Instance
 
       if processes.nil?
@@ -135,6 +140,8 @@ module Procodile
       processes = options.processes
 
       reload_config
+      enable_scheduled_processes(scheduled_processes_for(processes))
+      sync_scheduled_processes
 
       if processes.nil?
         instances = @processes.values.flatten
@@ -301,6 +308,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def sync_scheduled_processes : Nil
       wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
+        next if @disabled_scheduled_jobs[name]?
 
         hash[name] = process.schedule.not_nil!
       end
@@ -364,6 +372,31 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def scheduled_process_finished(instance : Instance) : Nil
       @scheduled_running.delete(instance.process.name)
+    end
+
+    private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
+      selected = if process_names
+                   process_names.map do |name|
+                     process_name = name.split('.', 2).first
+                     @config.processes[process_name]
+                   end
+                 else
+                   @config.processes.values
+                 end
+
+      selected.select(&.scheduled?)
+    end
+
+    private def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
+      processes.each do |process|
+        @disabled_scheduled_jobs.delete(process.name)
+      end
+    end
+
+    private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
+      processes.each do |process|
+        @disabled_scheduled_jobs[process.name] = true
+      end
     end
 
     private def watch_for_output : Nil

@@ -105,7 +105,7 @@ module Procodile
         @config.reload
 
         processes.each do |process|
-          process_name, _ = process.split('.', 2)
+          process_name = process.split('.', 2).first
 
           unless @config.processes.has_key?(process_name.to_s)
             raise Error.new "Unknown process '#{process_name}'."
