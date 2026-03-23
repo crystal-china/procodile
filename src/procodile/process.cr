@@ -8,6 +8,7 @@ module Procodile
 
     getter config : Config
     getter name : String
+    property schedule : String?
 
     property command : String
     property options : Procodile::Process::Option
@@ -21,7 +22,12 @@ module Procodile
       @name : String,
       @command : String,
       @options : Procodile::Process::Option = Procodile::Process::Option.new,
+      @schedule : String? = nil,
     )
+    end
+
+    def scheduled? : Bool
+      !@schedule.nil?
     end
 
     #
@@ -164,6 +170,7 @@ module Procodile
     def to_struct : ControlClient::ProcessStatus
       ControlClient::ProcessStatus.new(
         name: self.name,
+        schedule: self.schedule,
         log_color: self.log_color,
         quantity: self.quantity,
         max_respawns: self.max_respawns,
@@ -236,6 +243,8 @@ struct Procodile::Process::Option
 
   # Return the network protocol for this process
   property network_protocol : String?
+
+  property at : String?
 
   property env : Hash(String, String) = {} of String => String
 

@@ -107,6 +107,10 @@ module Procodile
           puts "#{"||".colorize(process.log_color)} Log path            #{process.log_path || "none specified"}"
           puts "#{"||".colorize(process.log_color)} Address/Port        #{port}"
 
+          if (schedule = process.schedule)
+            puts "#{"||".colorize(process.log_color)} Schedule            #{schedule}"
+          end
+
           if instances.empty?
             puts "#{"||".colorize(process.log_color)} No processes running."
           else

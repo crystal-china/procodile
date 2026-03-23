@@ -55,6 +55,7 @@ module Procodile
     include JSON::Serializable
 
     getter name : String
+    getter schedule : String?
     getter log_color : Colorize::ColorANSI
     getter quantity : Int32
     getter max_respawns : Int32
@@ -68,6 +69,7 @@ module Procodile
 
     def initialize(
       @name : String,
+      @schedule : String?,
       @log_color : Colorize::ColorANSI,
       @quantity : Int32,
       @max_respawns : Int32,

@@ -11,7 +11,9 @@ module Procodile
       Colorize::ColorANSI::Blue,    # 34 蓝
     ]
 
-    getter process_list : Hash(String, String) { load_process_list_from_file }
+    getter procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?)) { parse_procfile_entries }
+    getter process_list : Hash(String, String) { procfile_entries[:commands] }
+    getter process_schedules : Hash(String, String?) { procfile_entries[:schedules] }
     getter processes : Hash(String, Procodile::Process) { {} of String => Procodile::Process }
 
     getter options : Config::Option { load_options_from_file }
@@ -68,7 +70,9 @@ module Procodile
       @process_options = nil
       @local_process_options = nil
 
+      @procfile_entries = nil
       @process_list = nil
+      @process_schedules = nil
       @environment_variables = nil
       @loaded_at = nil
 
@@ -84,6 +88,7 @@ module Procodile
             end
 
             process.options = options_for_process(name)
+            process.schedule = schedule_for_process(name)
           else
             Procodile.log "system", "#{name} has been added to the Procfile. Adding it."
             processes[name] = create_process(name, command, COLORS[processes.size.divmod(COLORS.size)[1]])
@@ -166,17 +171,37 @@ Procfile. It will be removed when it is stopped."
       "#{procfile_path}.local"
     end
 
+    private def schedule_for_process(name : String) : String?
+      options_schedule = options_for_process(name).at
+      procfile_schedule = process_schedules[name]?
+
+      if procfile_schedule && options_schedule
+        Procodile.log(
+          "system",
+          "#{name} defines schedule in both Procfile and Procfile.options/.local; using options value #{options_schedule.inspect}"
+        )
+      end
+
+      options_schedule || procfile_schedule
+    end
+
     private def create_process(
       name : String,
       command : String,
       log_color : Colorize::ColorANSI,
     ) : Procodile::Process
-      process = Procodile::Process.new(self, name, command, options_for_process(name))
+      process = Procodile::Process.new(
+        self,
+        name,
+        command,
+        options_for_process(name),
+        schedule_for_process(name)
+      )
       process.log_color = log_color
       process
     end
 
-    private def load_process_list_from_file : Hash(String, String)
+    private def parse_procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?))
       content = File.read(procfile_path)
 
       if content.blank?
@@ -184,7 +209,32 @@ Procfile. It will be removed when it is stopped."
 Did you forget to add commands, or was it empty by mistake?"
       end
 
-      Hash(String, String).from_yaml(content)
+      raw_entries = Hash(String, String).from_yaml(content)
+      commands = {} of String => String
+      schedules = {} of String => String?
+
+      raw_entries.each do |raw_name, command|
+        name, schedule = parse_process_name_and_schedule(raw_name)
+
+        if commands.has_key?(name)
+          raise Error.new("Duplicate process name '#{name}' in Procfile")
+        end
+
+        commands[name] = command
+        schedules[name] = schedule
+      end
+
+      {commands: commands, schedules: schedules}
+    end
+
+    private def parse_process_name_and_schedule(raw_name : String) : Tuple(String, String?)
+      match = raw_name.match(/\A(.+?)__at__(.+)\z/i)
+
+      if match
+        {match[1], match[2].strip}
+      else
+        {raw_name, nil}
+      end
     end
 
     private def load_options_from_file : Config::Option
