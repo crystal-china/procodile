@@ -100,9 +100,11 @@ module Procodile
         status = process.wait
         @last_exit_status = status.exit_code?
 
-        if started_at = @started_at
+        if (started_at = @started_at)
           @last_run_duration = (Time.local - started_at).total_seconds
         end
+
+        @supervisor.finish_scheduled_instance(self) if @process.scheduled?
       end
 
       @pid = process.pid

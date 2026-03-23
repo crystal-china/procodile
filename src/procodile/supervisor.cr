@@ -272,6 +272,12 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
     end
 
+    def finish_scheduled_instance(instance : Instance) : Nil
+      instance.on_scheduled_finish
+      remove_instance(instance)
+      scheduled_process_finished(instance)
+    end
+
     private def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
       remove_stopped_instances
@@ -474,16 +480,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def remove_stopped_instances : Nil
       @processes.each do |_, instances|
         instances.reject! do |instance|
-          if instance.process.scheduled?
-            if !instance.running?
-              instance.on_scheduled_finish
-              scheduled_process_finished(instance)
-
-              true
-            else
-              false
-            end
-          elsif instance.stopping? && !instance.running?
+          if instance.stopping? && !instance.running?
             instance.on_stop
 
             true
