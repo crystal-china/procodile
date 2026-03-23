@@ -97,26 +97,29 @@ module Procodile
         status.processes.each_with_index do |process, index|
           port = process.proxy_port ? "#{process.proxy_address}:#{process.proxy_port}" : "none"
           instances = status.instances[process.name]
+          scheduled = !process.schedule.nil?
 
           puts unless index == 0
           puts "|| #{process.name}".colorize(process.log_color)
-          puts "#{"||".colorize(process.log_color)} Quantity            #{process.quantity}"
           puts "#{"||".colorize(process.log_color)} Command             #{process.command}"
-          puts "#{"||".colorize(process.log_color)} Respawning          #{process.max_respawns} every #{process.respawn_window} seconds"
-          puts "#{"||".colorize(process.log_color)} Restart mode        #{process.restart_mode}"
           puts "#{"||".colorize(process.log_color)} Log path            #{process.log_path || "none specified"}"
-          puts "#{"||".colorize(process.log_color)} Address/Port        #{port}"
 
-          if (schedule = process.schedule)
+          if scheduled
+            schedule = process.schedule.not_nil!
             puts "#{"||".colorize(process.log_color)} Schedule            #{schedule}"
             puts "#{"||".colorize(process.log_color)} Last Started At     #{formatted_timestamp(process.last_started_at)}" if process.last_started_at
             puts "#{"||".colorize(process.log_color)} Last Finished At    #{formatted_timestamp(process.last_finished_at)}" if process.last_finished_at
             puts "#{"||".colorize(process.log_color)} Last Exit Status    #{process.last_exit_status}" unless process.last_exit_status.nil?
             puts "#{"||".colorize(process.log_color)} Last Run Duration   #{formatted_duration(process.last_run_duration)}" if process.last_run_duration
+          else
+            puts "#{"||".colorize(process.log_color)} Quantity            #{process.quantity}"
+            puts "#{"||".colorize(process.log_color)} Respawning          #{process.max_respawns} every #{process.respawn_window} seconds"
+            puts "#{"||".colorize(process.log_color)} Restart mode        #{process.restart_mode}"
+            puts "#{"||".colorize(process.log_color)} Address/Port        #{port}"
           end
 
           if instances.empty?
-            puts "#{"||".colorize(process.log_color)} No processes running."
+            puts "#{"||".colorize(process.log_color)} #{scheduled ? "No scheduled runs in progress." : "No processes running."}"
           else
             instances.each do |instance|
               print "|| => #{instance.description.ljust(17, ' ')}".colorize(process.log_color)

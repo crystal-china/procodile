@@ -63,14 +63,17 @@ module Procodile
     private def status(options : ControlSession::Options) : String
       instances = {} of String => Array(Instance::Config)
 
-      @supervisor.processes.each do |process, process_instances|
+      @supervisor.config.processes.each do |_, process|
         instances[process.name] = [] of Instance::Config
+      end
+
+      @supervisor.processes.each do |process, process_instances|
         process_instances.each do |instance|
           instances[process.name] << instance.to_struct
         end
       end
 
-      processes = @supervisor.processes.keys.map(&.to_struct)
+      processes = @supervisor.config.processes.values.map(&.to_struct)
 
       loaded_at = @supervisor.config.loaded_at
 
