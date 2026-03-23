@@ -489,6 +489,7 @@ module Procodile
     #
     private def update_pid : Bool
       pid_from_file = self.pid_from_file
+
       if pid_from_file && pid_from_file != @pid
         @pid = pid_from_file
         @started_at = File.info(self.pid_file_path).modification_time

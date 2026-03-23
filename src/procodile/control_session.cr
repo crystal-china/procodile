@@ -73,7 +73,7 @@ module Procodile
         end
       end
 
-      processes = @supervisor.config.processes.values.map(&.to_struct)
+      processes = @supervisor.config.processes.map { |_, v| v.to_struct }
 
       loaded_at = @supervisor.config.loaded_at
 

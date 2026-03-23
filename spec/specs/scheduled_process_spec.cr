@@ -271,5 +271,4 @@ RUBY
       FileUtils.rm_rf(app_root)
     end
   end
-
 end

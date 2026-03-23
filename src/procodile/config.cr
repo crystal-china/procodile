@@ -173,20 +173,6 @@ Procfile. It will be removed when it is stopped."
       "#{procfile_path}.local"
     end
 
-    private def schedule_for_process(name : String) : String?
-      options_schedule = options_for_process(name).at
-      procfile_schedule = process_schedules[name]?
-
-      if procfile_schedule && options_schedule
-        Procodile.log(
-          "system",
-          "#{name} defines schedule in both Procfile and Procfile.options/.local; using options value #{options_schedule.inspect}"
-        )
-      end
-
-      options_schedule || procfile_schedule
-    end
-
     private def create_process(
       name : String,
       command : String,
@@ -203,6 +189,20 @@ Procfile. It will be removed when it is stopped."
       process
     end
 
+    private def schedule_for_process(name : String) : String?
+      options_schedule = options_for_process(name).at
+      procfile_schedule = process_schedules[name]?
+
+      if procfile_schedule && options_schedule
+        Procodile.log(
+          "system",
+          "#{name} defines schedule in both Procfile and Procfile.options/.local; using options value #{options_schedule.inspect}"
+        )
+      end
+
+      options_schedule || procfile_schedule
+    end
+
     private def parse_procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?))
       content = File.read(procfile_path)
 
@@ -217,9 +217,11 @@ Did you forget to add commands, or was it empty by mistake?"
 
       raw_entries.each do |raw_name, command|
         name, schedule = parse_process_name_and_schedule(raw_name)
+        existing_name = commands.keys.find { |key| key.compare(name, case_insensitive: true) == 0 }
 
-        if commands.keys.any? { |key| key.compare(name, case_insensitive: true) == 0 }
-          raise Error.new("Duplicate process name '#{name}' in Procfile")
+        if existing_name
+          raise Error.new("Duplicate process name '#{name}' in Procfile: \
+conflicts with '#{existing_name}' (case-insensitively).")
         end
 
         commands[name] = command
