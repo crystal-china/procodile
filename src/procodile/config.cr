@@ -230,7 +230,7 @@ Did you forget to add commands, or was it empty by mistake?"
     end
 
     private def parse_process_name_and_schedule(raw_name : String) : Tuple(String, String?)
-      match = raw_name.match(/\A(.+?)__at__(.+)\z/i)
+      match = raw_name.match(/\A(.+?)(?:__at__|__AT__)(.+)\z/)
 
       if match
         {match[1], match[2].strip}
