@@ -19,9 +19,11 @@ module Procodile
     getter options : Config::Option { load_options_from_file }
     getter local_options : Config::Option { load_local_options_from_file }
     getter process_options : Hash(String, Procodile::Process::Option) do
+      validate_process_option_keys(options.processes, options_path)
       options.processes || {} of String => Procodile::Process::Option
     end
     getter local_process_options : Hash(String, Procodile::Process::Option) do
+      validate_process_option_keys(local_options.processes, local_options_path)
       local_options.processes || {} of String => Procodile::Process::Option
     end
     getter app_name : String do
@@ -250,6 +252,19 @@ Did you forget to add commands, or was it empty by mistake?"
         Config::Option.from_yaml(File.read(local_options_path))
       else
         Config::Option.new
+      end
+    end
+
+    private def validate_process_option_keys(
+      process_options : Hash(String, Procodile::Process::Option)?,
+      source_path : String,
+    ) : Nil
+      return unless process_options
+
+      process_options.each_key do |name|
+        unless process_list.has_key?(name)
+          raise Error.new("Unknown process '#{name}' in #{source_path}.")
+        end
       end
     end
   end
