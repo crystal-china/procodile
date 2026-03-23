@@ -8,10 +8,6 @@ shards:
     git: https://github.com/kostya/cron_parser.git
     version: 0.4.0
 
-  cron_scheduler:
-    git: https://github.com/kostya/cron_scheduler.git
-    version: 0.4.0
-
   inotify:
     git: https://github.com/petoem/inotify.cr.git
     version: 1.2.0+git.commit.77b9c80f97247982754bab5fa72cbdadc61961df
