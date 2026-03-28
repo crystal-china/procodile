@@ -98,13 +98,16 @@ module Procodile
 
       spawn do
         status = process.wait
-        @last_exit_status = status.exit_code?
 
-        if (started_at = @started_at)
-          @last_run_duration = (Time.local - started_at).total_seconds
+        if @process.scheduled?
+          @last_exit_status = status.exit_code?
+
+          if (started_at = @started_at)
+            @last_run_duration = (Time.local - started_at).total_seconds
+          end
+
+          @supervisor.finish_scheduled_instance(self)
         end
-
-        @supervisor.finish_scheduled_instance(self) if @process.scheduled?
       end
 
       @pid = process.pid
