@@ -98,7 +98,7 @@ module Procodile
       _processes = @options.processes
 
       if _processes
-        processes = _processes.split(",").map(&.strip).reject(&.empty?).uniq!
+        processes = _processes.split(",").uniq!
 
         raise Error.new "No process names provided" if processes.empty?
 
