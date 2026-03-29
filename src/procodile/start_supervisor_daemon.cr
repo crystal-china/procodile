@@ -17,7 +17,7 @@ module Procodile
     def self.daemonize!(config : Config) : Int64
       exe = ::Process.executable_path
 
-      raise Error.new("Cannot daemonize: Process.executable_path is nil") unless exe
+      raise Error.new("Cannot daemonize: failed to determine the current executable path.") unless exe
 
       log_path = File.open(config.log_path, "a")
 

@@ -13,7 +13,7 @@ end
 
 private def run_status_command(app_root : String) : String
   output = IO::Memory.new
-  status = Process.run(
+  status = ::Process.run(
     "crystal",
     ["run", "src/procodile.cr", "--", "-r", app_root, "status"],
     output: output,
@@ -120,7 +120,7 @@ RUBY
     supervisor = Procodile::Supervisor.new(config)
 
     begin
-      File.write(config.supervisor_pid_path, Process.pid.to_s)
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
       Procodile::ControlServer.start(supervisor)
       wait_for_control_socket(config.sock_path).should be_true
 
