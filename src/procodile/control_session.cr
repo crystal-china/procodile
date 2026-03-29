@@ -62,18 +62,23 @@ module Procodile
 
     private def status(options : ControlSession::Options) : String
       instances = {} of String => Array(Instance::Config)
+      processes = [] of Procodile::Process
+      seen_names = {} of String => Bool
 
+      # 先使用配置文件初始化实例（可能是最新修改过的）
       @supervisor.config.processes.each do |_, process|
         instances[process.name] = [] of Instance::Config
+        processes << process
+        seen_names[process.name] = true
       end
 
+      # 使用目前实际存在的替换空列表（可能配置文件已经移除，但是仍在运行）
       @supervisor.processes.each do |process, process_instances|
-        process_instances.each do |instance|
-          instances[process.name] << instance.to_struct
-        end
+        instances[process.name] = process_instances.map(&.to_struct)
+        processes << process unless seen_names[process.name]?
       end
 
-      processes = @supervisor.config.processes.map { |_, v| v.to_struct }
+      processes = processes.map(&.to_struct)
 
       loaded_at = @supervisor.config.loaded_at
 

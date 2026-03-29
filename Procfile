@@ -1,4 +1,4 @@
-app1: sh scripts/../scripts/foo.sh
-app2: sh scripts/../scripts/foo.sh
-app3: sh scripts/../scripts/foo.sh
-app4__at__*/5 * * * * *: fd . -S +500M /home/zw963
+app1: bash ./scripts/../scripts/foo.sh
+app2: bash ./scripts/../scripts/foo.sh
+app3: bash ./scripts/../scripts/foo.sh
+app4__at__*/10 * * * * *: sh scripts/../scripts/cron.sh

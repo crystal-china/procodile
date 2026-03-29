@@ -27,9 +27,10 @@ function init_procfile () {
     mkdir -p pids/new_pids
 
     cat <<HEREDOC > Procfile
-app1: sh ${ROOT}/scripts/foo.sh
-app2: sh ${ROOT}/scripts/foo.sh
-app3: sh ${ROOT}/scripts/foo.sh
+app1: bash ${ROOT}/scripts/foo.sh
+app2: bash ${ROOT}/scripts/foo.sh
+app3: bash ${ROOT}/scripts/foo.sh
+app4__at__*/10 * * * * *: sh scripts/../scripts/cron.sh
 HEREDOC
 
     cat <<'HEREDOC' > Procfile.local
@@ -67,16 +68,25 @@ which shards && [ -f shard.yml ] && shards build
 header "Make sure print \`(15) Successful' to pass the test."
 bin/procodile
 bin/procodile kill && sleep 3  # ensure kill before test.
+while ! bin/procodile status --simple |grep -qs "NotRunning || Procodile supervisor isn't running"; do
+    sleep 1
+    echo 'Waiting kill previous running'
+done
 bin/procodile -r spec/apps/http kill && sleep 3
+while ! bin/procodile -r spec/apps/http status --simple |grep -qs "NotRunning || Procodile supervisor isn't running"; do
+    sleep 1
+    echo 'Waiting kill previous running'
+done
 header '(1) Checking procodile start ...'
 bin/procodile start && sleep 3
 header '(1.1) Checking procodile -r spec/apps/http/ start ...'
 bin/procodile -r spec/apps/http start --proxy -e && sleep 3
 header '(2) Checking procodile status --simple ...'
-bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
+bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'
 bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
 bin/procodile status |grep 'app2\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28320'
 bin/procodile status |grep 'app3\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28502'
+bin/procodile status |grep 'app4\.[0-9]*' -B 3 |grep 'Schedule' |grep -F '*/10 * * * * *'
 header '(3) check proxy'
 bin/procodile -r spec/apps/http status |grep 'Address/Port' |grep '0.0.0.0:3829'
 bin/procodile -r spec/apps/http status --simple |grep 'OK || http\[2\]'
@@ -90,10 +100,16 @@ bin/procodile stop && sleep 3
 bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1), app3 has 0 instances (should have 1)$'
 header '(5.2) Checking procodile start when stopped ...'
 bin/procodile start && sleep 3
-bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
+while ! bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'; do
+    sleep 1
+    echo 'Waiting start successful'
+done
 header '(5.3) Checking procodile restart successful when started ...'
 bin/procodile restart && sleep 3
-bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
+while ! bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'; do
+    sleep 1
+    echo 'Waiting restart successful'
+done
 header '(5.4) Checking procodile stop -papp1,app2 ...'
 bin/procodile stop -papp1,app2 && sleep 3
 bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1)$'
@@ -102,7 +118,10 @@ bin/procodile stop && sleep 3
 bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1), app3 has 0 instances (should have 1)$'
 header '(5.6) Checking procodile restart when stopped ...'
 bin/procodile restart && sleep 3
-bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\]$'
+while ! bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'; do
+    sleep 1
+    echo 'Waiting restart successful'
+done
 header '(6) Check console command not set'
 bin/procodile console 2>&1 |grep 'Error' || true
 header '(7) Change Procfile.local to set quantity of app1 from 1 to 2, add console_command  ...'
@@ -126,7 +145,10 @@ bin/procodile reload
 bin/procodile console |grep 'foo'
 header '(9) Checking procodile check_concurrency ...'
 bin/procodile check_concurrency
-bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$'
+while ! bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\], app4\[1]$'; do
+    sleep 1
+    echo 'Waiting change concurrency successful'
+done
 header '(9.1) Checking PORT envs for app1'
 bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
 bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28129'
@@ -145,7 +167,7 @@ HEREDOC
 
 header '(12.1) Checking procodile reload to see run app3.sh failed ...'
 bin/procodile reload && sleep 3
-header '(12.2) Checking reload command update app3 status ...'
+header '(12.2) Checking reload command update app3 status and delete crontab ...'
 bin/procodile status |grep 'app3' -A2 |grep 'Command' |grep 'bar.sh'
 header '(12.3) Checking app3 status still running because process not restart ...'
 bin/procodile status |grep 'app3.4' |grep 'Running'
