@@ -33,6 +33,10 @@ module Procodile
           client.puts response
         end
       end
+    rescue ex
+      Procodile.log "control", "Error handling client: #{ex.class}: #{ex.message}"
+    ensure
+      client.close
     end
   end
 end
