@@ -59,6 +59,15 @@ function header()
     sleep 1
 }
 
+function waiting() {
+    local command=$1
+
+    while ! $command; do
+        sleep 1
+        echo 'Waiting ...'
+    done
+}
+
 init_procfile
 
 # header 'Running spec'
@@ -82,7 +91,7 @@ bin/procodile start && sleep 3
 header '(1.1) Checking procodile -r spec/apps/http/ start ...'
 bin/procodile -r spec/apps/http start --proxy -e && sleep 3
 header '(2) Checking procodile status --simple ...'
-bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'
+waiting "bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'"
 bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
 bin/procodile status |grep 'app2\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28320'
 bin/procodile status |grep 'app3\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28502'
@@ -160,9 +169,9 @@ bin/procodile run scripts/baz.sh |grep 'foo'
 header '(12) Change Procfile to set app3 lunch bar.sh instead of foo.sh'
 
 cat <<HEREDOC > Procfile
-app1: sh ${ROOT}/scripts/foo.sh
-app2: sh ${ROOT}/scripts/foo.sh
-app3: sh ${ROOT}/scripts/bar.sh
+app1: bash ${ROOT}/scripts/foo.sh
+app2: bash ${ROOT}/scripts/foo.sh
+app3: bash ${ROOT}/scripts/bar.sh
 HEREDOC
 
 header '(12.1) Checking procodile reload to see run app3.sh failed ...'
