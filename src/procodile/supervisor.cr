@@ -6,8 +6,8 @@ module Procodile
   class Supervisor
     @started_at : Time?
     @scheduled_jobs : Hash(String, String) = {} of String => String
-    @scheduled_running : Hash(String, Bool) = {} of String => Bool
-    @disabled_scheduled_jobs : Hash(String, Bool) = {} of String => Bool
+    @scheduled_running : Set(String) = Set(String).new
+    @disabled_scheduled_jobs : Set(String) = Set(String).new
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -308,7 +308,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def sync_scheduled_processes : Nil
       wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
-        next if @disabled_scheduled_jobs[name]?
+        next if @disabled_scheduled_jobs.includes?(name)
 
         hash[name] = process.schedule.not_nil!
       end
@@ -351,12 +351,12 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       process = @config.processes[name]?
       return unless process && process.scheduled?
 
-      if @scheduled_running[name]?
+      if @scheduled_running.includes?(name)
         Procodile.log "system", "Skipping scheduled run for #{name}; previous run is still active"
         return
       end
 
-      @scheduled_running[name] = true
+      @scheduled_running.add(name)
 
       Procodile.log "system", "Running scheduled process #{name}"
 
@@ -395,7 +395,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
       processes.each do |process|
-        @disabled_scheduled_jobs[process.name] = true
+        @disabled_scheduled_jobs.add(process.name)
       end
     end
 
