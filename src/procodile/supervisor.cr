@@ -5,8 +5,11 @@ require "./signal_handler"
 module Procodile
   class Supervisor
     @started_at : Time?
+    # 要执行的任务，key 是 name, value 是 crontab
     @scheduled_jobs : Hash(String, String) = {} of String => String
+    # 检测是不是当前正在运行
     @scheduled_running : Set(String) = Set(String).new
+    # 加入这个 Set 的 process 不再调度
     @disabled_scheduled_jobs : Set(String) = Set(String).new
 
     getter tag : String?
@@ -313,14 +316,10 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         hash[name] = process.schedule.not_nil!
       end
 
-      @scheduled_jobs.keys.each do |name|
-        next if wanted.has_key?(name)
-
-        @scheduled_jobs.delete(name)
-      end
+      @scheduled_jobs.select! { |name, _| wanted.has_key?(name) }
 
       wanted.each do |name, schedule|
-        next if @scheduled_jobs[name]? == schedule
+        next if scheduled_job_active?(name, schedule)
 
         @scheduled_jobs[name] = schedule
         spawn watch_scheduled_process(name, schedule)
