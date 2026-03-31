@@ -11,6 +11,8 @@ module Procodile
     @scheduled_running : Set(String) = Set(String).new
     # 加入这个 Set 的 process 不再调度
     @disabled_scheduled_jobs : Set(String) = Set(String).new
+    # 用于唤醒旧 watcher 立即退出，避免软退出
+    @scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -316,31 +318,47 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         hash[name] = process.schedule.not_nil!
       end
 
-      @scheduled_jobs.select! { |name, _| wanted.has_key?(name) }
+      @scheduled_jobs.keys.each do |name|
+        next if wanted.has_key?(name)
+
+        signal_scheduled_job(name)
+        @scheduled_jobs.delete(name)
+        @scheduled_job_signals.delete(name)
+      end
 
       wanted.each do |name, schedule|
-        next if scheduled_job_active?(name, schedule)
+        next if @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]?
 
+        signal_scheduled_job(name)
         @scheduled_jobs[name] = schedule
-        spawn watch_scheduled_process(name, schedule)
+        signal = Channel(Nil).new(1)
+        @scheduled_job_signals[name] = signal
+        spawn watch_scheduled_process(name, schedule, signal)
       end
     end
 
-    private def watch_scheduled_process(name : String, schedule : String) : Nil
+    private def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
       parser = CronParser.new(schedule)
       previous_next_time = Time.local - 1.minute
 
       loop do
-        break unless scheduled_job_active?(name, schedule)
+        break unless scheduled_job_active?(name, schedule, signal)
 
         now = Time.local
         next_time = parser.next(now)
         next_time = parser.next(next_time) if next_time == previous_next_time
         previous_next_time = next_time
 
-        sleep(next_time - now)
+        sleep_time = next_time - now
+        sleep_time = 0.seconds if sleep_time.negative?
 
-        next unless scheduled_job_active?(name, schedule)
+        select
+        when signal.receive
+          break
+        when timeout sleep_time
+        end
+
+        next unless scheduled_job_active?(name, schedule, signal)
 
         run_scheduled_process(name)
       end
@@ -365,8 +383,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
-    private def scheduled_job_active?(name : String, schedule : String) : Bool
-      @scheduled_jobs[name]? == schedule
+    private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
+      @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]? == signal
     end
 
     private def scheduled_process_finished(instance : Instance) : Nil
@@ -395,6 +413,15 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
       processes.each do |process|
         @disabled_scheduled_jobs.add(process.name)
+      end
+    end
+
+    private def signal_scheduled_job(name : String) : Nil
+      return unless (signal = @scheduled_job_signals[name]?)
+
+      select
+      when signal.send(nil)
+      else
       end
     end
 

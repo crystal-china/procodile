@@ -118,6 +118,7 @@ RUBY
 
     config = Procodile::Config.new(root: app_root)
     supervisor = Procodile::Supervisor.new(config)
+    process = config.processes["job"]
 
     begin
       File.write(config.supervisor_pid_path, ::Process.pid.to_s)
@@ -242,6 +243,7 @@ RUBY
 
     config = Procodile::Config.new(root: app_root)
     supervisor = Procodile::Supervisor.new(config)
+    process = config.processes["job"]
 
     begin
       Procodile::ControlServer.start(supervisor)
@@ -264,6 +266,57 @@ RUBY
 
       wait_until(5.seconds, 100.milliseconds) do
         File.read_lines(output_file).size > first_run_count
+      end.should be_true
+    ensure
+      File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      supervisor.reload_config
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
+  it "uses the new schedule immediately after reload" do
+    app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-reload-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+    initial_second = (Time.local.second + 10) % 60
+
+    File.write(
+      File.join(app_root, "scheduled_task.rb"),
+      <<-'RUBY'
+File.open("schedule.out", "a") do |file|
+  file.puts Time.local.to_unix_ms
+end
+RUBY
+    )
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      %Q("job__at__#{initial_second} * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+    process = config.processes["job"]
+
+    begin
+      supervisor.start_processes(nil).should be_empty
+
+      sleep 1.2.seconds
+      process.last_started_at.should be_nil
+
+      File.write(
+        File.join(app_root, "Procfile"),
+        %Q("job__at__*/1 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+      )
+
+      reload_started_at = Time.local
+      supervisor.reload_config
+
+      wait_until(3.seconds, 100.milliseconds) do
+        if started_at = process.last_started_at
+          started_at >= reload_started_at
+        else
+          false
+        end
       end.should be_true
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
