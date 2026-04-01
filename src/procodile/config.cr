@@ -11,6 +11,9 @@ module Procodile
       Colorize::ColorANSI::Blue,    # 34 蓝
     ]
 
+    PROCFILE_SCHEDULE_SEPARATOR_REGEX = /__at__|__AT__/
+    PROCFILE_SCHEDULE_ENTRY_REGEX = /\A(.+?)(?:#{PROCFILE_SCHEDULE_SEPARATOR_REGEX})(.+)\z/
+
     getter procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?)) { parse_procfile_entries }
     getter process_list : Hash(String, String) { procfile_entries[:commands] }
     getter process_schedules : Hash(String, String?) { procfile_entries[:schedules] }
@@ -232,7 +235,7 @@ conflicts with '#{existing_name}' (case-insensitively).")
     end
 
     private def parse_process_name_and_schedule(raw_name : String) : Tuple(String, String?)
-      match = raw_name.match(/\A(.+?)(?:__at__|__AT__)(.+)\z/)
+      match = raw_name.match(PROCFILE_SCHEDULE_ENTRY_REGEX)
 
       if match
         {match[1], match[2].strip}
