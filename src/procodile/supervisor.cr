@@ -318,6 +318,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         hash[name] = process.schedule.not_nil!
       end
 
+      # keys 先返回一个独立的 Array(String)，后面 each 遍历的是这个数组，不是原 hash。
+      # 因此，这里遍历时删除哈希元素是安全的。
       @scheduled_jobs.keys.each do |name|
         next if wanted.has_key?(name)
 
@@ -331,6 +333,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
         signal_scheduled_job(name)
         @scheduled_jobs[name] = schedule
+        # 这里的 signal 不是“精确计数消息”，因此不是 new，而是使用 new(1)
+        # 1 表示，不管 watcher 是啥状态（哪怕还没有阻塞在 receive），我也能把信号先放进去。
+        # 然后下一次 select 的时候马上会收到。
+        # 即：至少可以存进去一个待消费的退出信号，同时又不会无限堆积重复 signal（见 signal_scheduled_job 用法)
+        # 如果这里用 0 的话，如果 watcher 还在计算 next_time 的时候（即还没到 #watch_scheduled_process
+        # select receive 那一步），signal_scheduled_job 发送信号，因为 block 而会被丢弃，
+        # watcher 因为没收到信号，会继续睡下去。
         signal = Channel(Nil).new(1)
         @scheduled_job_signals[name] = signal
         spawn watch_scheduled_process(name, schedule, signal)
@@ -350,7 +359,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         previous_next_time = next_time
 
         sleep_time = next_time - now
-        sleep_time = 0.seconds if sleep_time.negative?
+        sleep_time = 0.seconds if sleep_time.negative? # 这个和前面的 if 都是防御性代码。
 
         select
         when signal.receive
@@ -419,6 +428,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def signal_scheduled_job(name : String) : Nil
       return unless (signal = @scheduled_job_signals[name]?)
 
+      # 非阻塞 send，避免重复 signal 卡住
       select
       when signal.send(nil)
       else
