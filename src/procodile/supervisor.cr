@@ -13,6 +13,7 @@ module Procodile
     @disabled_scheduled_jobs : Set(String) = Set(String).new
     # 用于唤醒旧 watcher 立即退出，避免软退出
     @scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
+    @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -260,6 +261,10 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
 
       messages
+    end
+
+    def runtime_issues : Array(RuntimeIssue)
+      @runtime_issues.values
     end
 
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
@@ -646,6 +651,29 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         in .incorrect_quantity?
           io.print "#{process} has #{current} instances (should have #{desired})"
         end
+      end
+    end
+
+    enum RuntimeIssueType
+      ProcessFailedPermanently
+      ScheduledRunFailed
+      InvalidSchedule
+    end
+
+    struct RuntimeIssue
+      include JSON::Serializable
+
+      getter key : String
+      getter type : RuntimeIssueType
+      getter process : String
+      getter message : String
+
+      def initialize(
+        @key : String,
+        @type : RuntimeIssueType,
+        @process : String,
+        @message : String,
+      )
       end
     end
   end

@@ -103,6 +103,7 @@ module Procodile
     getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
     getter instances : Hash(String, Array(Instance::Config))
     getter processes : Array(ControlClient::ProcessStatus)
+    getter runtime_issues : Array(Supervisor::RuntimeIssue)
     getter environment_variables : Hash(String, String)
     getter procfile_path : String
     getter options_path : String
@@ -121,6 +122,7 @@ module Procodile
       @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
       @instances : Hash(String, Array(Instance::Config)),
       @processes : Array(ControlClient::ProcessStatus),
+      @runtime_issues : Array(Supervisor::RuntimeIssue),
       @environment_variables : Hash(String, String),
       @procfile_path : String,
       @options_path : String,
