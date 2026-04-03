@@ -267,6 +267,19 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @runtime_issues.values
     end
 
+    def report_issue(key : String, type : RuntimeIssueType, process : String, message : String) : Nil
+      @runtime_issues[key] = RuntimeIssue.new(
+        key: key,
+        type: type,
+        process: process,
+        message: message
+      )
+    end
+
+    def resolve_issue(key : String) : Nil
+      @runtime_issues.delete(key)
+    end
+
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
       add_reader(instance, io) if io
 
