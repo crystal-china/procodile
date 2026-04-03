@@ -31,6 +31,7 @@ app1: bash ${ROOT}/scripts/foo.sh
 app2: bash ${ROOT}/scripts/foo.sh
 app3: bash ${ROOT}/scripts/foo.sh
 app4__at__*/10 * * * * *: sh scripts/../scripts/cron.sh
+app5__at__*/2 * * * **: sh scripts/../scripts/cron.sh
 HEREDOC
 
     cat <<'HEREDOC' > Procfile.local
@@ -95,7 +96,8 @@ waiting "bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\
 bin/procodile status |grep 'app1\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28128'
 bin/procodile status |grep 'app2\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28320'
 bin/procodile status |grep 'app3\.[0-9]*' |grep -o 'port:[0-9]*' |grep '28502'
-bin/procodile status |grep 'app4\.[0-9]*' -B 3 |grep 'Schedule' |grep -F '*/10 * * * * *'
+bin/procodile status |grep -F '|| app4' -A3 |grep 'Schedule' |grep -F '*/10 * * * * *'
+bin/procodile status 2>&1 |grep -F "Scheduled process 'app5' has invalid cron schedule '*/2 * * * **'"
 header '(3) check proxy'
 bin/procodile -r spec/apps/http status |grep 'Address/Port' |grep '0.0.0.0:3829'
 bin/procodile -r spec/apps/http status --simple |grep 'OK || http\[2\]'
@@ -109,13 +111,13 @@ bin/procodile stop && sleep 3
 bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1), app3 has 0 instances (should have 1)$'
 header '(5.2) Checking procodile start when stopped ...'
 bin/procodile start && sleep 3
-while ! bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'; do
+while ! bin/procodile status --simple |grep -F 'OK || app1[1], app2[1], app3[1], app4[1]'; do
     sleep 1
     echo 'Waiting start successful'
 done
 header '(5.3) Checking procodile restart successful when started ...'
 bin/procodile restart && sleep 3
-while ! bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'; do
+while ! bin/procodile status --simple |grep -F 'OK || app1[1], app2[1], app3[1], app4[1]'; do
     sleep 1
     echo 'Waiting restart successful'
 done
@@ -127,7 +129,7 @@ bin/procodile stop && sleep 3
 bin/procodile status --simple |grep '^Issues || app1 has 0 instances (should have 1), app2 has 0 instances (should have 1), app3 has 0 instances (should have 1)$'
 header '(5.6) Checking procodile restart when stopped ...'
 bin/procodile restart && sleep 3
-while ! bin/procodile status --simple |grep '^OK || app1\[1\], app2\[1\], app3\[1\], app4\[1]$'; do
+while ! bin/procodile status --simple |grep -F 'OK || app1[1], app2[1], app3[1], app4[1]'; do
     sleep 1
     echo 'Waiting restart successful'
 done
@@ -154,7 +156,7 @@ bin/procodile reload
 bin/procodile console |grep 'foo'
 header '(9) Checking procodile check_concurrency ...'
 bin/procodile check_concurrency
-while ! bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\], app4\[1]$'; do
+while ! bin/procodile status --simple |grep -F 'OK || app1[2], app2[1], app3[1], app4[1]'; do
     sleep 1
     echo 'Waiting change concurrency successful'
 done
@@ -178,6 +180,7 @@ header '(12.1) Checking procodile reload to see run app3.sh failed ...'
 bin/procodile reload && sleep 3
 header '(12.2) Checking reload command update app3 status and delete crontab ...'
 bin/procodile status |grep 'app3' -A2 |grep 'Command' |grep 'bar.sh'
+! bin/procodile status 2>&1 |grep -F "Scheduled process 'app5' has invalid cron schedule '*/2 * * * **'"
 header '(12.3) Checking app3 status still running because process not restart ...'
 bin/procodile status |grep 'app3.4' |grep 'Running'
 bin/procodile restart -papp3 && sleep 3
@@ -193,6 +196,7 @@ done
 
 header '(12.4) Checking procodile restart app3.sh Failed status ...'
 bin/procodile status |grep -F 'app3.5' |grep -F 'Failed'
+bin/procodile status 2>&1 |grep -F "Process 'app3' failed repeatedly and will not be respawned automatically"
 
 header '(13) Change Procfile to set correct env for app3.sh only'
 
@@ -217,6 +221,7 @@ HEREDOC
 header '(14) Checking procodile restart -papp3  ...'
 bin/procodile restart -papp3 && sleep 3
 bin/procodile status --simple |grep '^OK || app1\[2\], app2\[1\], app3\[1\]$'
+! bin/procodile status 2>&1 |grep -F "Process 'app3' failed repeatedly and will not be respawned automatically"
 bin/procodile kill && sleep 3
 bin/procodile -r spec/apps/http/ kill
 
