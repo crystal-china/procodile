@@ -49,10 +49,30 @@ module Procodile
 
     def dispatch(command : String) : Nil
       if self.class.commands.has_key?(command)
-        self.class.commands[command].callable.call
+        begin
+          self.class.commands[command].callable.call
+        ensure
+          print_runtime_issues if command != "help" && supervisor_running?
+        end
       else
         raise Error.new("Invalid command `#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
       end
+    end
+
+    private def print_runtime_issues : Nil
+      status = ControlClient.run(
+        @config.sock_path, "status"
+      ).as ControlClient::ReplyOfStatusCommand
+
+      return if status.runtime_issues.empty?
+
+      STDERR.puts "Active issues:".colorize.red
+      status.runtime_issues.each do |issue|
+        STDERR.puts " - #{issue.message}".colorize.red
+      end
+      STDERR.puts
+    rescue ex : Error | Socket::Error | IO::Error
+      # Do not block the actual command if issue reporting fails.
     end
 
     # 新增：检查 control socket 是否可连接（带短暂等待，避免启动竞态）
