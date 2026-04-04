@@ -363,6 +363,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         signal_scheduled_job(name)
         @scheduled_jobs.delete(name)
         @scheduled_job_signals.delete(name)
+        resolve_issue(:invalid_schedule, name)
       end
 
       wanted.each do |name, schedule|
@@ -384,7 +385,23 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     private def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
-      parser = CronParser.new(schedule)
+      begin
+        parser = CronParser.new(schedule)
+        resolve_issue(:invalid_schedule, name)
+      rescue ex
+        if @scheduled_job_signals[name]? == signal
+          @scheduled_jobs.delete(name)
+          @scheduled_job_signals.delete(name)
+        end
+
+        report_issue(
+          :invalid_schedule,
+          name,
+          "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. Fix it, then run `procodile restart -p #{name}`."
+        )
+        Procodile.log "system", "Invalid cron schedule '#{schedule}' for #{name}: #{ex.message}"
+        return
+      end
       previous_next_time = Time.local - 1.minute
 
       loop do
