@@ -12,7 +12,7 @@ module Procodile
     ]
 
     PROCFILE_SCHEDULE_SEPARATOR_REGEX = /__at__|__AT__/
-    PROCFILE_SCHEDULE_ENTRY_REGEX = /\A(.+?)(?:#{PROCFILE_SCHEDULE_SEPARATOR_REGEX})(.+)\z/
+    PROCFILE_SCHEDULE_ENTRY_REGEX     = /\A(.+?)(?:#{PROCFILE_SCHEDULE_SEPARATOR_REGEX})(.+)\z/
 
     getter procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?)) { parse_procfile_entries }
     getter process_list : Hash(String, String) { procfile_entries[:commands] }

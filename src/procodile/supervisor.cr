@@ -267,7 +267,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @runtime_issues.values
     end
 
-    def report_issue(key : String, type : RuntimeIssueType, process : String, message : String) : Nil
+    def report_issue(type : RuntimeIssueType, process : String, message : String) : Nil
+      key = runtime_issue_key(type, process)
       @runtime_issues[key] = RuntimeIssue.new(
         key: key,
         type: type,
@@ -276,8 +277,12 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       )
     end
 
-    def resolve_issue(key : String) : Nil
-      @runtime_issues.delete(key)
+    def resolve_issue(type : RuntimeIssueType, process : String) : Nil
+      @runtime_issues.delete(runtime_issue_key(type, process))
+    end
+
+    private def runtime_issue_key(type : RuntimeIssueType, process : String) : String
+      "#{type.to_s.underscore}:#{process}"
     end
 
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil

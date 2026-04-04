@@ -264,14 +264,13 @@ module Procodile
             @process.log_color
           )
 
-          @failed_at = Time.local
           @supervisor.report_issue(
-            "process_failed:#{@process.name}",
             :process_failed_permanently,
             @process.name,
             "Process '#{@process.name}' failed repeatedly and will not be respawned automatically. Fix it, then run `procodile restart -p #{@process.name}`."
           )
 
+          @failed_at = Time.local
           tidy
         end
       else
@@ -281,14 +280,13 @@ module Procodile
           @process.log_color
         )
 
-        @failed_at = Time.local
         @supervisor.report_issue(
-          "process_failed:#{@process.name}",
           :process_failed_permanently,
           @process.name,
           "Process '#{@process.name}' stopped and automatic respawning is disabled. Fix it, then run `procodile restart -p #{@process.name}`."
         )
 
+        @failed_at = Time.local
         tidy
       end
     end
