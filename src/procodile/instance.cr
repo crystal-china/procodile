@@ -126,6 +126,8 @@ module Procodile
         @process.log_color
       )
 
+      @supervisor.resolve_issue(:process_failed_permanently, @process.name) unless @process.scheduled?
+
       if self.process.log_path && io.nil?
         Procodile.log(
           description,
