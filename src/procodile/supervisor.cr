@@ -308,9 +308,23 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     def finish_scheduled_instance(instance : Instance) : Nil
+      stopped_by_user = instance.stopping?
+      process_name = instance.process.name
+
       instance.on_scheduled_finish
       remove_instance(instance)
       scheduled_process_finished(instance)
+
+      if stopped_by_user || instance.process.last_exit_status == 0
+        resolve_issue(:scheduled_run_failed, process_name)
+      else
+        report_issue(
+          :scheduled_run_failed,
+          process_name,
+          "Scheduled process '#{process_name}' failed with exit status \
+#{instance.process.last_exit_status || -1}. Fix it, then run `procodile restart -p #{process_name}`."
+        )
+      end
     end
 
     private def supervise : Nil
