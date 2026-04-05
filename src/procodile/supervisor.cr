@@ -576,9 +576,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     ) : Hash(Symbol, Array(Instance))
       status = {:started => [] of Instance, :stopped => [] of Instance}
 
-      @processes.each do |process, instances|
+      @config.processes.each do |_, process|
         next if processes && !processes.includes?(process.name)
         next if process.scheduled?
+
+        instances = @processes[process]? || [] of Instance
 
         if (type.both? || type.stopped?) && instances.size > process.quantity
           quantity_to_stop = instances.size - process.quantity
