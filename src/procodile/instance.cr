@@ -144,7 +144,8 @@ module Procodile
         @supervisor.report_issue(
           :scheduled_run_failed,
           @process.name,
-          "Scheduled process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`."
+          %|Scheduled process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`.
+#{shell_wrap_hint}|
         )
       else
         @failed_at = Time.local
@@ -152,7 +153,8 @@ module Procodile
         @supervisor.report_issue(
           :process_failed_permanently,
           @process.name,
-          "Process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`."
+          %|Process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`.
+#{shell_wrap_hint}|
         )
       end
 
@@ -163,6 +165,10 @@ module Procodile
       )
     ensure
       log_destination.close if log_destination && !log_destination.closed?
+    end
+
+    private def shell_wrap_hint : String
+      %|Wrap it in a shell and try again? For example: `bash -lc "#{@process.command}"`.|
     end
 
     #
