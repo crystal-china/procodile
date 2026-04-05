@@ -266,7 +266,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     def runtime_issues : Array(RuntimeIssue)
-      @runtime_issues.values
+      @runtime_issues.values.sort_by { |issue| {issue.process, issue.type.to_s} }
     end
 
     def report_issue(type : RuntimeIssueType, process : String, message : String) : Nil
