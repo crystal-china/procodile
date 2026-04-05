@@ -266,25 +266,25 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     end
 
     def runtime_issues : Array(RuntimeIssue)
-      @runtime_issues.values.sort_by { |issue| {issue.process, issue.type.to_s} }
+      @runtime_issues.values.sort_by { |issue| {issue.process_name, issue.type.to_s} }
     end
 
-    def report_issue(type : RuntimeIssueType, process : String, message : String) : Nil
-      key = runtime_issue_key(type, process)
+    def report_issue(type : RuntimeIssueType, process_name : String, message : String) : Nil
+      key = runtime_issue_key(type, process_name)
       @runtime_issues[key] = RuntimeIssue.new(
         key: key,
         type: type,
-        process: process,
+        process_name: process_name,
         message: message
       )
     end
 
-    def resolve_issue(type : RuntimeIssueType, process : String) : Nil
-      @runtime_issues.delete(runtime_issue_key(type, process))
+    def resolve_issue(type : RuntimeIssueType, process_name : String) : Nil
+      @runtime_issues.delete(runtime_issue_key(type, process_name))
     end
 
-    private def runtime_issue_key(type : RuntimeIssueType, process : String) : String
-      "#{type.to_s.underscore}:#{process}"
+    private def runtime_issue_key(type : RuntimeIssueType, process_name : String) : String
+      "#{type.to_s.underscore}:#{process_name}"
     end
 
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
@@ -722,13 +722,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
       getter key : String
       getter type : RuntimeIssueType
-      getter process : String
+      getter process_name : String
       getter message : String
 
       def initialize(
         @key : String,
         @type : RuntimeIssueType,
-        @process : String,
+        @process_name : String,
         @message : String,
       )
       end
