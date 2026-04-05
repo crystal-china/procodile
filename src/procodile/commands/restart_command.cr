@@ -24,14 +24,28 @@ module Procodile
       private def restart : Nil
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
+        process_names = process_names_from_cli_option
         instance_configs = ControlClient.run(
           @config.sock_path,
           "restart",
-          processes: process_names_from_cli_option,
+          processes: process_names,
           tag: @options.tag,
         ).as Array(Tuple(Instance::Config?, Instance::Config?))
 
         if instance_configs.empty?
+          if process_names
+            scheduled_processes = process_names.compact_map do |name|
+              process_name = name.split('.', 2).first
+              process = @config.processes[process_name]?
+              process if process && process.scheduled?
+            end
+
+            if scheduled_processes.any?
+              puts "Reloaded schedule for #{scheduled_processes.map(&.name).join(", ")}."
+              return
+            end
+          end
+
           puts "There are no processes to restart."
         else
           #           if instance_configs.first.to_a.compact[0].foreground?
