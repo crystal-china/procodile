@@ -164,4 +164,95 @@ YAML
       FileUtils.rm_rf(app_root)
     end
   end
+
+  it "reports process start failures, keeps the supervisor alive, and clears the issue after restart" do
+    app_root = File.join("/tmp", "procodile-process-start-failure-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "ok.sh"),
+      <<-'SH'
+#!/usr/bin/env bash
+sleep 2
+SH
+    )
+    File.chmod(File.join(app_root, "ok.sh"), 0o755)
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      <<-'PROCFILE'
+app1: /definitely/not/exist/foo1.sh
+app2: bash ok.sh
+PROCFILE
+    )
+    File.write(
+      File.join(app_root, "Procfile.options"),
+      <<-'YAML'
+processes:
+  app1:
+    max_respawns: 0
+  app2:
+    max_respawns: 0
+YAML
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      started = supervisor.start_processes(nil)
+      started.map(&.process.name).should eq(["app2"])
+
+      wait_until(2.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.any?(&.type.process_failed_permanently?)
+      end.should be_true
+
+      wait_until(2.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app2" && instance.running? }
+      end.should be_true
+
+      status, output = run_cli_command(app_root, "status")
+      status.success?.should be_true
+      output.should contain("Active issues:")
+      output.should contain("Process 'app1' failed to start:")
+      output.should contain("/definitely/not/exist/foo1.sh")
+
+      File.write(
+        File.join(app_root, "Procfile"),
+        <<-'PROCFILE'
+app1: bash ok.sh
+app2: bash ok.sh
+PROCFILE
+      )
+
+      restart_status, restart_output = run_cli_command(app_root, "restart", "-p", "app1")
+      restart_status.success?.should be_true
+      restart_output.should contain("Started")
+      restart_output.should_not contain("Active issues:")
+
+      wait_until(2.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.none?(&.type.process_failed_permanently?)
+      end.should be_true
+
+      status, output = run_cli_command(app_root, "status")
+      status.success?.should be_true
+      output.should_not contain("Active issues:")
+      output.should_not contain("Failed to start.")
+    ensure
+      supervisor.processes.each_value do |instances|
+        instances.each(&.stop)
+      end
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.none?(&.running?)
+      end
+
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
 end
