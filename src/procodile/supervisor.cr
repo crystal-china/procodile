@@ -399,7 +399,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         report_issue(
           :invalid_schedule,
           name,
-          "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. Fix it, then run `procodile restart -p #{name}`."
+          "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. Fix it, then run `procodile reload` or `procodile restart -p #{name}`."
         )
         Procodile.log "system", "Invalid cron schedule '#{schedule}' for #{name}: #{ex.message}"
         return
