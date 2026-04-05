@@ -94,6 +94,12 @@ module Procodile
       private def print_processes(status : ControlClient::ReplyOfStatusCommand) : Nil
         puts
 
+        failed_processes = status.runtime_issues.each_with_object(Set(String).new) do |issue, set|
+          next unless issue.type.process_failed_permanently?
+
+          set << issue.process_name
+        end
+
         status.processes.each_with_index do |process, index|
           port = process.proxy_port ? "#{process.proxy_address}:#{process.proxy_port}" : "none"
           instances = status.instances[process.name]
@@ -119,7 +125,13 @@ module Procodile
           end
 
           if instances.empty?
-            puts "#{"||".colorize(process.log_color)} #{scheduled ? "No scheduled runs in progress." : "No processes running."}"
+            if scheduled
+              puts "#{"||".colorize(process.log_color)} No scheduled runs in progress."
+            elsif failed_processes.includes?(process.name)
+              puts "#{"||".colorize(process.log_color)} Failed to start."
+            else
+              puts "#{"||".colorize(process.log_color)} No processes running."
+            end
           else
             instances.each do |instance|
               print "|| => #{instance.description.ljust(17, ' ')}".colorize(process.log_color)
