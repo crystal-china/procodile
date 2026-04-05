@@ -42,6 +42,7 @@ module Procodile
 
             if scheduled_processes.any?
               puts "Reloaded schedule for #{scheduled_processes.map(&.name).join(", ")}."
+
               return
             end
           end
@@ -64,7 +65,7 @@ module Procodile
             elsif old_instance
               puts "#{"Stopped".colorize.red} #{old_instance.description}"
             elsif new_instance
-              puts "#{"Started".colorize.green} #{new_instance.description}"
+              puts "#{"Started".colorize.green} #{new_instance.description} (was not running)"
             end
 
             STDOUT.flush
