@@ -443,6 +443,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       process.create_instance(self).start
     rescue ex
       @scheduled_running.delete(name)
+      report_issue(
+        :scheduled_run_failed,
+        name,
+        "Scheduled process '#{name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{name}`."
+      )
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
