@@ -93,8 +93,10 @@ module Procodile
         next if @processes[process]? && !@processes[process].empty? # Process type already running
 
         instances = process.generate_instances(self)
-        instances.each &.start
-        instances_started.concat instances
+        instances.each do |instance|
+          instance.start
+          instances_started << instance if instance.pid
+        end
       end
 
       instances_started
@@ -443,11 +445,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       process.create_instance(self).start
     rescue ex
       @scheduled_running.delete(name)
-      report_issue(
-        :scheduled_run_failed,
-        name,
-        "Scheduled process '#{name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{name}`."
-      )
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
@@ -598,9 +595,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
           Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
 
-          started_instances.each(&.start)
-
-          status[:started].concat(started_instances)
+          # 现在如果进程第一次启动就炸了，会 rescue 并 report_issue, 而不像之前那样，
+          # 直接异常向上抛出，并让 supervisor 一起炸掉。
+          # 因此，这里需要额外限制，没有 pid 的进程（炸掉的进程）不要加入显示为 started.
+          started_instances.each do |instance|
+            instance.start
+            status[:started] << instance if instance.pid
+          end
         end
       end
 

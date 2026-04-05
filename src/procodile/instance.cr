@@ -139,6 +139,30 @@ module Procodile
       @started_at = Time.local
       @finished_at = nil
       @process.last_started_at = @started_at
+    rescue ex
+      if @process.scheduled?
+        @supervisor.report_issue(
+          :scheduled_run_failed,
+          @process.name,
+          "Scheduled process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`."
+        )
+      else
+        @failed_at = Time.local
+
+        @supervisor.report_issue(
+          :process_failed_permanently,
+          @process.name,
+          "Process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`."
+        )
+      end
+
+      Procodile.log(
+        description,
+        "Failed to start: #{ex.message}",
+        @process.log_color
+      )
+    ensure
+      log_destination.close if log_destination && !log_destination.closed?
     end
 
     #
