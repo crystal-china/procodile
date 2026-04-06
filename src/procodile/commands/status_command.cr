@@ -124,6 +124,10 @@ module Procodile
             puts "#{"||".colorize(process.log_color)} Address/Port        #{port}"
           end
 
+          if process.removed? && instances.any?(&.status.running?)
+            puts "#{"||".colorize(process.log_color)} Status              Removed from Procfile, still running"
+          end
+
           if instances.empty?
             if scheduled
               puts "#{"||".colorize(process.log_color)} No scheduled runs in progress."

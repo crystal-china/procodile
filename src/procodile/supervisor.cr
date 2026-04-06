@@ -242,6 +242,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       processes.each do |process, process_instances|
         next if process.scheduled?
 
+        if process.removed? && process_instances.any?(&.status.running?)
+          messages << Message.new(
+            type: :removed_but_running,
+            process: process.name,
+          )
+        end
+
         unless process.correct_quantity?(process_instances.size)
           messages << Message.new(
             type: :incorrect_quantity,
@@ -680,6 +687,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       enum Type
         NotRunning
         IncorrectQuantity
+        RemovedButRunning
       end
 
       include JSON::Serializable
@@ -707,6 +715,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           io.print "#{instance} is not running (#{status})"
         in .incorrect_quantity?
           io.print "#{process} has #{current} instances (should have #{desired})"
+        in .removed_but_running?
+          io.print "#{process} has been removed from the Procfile but is still running; run `procodile stop -p #{process}` to stop it"
         end
       end
     end
