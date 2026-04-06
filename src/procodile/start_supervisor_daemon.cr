@@ -12,6 +12,12 @@ module Procodile
       ENV[ENV_KEY]? == "1"
     end
 
+    def self.detach_child! : Nil
+      if LibC.setsid < 0
+        raise Error.new("Cannot daemonize: failed to detach supervisor from the controlling terminal.")
+      end
+    end
+
     # Spawn a daemon child (same executable, same argv), redirecting output to log.
     # Returns the child's PID. Also does a tiny sanity check that the PID exists.
     def self.daemonize!(config : Config) : Int64
@@ -34,5 +40,9 @@ module Procodile
 
       child.pid
     end
+  end
+
+  lib LibC
+    fun setsid : Int32
   end
 end
