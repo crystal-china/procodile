@@ -98,10 +98,9 @@ module Procodile
 
       spawn do
         status = process.wait
+        @last_exit_status = status.exit_code?
 
         if @process.scheduled?
-          @last_exit_status = status.exit_code?
-
           if (started_at = @started_at)
             @last_run_duration = (Time.local - started_at).total_seconds
           end
@@ -169,6 +168,12 @@ module Procodile
 
     private def shell_wrap_hint : String
       %|Wrap it in a shell and try again? For example: `bash -lc "#{@process.command}"`.|
+    end
+
+    private def daemon_process_hint : String
+      return "" unless @last_exit_status == 0
+
+      "This does not look like a long-running process.\nIf this command is meant to run once, it may not be suitable as a normal Procfile process."
     end
 
     #
@@ -299,7 +304,9 @@ module Procodile
           @supervisor.report_issue(
             :process_failed_permanently,
             @process.name,
-            "Process '#{@process.name}' failed repeatedly and will not be respawned automatically. Fix it, then run `procodile restart -p #{@process.name}`."
+            "Process '#{@process.name}' failed repeatedly and will not be respawned \
+automatically. Fix it, then run `procodile restart -p #{@process.name}`.
+#{daemon_process_hint}"
           )
 
           @failed_at = Time.local
@@ -315,7 +322,9 @@ module Procodile
         @supervisor.report_issue(
           :process_failed_permanently,
           @process.name,
-          "Process '#{@process.name}' stopped and automatic respawning is disabled. Fix it, then run `procodile restart -p #{@process.name}`."
+          "Process '#{@process.name}' stopped and automatic respawning is disabled. \
+Fix it, then run `procodile restart -p #{@process.name}`.
+#{daemon_process_hint}"
         )
 
         @failed_at = Time.local
