@@ -128,7 +128,7 @@ module Procodile
           process_name = process.split('.', 2).first
 
           if !@config.processes.has_key?(process_name.to_s)
-            raise Error.new "Unknown process '#{process_name}'."
+            raise Error.new "Unknown process '#{process_name}'. It may be a typo, or it may have been removed from the Procfile."
           end
         end
 
