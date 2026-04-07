@@ -152,6 +152,8 @@ module Procodile
       raise Error.new "Unknown process '#{process_name}'. A typo?"
     end
 
+    # 被 restart 和 stop 调用，但是其实只有 stop 被传递的 process_names 可能包含 stopped process
+    # 即：只有 stop 需要 compact_mapping, 不过，针对两个命令都额外去 nil 也没问题
     private def scheduled_processes_from_names(process_names : Array(String)?) : Array(Procodile::Process)
       return [] of Procodile::Process unless process_names
 
