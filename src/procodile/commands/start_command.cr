@@ -101,6 +101,8 @@ module Procodile
       end
 
       private def start : Nil
+        process_names = configured_process_names_from_cli_option
+
         if !supervisor_running?
           raise Error.new "Supervisor is not running and cannot be started \
 because --no-supervisor is set" if @options.start_supervisor? == false
@@ -109,7 +111,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
           # processes can be begin being processed
           Supervisor.start(@config, @options) do |supervisor|
             supervisor.start_processes(
-              process_names_from_cli_option,
+              process_names,
               Supervisor::Options.new(tag: @options.tag)
             ) unless @options.start_processes? == false
           end
@@ -136,7 +138,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
         instance_configs = ControlClient.run(
           @config.sock_path,
           "start_processes",
-          processes: process_names_from_cli_option,
+          processes: process_names,
           tag: @options.tag,
           port_allocations: @options.port_allocations,
         ).as Array(Instance::Config)

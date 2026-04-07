@@ -24,7 +24,8 @@ module Procodile
       private def restart : Nil
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
-        process_names = process_names_from_cli_option
+        process_names = configured_process_names_from_cli_option
+
         instance_configs = ControlClient.run(
           @config.sock_path,
           "restart",
