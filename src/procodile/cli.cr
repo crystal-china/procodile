@@ -134,6 +134,44 @@ module Procodile
       end
     end
 
+    private def configured_process_names_from_cli_option : Array(String)?
+      if (processes = process_names_from_cli_option)
+        @config.reload
+
+        processes.each do |process|
+          process_name = process.split('.', 2).first
+
+          if !@config.processes.has_key?(process_name.to_s)
+            raise_unknown_or_removed_process_error(process_name.to_s)
+          end
+        end
+
+        processes
+      end
+    end
+
+    private def raise_unknown_or_removed_process_error(process_name : String) : NoReturn
+      if supervisor_running?
+        status = status_reply
+
+        if status.processes.any? { |process| process.name == process_name && process.removed? }
+          raise Error.new "Process '#{process_name}' has been removed from the Procfile and cannot be started or restarted. Run `procodile stop -p #{process_name}` to stop it."
+        end
+      end
+
+      raise Error.new "Unknown process '#{process_name}'. A typo?"
+    end
+
+    private def scheduled_processes_from_names(process_names : Array(String)?) : Array(Procodile::Process)
+      return [] of Procodile::Process unless process_names
+
+      process_names.compact_map do |name|
+        process_name = name.split('.', 2).first
+        process = @config.processes[process_name]?
+        process if process && process.scheduled?
+      end
+    end
+
     private def status_reply : ControlClient::ReplyOfStatusCommand
       ControlClient.run(
         @config.sock_path, "status"
