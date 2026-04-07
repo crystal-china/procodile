@@ -37,9 +37,7 @@ module Procodile
           end
         end
 
-        status = ControlClient.run(
-          @config.sock_path, "status"
-        ).as ControlClient::ReplyOfStatusCommand
+        status = status_reply
 
         case @options
         when .json?

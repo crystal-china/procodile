@@ -60,9 +60,7 @@ module Procodile
     end
 
     private def print_runtime_issues : Nil
-      status = ControlClient.run(
-        @config.sock_path, "status"
-      ).as ControlClient::ReplyOfStatusCommand
+      status = status_reply
 
       return if status.runtime_issues.empty?
 
@@ -134,6 +132,12 @@ module Procodile
 
         processes
       end
+    end
+
+    private def status_reply : ControlClient::ReplyOfStatusCommand
+      ControlClient.run(
+        @config.sock_path, "status"
+      ).as ControlClient::ReplyOfStatusCommand
     end
 
     private def self.options(name : Symbol, &block : Proc(OptionParser, CLI, Nil)) : Nil
