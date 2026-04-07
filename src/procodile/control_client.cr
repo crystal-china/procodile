@@ -42,7 +42,7 @@ module Procodile
           raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
-        raise Error.new "Control server disconnected. data: #{data.inspect}"
+        raise Error.new "Control server disconnected. Check procodile.log for details."
       end
     end
 
