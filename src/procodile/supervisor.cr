@@ -465,9 +465,9 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
       selected = if process_names
-                   process_names.map do |name|
+                   process_names.compact_map do |name|
                      process_name = name.split('.', 2).first
-                     @config.processes[process_name]
+                     @config.processes[process_name]?
                    end
                  else
                    @config.processes.values
