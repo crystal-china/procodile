@@ -28,8 +28,7 @@ module Procodile
       log_path = File.open(config.log_path, "a")
 
       child = ::Process.new(
-        exe,
-        Procodile::ORIGINAL_ARGV.dup,
+        [exe, *Procodile::ORIGINAL_ARGV.dup],
         output: log_path,
         error: log_path,
         env: {ENV_KEY => "1"}
