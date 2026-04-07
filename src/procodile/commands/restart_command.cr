@@ -46,13 +46,14 @@ module Procodile
           tag: @options.tag,
         ).as Array(Tuple(Instance::Config?, Instance::Config?))
 
+        # 正常 instance_configs 三种情况：
+        # - [old, new] 真正 restart 了一个实例
+        # - [old, nil] 只 stop 了一个实例
+        # - [nil, new] 来没跑，现在补启动了一个实例
+        # 如果没有任何 normal processes 重启结果发生，空数组 []
         if instance_configs.empty?
           if process_names
-            scheduled_processes = process_names.compact_map do |name|
-              process_name = name.split('.', 2).first
-              process = @config.processes[process_name]?
-              process if process && process.scheduled?
-            end
+            scheduled_processes = scheduled_processes_from_names(process_names)
 
             if scheduled_processes.any?
               puts "Reloaded schedule for #{scheduled_processes.map(&.name).join(", ")}."
