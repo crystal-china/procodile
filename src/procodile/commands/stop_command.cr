@@ -31,10 +31,11 @@ module Procodile
       private def stop : Nil
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
+        process_names = process_names_from_cli_option
         instances = ControlClient.run(
           @config.sock_path,
           "stop",
-          processes: process_names_from_cli_option,
+          processes: process_names,
           stop_supervisor: @options.stop_supervisor?,
         ).as(Array(Instance::Config))
 
