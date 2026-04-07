@@ -152,7 +152,11 @@ module Procodile
       sync_scheduled_processes
 
       if processes.nil?
-        instances = @processes.values.flatten
+        instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
+          next if process.removed?
+
+          array.concat(process_instances)
+        end
 
         Procodile.log "system", "Restarting all #{@config.app_name} processes"
       else
@@ -716,7 +720,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         in .incorrect_quantity?
           io.print "#{process} has #{current} instances (should have #{desired})"
         in .removed_but_running?
-          io.print "#{process} has been removed from the Procfile but is still running; run `procodile stop -p #{process}` to stop it"
+          io.print "#{process} has been removed from the Procfile but is still running; \
+run `procodile stop -p #{process}` to stop it"
         end
       end
     end
