@@ -255,4 +255,75 @@ PROCFILE
       FileUtils.rm_rf(app_root)
     end
   end
+
+  it "stops a removed running process without disconnecting the control server" do
+    app_root = File.join("/tmp", "procodile-stop-removed-process-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "ok.sh"),
+      <<-'SH'
+#!/usr/bin/env bash
+sleep 10
+SH
+    )
+    File.chmod(File.join(app_root, "ok.sh"), 0o755)
+
+    File.write(File.join(app_root, "Procfile"), "app1: bash ok.sh\n")
+    File.write(
+      File.join(app_root, "Procfile.options"),
+      <<-'YAML'
+processes:
+  app1:
+    max_respawns: 0
+YAML
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).map(&.process.name).should eq(["app1"])
+
+      wait_until(2.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app1" && instance.running? }
+      end.should be_true
+
+      File.write(File.join(app_root, "Procfile"), "app2: bash ok.sh\n")
+      File.write(
+        File.join(app_root, "Procfile.options"),
+        <<-'YAML'
+processes:
+  app2:
+    max_respawns: 0
+YAML
+      )
+      supervisor.reload_config
+
+      stop_status, stop_output = run_cli_command(app_root, "stop", "-p", "app1")
+      stop_status.success?.should be_true
+      stop_output.should contain("Stopped")
+      stop_output.should contain("app1.")
+      stop_output.should_not contain("Control server disconnected")
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.none? { |instance| instance.process.name == "app1" && instance.running? }
+      end.should be_true
+    ensure
+      supervisor.processes.each_value do |instances|
+        instances.each(&.stop)
+      end
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.none?(&.running?)
+      end
+
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
 end
