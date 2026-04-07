@@ -120,16 +120,6 @@ module Procodile
 
         raise Error.new "No process names provided" if processes.empty?
 
-        @config.reload
-
-        processes.each do |process|
-          process_name = process.split('.', 2).first
-
-          if !@config.processes.has_key?(process_name.to_s)
-            raise Error.new "Unknown process '#{process_name}'. It may be a typo, or it may have been removed from the Procfile."
-          end
-        end
-
         processes
       end
     end
