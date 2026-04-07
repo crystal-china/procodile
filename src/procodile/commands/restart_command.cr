@@ -25,6 +25,19 @@ module Procodile
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
         process_names = configured_process_names_from_cli_option
+        removed_running_instances = [] of Instance::Config
+
+        if !process_names # 如果是全量 restart
+          status = status_reply
+
+          status.processes.each do |process|
+            next unless process.removed?
+
+            removed_running_instances.concat(
+              status.instances[process.name].select(&.status.running?)
+            )
+          end
+        end
 
         instance_configs = ControlClient.run(
           @config.sock_path,
@@ -71,6 +84,10 @@ module Procodile
 
             STDOUT.flush
           end
+        end
+
+        removed_running_instances.each do |instance|
+          puts "#{"Skipped".colorize.yellow} #{instance.description}, it is still running but has been removed from the Procfile"
         end
       end
     end
