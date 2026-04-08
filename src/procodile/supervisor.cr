@@ -435,6 +435,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
         now = Time.local
         next_time = parser.next(now)
+        next_time = parser.next(next_time) if next_time <= now
         next_time = parser.next(next_time) if next_time == previous_next_time
         previous_next_time = next_time
 
