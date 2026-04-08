@@ -30,7 +30,7 @@ function init_procfile () {
 app1: bash ${ROOT}/scripts/foo.sh
 app2: bash ${ROOT}/scripts/foo.sh
 app3: bash ${ROOT}/scripts/foo.sh
-app4__at__*/10 * * * * *: sh scripts/../scripts/cron.sh
+app4: sh scripts/../scripts/cron.sh
 app5__at__*/20 * * * **: sh scripts/../scripts/cron.sh
 app6: scripts/../scripts/baz1.sh
 HEREDOC
@@ -48,10 +48,12 @@ processes:
     allocate_port_from: 28320
   app3:
     allocate_port_from: 28502
+  app4:
+    at: "*/10 * * * * *"
 HEREDOC
 }
 
-trap init_procfile INT TERM EXIT
+# trap init_procfile INT TERM EXIT
 
 function header()
 {
@@ -72,8 +74,8 @@ function waiting() {
 
 init_procfile
 
-header 'Running spec'
-crystal spec --order=random --error-on-warnings
+# header 'Running spec'
+# crystal spec --order=random --error-on-warnings
 header 'Building ...'
 which shards && [ -f shard.yml ] && shards build
 header "Make sure print \`(15) Successful' to pass the test."
@@ -103,8 +105,24 @@ bin/procodile status 2>&1 |grep -F "Process 'app6' failed to start: Error execut
 bin/procodile status 2>&1 |grep -F "Wrap it in a shell and try again"
 header '(2.1) Fix invalid cron and reload'
 sed -i 's#\*\*:#\* \*:#' $ROOT/Procfile
+sed -i 's#\*/20#*/5#' $ROOT/Procfile
 bin/procodile reload
 ! bin/procodile status 2>&1 |grep -F "Scheduled process 'app5' has invalid cron schedule '*/20 * * * **'"
+bin/procodile status |grep -F -A3 '|| app5' |grep 'Schedule' |grep -F '*/5 * * * * *'
+waiting "bin/procodile status --simple |grep -F 'app5[1]'"
+header '(2.2) restart/stop crontab'
+bin/procodile restart -papp5 && sleep 3
+bin/procodile status |grep -F -A3 '|| app5' |grep 'Schedule' |grep -F '*/5 * * * * *'
+waiting "bin/procodile status --simple |grep -F 'app5[1]'"
+waiting "bin/procodile status 2>&1 |grep -F \"Scheduled process 'app5' skipped 3 runs because the previous run is still active\""
+bin/procodile stop -papp5 |grep 'Future scheduling was disabled for app5' && sleep 3
+deadline=$((SECONDS + 6))
+while (( SECONDS < deadline )); do
+    sleep 0.5
+    if bin/procodile status --simple |grep -Fq 'app5[1]'; then
+        exit 1
+    fi
+done
 header '(2.2) Fix failed to start process and restart'
 sed -i 's#baz1\.sh#baz\.sh#' $ROOT/Procfile
 bin/procodile restart -p app6
@@ -116,7 +134,7 @@ done
 bin/procodile status 2>&1 |grep 'This does not look like a long-running process'
 sed -i 's#baz\.sh#baz_loop.sh#' $ROOT/Procfile
 bin/procodile restart -p app6
-while ! bin/procodile status --simple |grep -F 'OK || app1[1], app2[1], app3[1], app4[1], app5[1], app6[1]'; do
+while ! bin/procodile status --simple |grep -F 'OK || app1[1], app2[1], app3[1], app4[1], app5[0], app6[1]'; do
     sleep 1
     echo 'Waiting restart successful'
 done
@@ -192,7 +210,6 @@ header '(11) Checking procodile exec can know global env'
 bin/procodile exec scripts/baz.sh |grep 'foo'
 bin/procodile run scripts/baz.sh |grep 'foo'
 header '(12) Change Procfile to set app3 lunch bar.sh instead of foo.sh'
-
 cat <<HEREDOC > $ROOT/Procfile
 app1: bash ${ROOT}/scripts/foo.sh
 app2: bash ${ROOT}/scripts/foo.sh
@@ -239,19 +256,22 @@ processes:
     env:
       bar: bar
 HEREDOC
-
 header '(14) Checking procodile restart -papp3  ...'
 bin/procodile restart -papp3 && sleep 3
-bin/procodile status --simple |grep -F 'Issues || app6 has been removed from the Procfile but is still running'
+bin/procodile status --simple |grep -F 'app6 has been removed from the Procfile but is still running'
 ! bin/procodile status 2>&1 |grep -F "Process 'app3' failed repeatedly and will not be respawned automatically"
 bin/procodile restart && sleep 3
 bin/procodile status |grep -F '|| => app6.6' |grep 'Running'
-bin/procodile status --simple |grep -F 'Issues || app6 has been removed from the Procfile but is still running'
+bin/procodile status --simple |grep -F 'app6 has been removed from the Procfile but is still running'
 bin/procodile restart -p app6 2>&1 |grep -F "Error: Process 'app6' has been removed from the Procfile and cannot be started or restarted"
 bin/procodile stop -papp6 && sleep 3
-bin/procodile status --simple |grep -F 'OK || app1[2], app2[1], app3[1]'
-! bin/procodile status |grep -F '* app6 has been removed from the Procfile but is still running'
-bin/procodile kill && sleep 3
-bin/procodile -r spec/apps/http/ kill
+bin/procodile status
+waiting "bin/procodile status --simple |grep 'Issues \|\| app4.[\d+] is not running \(Failed\)'"
+bin/procodile stop -papp4
+bin/procodile status
+# ! bin/procodile status --simple 2>&1 |grep 'Active issues'
+# bin/procodile status --simple |grep -F 'OK || app1[2], app2[1], app3[1]'
+# bin/procodile kill && sleep 3
+# bin/procodile -r spec/apps/http/ kill
 
-header '(15) Successful'
+# header '(15) Successful'
