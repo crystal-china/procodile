@@ -5,12 +5,12 @@ set -eu
 echo "start cron"
 sleep 0.5
 echo "cron running"
-count=
-while echo -n '.'; sleep 0.3; do
-    if [ "$count" == '11111111111111111111111111111111111111111111111111111111111111111111111111111111' ]; then
-        break
-    fi
-    count+=1
+
+deadline=$((SECONDS + 20))
+
+while  (( SECONDS < deadline )); do
+    sleep 0.3
+    echo -n '.'
 done
 echo
 echo "cron quiting"
