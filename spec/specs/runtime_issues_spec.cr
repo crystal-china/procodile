@@ -326,4 +326,164 @@ YAML
       FileUtils.rm_rf(app_root)
     end
   end
+
+  it "clears scheduled run failed issues after stopping a scheduled process" do
+    app_root = File.join("/tmp", "procodile-stop-scheduled-issue-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "fail.sh"),
+      <<-'SH'
+#!/usr/bin/env bash
+exit 1
+SH
+    )
+    File.chmod(File.join(app_root, "fail.sh"), 0o755)
+
+    File.write(File.join(app_root, "Procfile"), "app1: bash fail.sh\n")
+    File.write(
+      File.join(app_root, "Procfile.local"),
+      <<-'YAML'
+processes:
+  app1:
+    at: "*/1 * * * * *"
+YAML
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).should be_empty
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.any?(&.type.scheduled_run_failed?)
+      end.should be_true
+
+      stop_status, stop_output = run_cli_command(app_root, "stop", "-p", "app1")
+      stop_status.success?.should be_true
+      stop_output.should contain("Future scheduling was disabled for app1.")
+      stop_output.should_not contain("Active issues:")
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.none?(&.type.scheduled_run_failed?)
+      end.should be_true
+
+      status, output = run_cli_command(app_root, "status")
+      status.success?.should be_true
+      output.should_not contain("Scheduled process 'app1' failed with exit status")
+      output.should_not contain("Active issues:")
+    ensure
+      supervisor.processes.each_value do |instances|
+        instances.each(&.stop)
+      end
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.none?(&.running?)
+      end
+
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
+  it "clears runtime issues after a removed process is stopped and fully removed" do
+    app_root = File.join("/tmp", "procodile-clear-removed-issues-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "fail.sh"),
+      <<-'SH'
+#!/usr/bin/env bash
+exit 1
+SH
+    )
+    File.write(
+      File.join(app_root, "ok.sh"),
+      <<-'SH'
+#!/usr/bin/env bash
+sleep 10
+SH
+    )
+    File.chmod(File.join(app_root, "fail.sh"), 0o755)
+    File.chmod(File.join(app_root, "ok.sh"), 0o755)
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      <<-'PROCFILE'
+app1: bash fail.sh
+app2: bash ok.sh
+PROCFILE
+    )
+    File.write(
+      File.join(app_root, "Procfile.options"),
+      <<-'YAML'
+processes:
+  app1:
+    max_respawns: 0
+  app2:
+    max_respawns: 0
+YAML
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
+      spawn do
+        supervisor.start(->(s : Procodile::Supervisor) { s.start_processes(nil) })
+      end
+
+      wait_for_control_socket(config.sock_path).should be_true
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.any? { |issue| issue.type.process_failed_permanently? && issue.process_name == "app1" }
+      end.should be_true
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app2" && instance.running? }
+      end.should be_true
+
+      File.write(File.join(app_root, "Procfile"), "app2: bash ok.sh\n")
+      File.write(
+        File.join(app_root, "Procfile.options"),
+        <<-'YAML'
+processes:
+  app2:
+    max_respawns: 0
+YAML
+      )
+      supervisor.reload_config
+
+      stop_status, stop_output = run_cli_command(app_root, "stop", "-p", "app1")
+      stop_status.success?.should be_true
+      stop_output.should contain("Stopped")
+      stop_output.should contain("app1.")
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.none? { |issue| issue.process_name == "app1" }
+      end.should be_true
+
+      status, output = run_cli_command(app_root, "status")
+      status.success?.should be_true
+      output.should_not contain("Process 'app1' failed")
+      output.should_not contain("Active issues:")
+    ensure
+      supervisor.processes.each_value do |instances|
+        instances.each(&.stop)
+      end
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.none?(&.running?)
+      end
+
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
 end
