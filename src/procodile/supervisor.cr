@@ -423,7 +423,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         report_issue(
           :invalid_schedule,
           name,
-          "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. Fix it, then run `procodile reload` or `procodile restart -p #{name}`."
+          "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. \
+Use 6 space-separated fields: second minute hour day month weekday. In Procfile, \
+write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
+or set `processes.#{name}.at: \"*/10 * * * * *\"` in options. Fix it, then run `procodile reload` \
+or `procodile restart -p #{name}`."
         )
         Procodile.log "system", "Invalid cron schedule '#{schedule}' for #{name}: #{ex.message}"
         return
