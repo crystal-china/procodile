@@ -40,7 +40,7 @@ RUBY
 
     File.write(
       File.join(app_root, "Procfile"),
-      %Q("job__at__*/2 * * * **": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+      %Q("job__AT__*/2 * * * **": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
     )
 
     config = Procodile::Config.new(root: app_root)
@@ -64,7 +64,7 @@ RUBY
 
       File.write(
         File.join(app_root, "Procfile"),
-        %Q("job__at__*/1 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+        %Q("job__AT__*/1 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
       )
 
       supervisor.reload_config

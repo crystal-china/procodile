@@ -222,16 +222,16 @@ processes:
   end
 
   context "scheduled process separators" do
-    it "accepts __at__ and __AT__" do
-      app_root = File.join("/tmp", "procodile-schedule-separators-#{Random.rand(1_000_000)}")
+    it "accepts __AT__ as a schedule separator" do
+      app_root = File.join("/tmp", "procodile-schedule-separator-upper-#{Random.rand(1_000_000)}")
       FileUtils.mkdir_p(app_root)
 
       begin
         File.write(
           File.join(app_root, "Procfile"),
           <<-YAML
-"job1__at__*/5 * * * * *": echo lower
-"job2__AT__*/10 * * * * *": echo upper
+"job1__AT__*/5 * * * * *": echo upper1
+"job2__AT__*/10 * * * * *": echo upper2
 YAML
         )
 
