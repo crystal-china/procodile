@@ -48,8 +48,11 @@ module Procodile
             if scheduled_processes.any?
               puts disabled_scheduling_message
             else
-              suffix = process_names.size == 1 ? " '#{process_names.first}'" : "es"
-              raise Error.new "No running process matches#{suffix}."
+              if process_names.size == 1
+                raise Error.new "No running process matches '#{process_names.first}'."
+              else
+                raise Error.new "No running processes match: #{process_names.join(", ")}."
+              end
             end
           else
             puts "No processes were stopped."
