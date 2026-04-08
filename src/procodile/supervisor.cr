@@ -4,11 +4,14 @@ require "./signal_handler"
 
 module Procodile
   class Supervisor
+    SCHEDULED_SKIP_ISSUE_THRESHOLD = 3
+
     @started_at : Time?
     # 要执行的任务，key 是 name, value 是 crontab
     @scheduled_jobs : Hash(String, String) = {} of String => String
     # 检测是不是当前正在运行
     @scheduled_running : Set(String) = Set(String).new
+    @scheduled_skip_counts : Hash(String, Int32) = {} of String => Int32
     # 加入这个 Set 的 process 不再调度
     @disabled_scheduled_jobs : Set(String) = Set(String).new
     # 用于唤醒旧 watcher 立即退出，避免软退出
@@ -154,6 +157,7 @@ module Procodile
       if processes.nil?
         instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
           next if process.removed?
+          next if process.scheduled?
 
           array.concat(process_instances)
         end
@@ -383,6 +387,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         @scheduled_jobs.delete(name)
         @scheduled_job_signals.delete(name)
         resolve_issue(:invalid_schedule, name)
+        clear_scheduled_skip_state(name)
       end
 
       wanted.each do |name, schedule|
@@ -413,6 +418,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           @scheduled_job_signals.delete(name)
         end
 
+        clear_scheduled_skip_state(name)
         report_issue(
           :invalid_schedule,
           name,
@@ -451,10 +457,21 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       return unless process && process.scheduled?
 
       if @scheduled_running.includes?(name)
+        skip_count = @scheduled_skip_counts[name] = (@scheduled_skip_counts[name]? || 0) + 1
+
+        if skip_count >= SCHEDULED_SKIP_ISSUE_THRESHOLD
+          report_issue(
+            :scheduled_run_skipped_repeatedly,
+            name,
+            "Scheduled process '#{name}' skipped #{skip_count} runs because the previous run is still active. Consider increasing the schedule interval or shortening the task runtime."
+          )
+        end
+
         Procodile.log "system", "Skipping scheduled run for #{name}; previous run is still active"
         return
       end
 
+      clear_scheduled_skip_state(name)
       @scheduled_running.add(name)
 
       Procodile.log "system", "Running scheduled process #{name}"
@@ -471,6 +488,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def scheduled_process_finished(instance : Instance) : Nil
       @scheduled_running.delete(instance.process.name)
+    end
+
+    private def clear_scheduled_skip_state(name : String) : Nil
+      @scheduled_skip_counts.delete(name)
+      resolve_issue(:scheduled_run_skipped_repeatedly, name)
     end
 
     private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
@@ -738,6 +760,7 @@ run `procodile stop -p #{process}` to stop it"
       ProcessFailedPermanently
       ScheduledRunFailed
       InvalidSchedule
+      ScheduledRunSkippedRepeatedly
     end
 
     struct RuntimeIssue
