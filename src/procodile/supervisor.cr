@@ -298,6 +298,12 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       "#{type.to_s.underscore}:#{process_name}"
     end
 
+    private def clear_runtime_issues_for_process(process_name : String) : Nil
+      RuntimeIssueType.values.each do |type|
+        resolve_issue(type, process_name)
+      end
+    end
+
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
       add_reader(instance, io) if io
 
@@ -636,6 +642,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
     private def remove_removed_processes : Nil
       @processes.reject! do |process, instances|
         if process.removed? && instances.empty?
+          clear_runtime_issues_for_process(process.name)
+
           if (tcp_proxy = @tcp_proxy)
             tcp_proxy.remove_process(process)
           end
