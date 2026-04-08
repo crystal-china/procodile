@@ -53,7 +53,7 @@ processes:
 HEREDOC
 }
 
-# trap init_procfile INT TERM EXIT
+trap init_procfile INT TERM EXIT
 
 function header()
 {
@@ -74,8 +74,8 @@ function waiting() {
 
 init_procfile
 
-# header 'Running spec'
-# crystal spec --order=random --error-on-warnings
+header 'Running spec'
+crystal spec --order=random --error-on-warnings
 header 'Building ...'
 which shards && [ -f shard.yml ] && shards build
 header "Make sure print \`(15) Successful' to pass the test."
