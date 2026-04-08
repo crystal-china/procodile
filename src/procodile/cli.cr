@@ -52,14 +52,16 @@ module Procodile
         begin
           self.class.commands[command].callable.call
         ensure
-          print_runtime_issues if command != "help" && supervisor_running?
+          print_runtime_issues(command) if command != "help" && supervisor_running?
         end
       else
         raise Error.new("Invalid command `#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
       end
     end
 
-    private def print_runtime_issues : Nil
+    private def print_runtime_issues(command : String) : Nil
+      sleep 150.milliseconds if {"start", "stop", "restart"}.includes?(command)
+
       status = status_reply
 
       return if status.runtime_issues.empty?
