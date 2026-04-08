@@ -31,7 +31,7 @@ app1: bash ${ROOT}/scripts/foo.sh
 app2: bash ${ROOT}/scripts/foo.sh
 app3: bash ${ROOT}/scripts/foo.sh
 app4: sh scripts/../scripts/cron.sh
-app5__at__*/20 * * * **: sh scripts/../scripts/cron.sh
+app5__AT__*/20 * * * **: sh scripts/../scripts/cron.sh
 app6: scripts/../scripts/baz1.sh
 HEREDOC
 
@@ -269,9 +269,9 @@ bin/procodile status
 waiting "bin/procodile status --simple |grep 'Issues \|\| app4.[\d+] is not running \(Failed\)'"
 bin/procodile stop -papp4
 bin/procodile status
-# ! bin/procodile status --simple 2>&1 |grep 'Active issues'
-# bin/procodile status --simple |grep -F 'OK || app1[2], app2[1], app3[1]'
-# bin/procodile kill && sleep 3
-# bin/procodile -r spec/apps/http/ kill
+! bin/procodile status --simple 2>&1 |grep 'Active issues'
+bin/procodile status --simple |grep -F 'OK || app1[2], app2[1], app3[1]'
+bin/procodile kill && sleep 3
+bin/procodile -r spec/apps/http/ kill
 
-# header '(15) Successful'
+header '(15) Successful'
