@@ -387,6 +387,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         @scheduled_jobs.delete(name)
         @scheduled_job_signals.delete(name)
         resolve_issue(:invalid_schedule, name)
+        resolve_issue(:scheduled_run_failed, name)
         clear_scheduled_skip_state(name)
       end
 
