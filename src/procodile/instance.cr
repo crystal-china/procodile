@@ -135,6 +135,8 @@ module Procodile
       @started_at = Time.local
       @finished_at = nil
       @process.last_started_at = @started_at
+    rescue ex : Error
+      raise ex
     rescue ex
       if @process.scheduled?
         @supervisor.report_issue(
@@ -521,7 +523,12 @@ Fix it, then run `procodile restart -p #{@process.name}`.
       if (env_file = @supervisor.run_options.env_file)
         path = Path.new(env_file)
         file = path.absolute? ? env_file : File.join(@process.config.root, env_file)
-        vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
+
+        begin
+          vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
+        rescue ex : LuckyEnv::MissingFileError
+          raise Error.new ex.message
+        end
       end
 
       vars = vars.merge({
