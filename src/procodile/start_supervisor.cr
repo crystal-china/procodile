@@ -17,6 +17,15 @@ module Procodile
         foreground: !!options.foreground?
       )
 
+      if (env_file = options.env_file)
+        path = Path.new(env_file)
+        file = path.absolute? ? env_file : File.join(config.root, env_file)
+
+        unless File.exists?(file)
+          raise Error.new "The file #{env_file} could not be found."
+        end
+      end
+
       tidy_pids(config)
 
       if options.clean?
