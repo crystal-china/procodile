@@ -118,6 +118,10 @@ Procfile. It will be removed when it is stopped."
       @loaded_at = Time.local
     end
 
+    def suggested_command(command : String) : String
+      "#{suggested_command_prefix} #{command}"
+    end
+
     def user : String?
       local_options.user || options.user
     end
@@ -177,6 +181,19 @@ Procfile. It will be removed when it is stopped."
 
     def local_options_path : String
       "#{procfile_path}.local"
+    end
+
+    private def suggested_command_prefix : String
+      current_root = Dir.current
+      return "procodile" if @root == current_root
+
+      suggested_root = if @root.starts_with?(current_root + "/")
+                         @root[current_root.size + 1..]
+                       else
+                         @root
+                       end
+
+      "procodile -r #{suggested_root}"
     end
 
     private def create_process(

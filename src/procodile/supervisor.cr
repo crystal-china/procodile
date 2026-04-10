@@ -346,7 +346,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           :scheduled_run_failed,
           process_name,
           "Scheduled process '#{process_name}' failed with exit status \
-#{instance.process.last_exit_status || -1}. Fix it, then run `procodile restart -p #{process_name}`."
+#{instance.process.last_exit_status || -1}. Fix it, then run `#{@config.suggested_command("restart -p #{process_name}")}`."
         )
       end
     end
@@ -427,8 +427,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
           "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. \
 Use 6 space-separated fields: second minute hour day month weekday. In Procfile, \
 write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
-or set `processes.#{name}.at: \"*/10 * * * * *\"` in options. Fix it, then run `procodile reload` \
-or `procodile restart -p #{name}`."
+or set `processes.#{name}.at: \"*/10 * * * * *\"` in options. Fix it, then run `#{@config.suggested_command("reload")}` \
+or `#{@config.suggested_command("restart -p #{name}")}`."
         )
         Procodile.log "system", "Invalid cron schedule '#{schedule}' for #{name}: #{ex.message}"
         return

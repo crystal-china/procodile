@@ -151,8 +151,8 @@ module Procodile
         @supervisor.report_issue(
           :scheduled_run_failed,
           @process.name,
-          %|Scheduled process '#{@process.name}' failed to start: #{message}
-Fix it, then run `procodile restart -p #{@process.name}`.|
+          %|Scheduled process '#{@process.name}' failed to start: #{message} Fix it, \
+then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.|
         )
       else
         @failed_at = Time.local
@@ -160,8 +160,8 @@ Fix it, then run `procodile restart -p #{@process.name}`.|
         @supervisor.report_issue(
           :process_failed_permanently,
           @process.name,
-          %|Process '#{@process.name}' failed to start: #{message}
-Fix it, then run `procodile restart -p #{@process.name}`.|
+          %|Process '#{@process.name}' failed to start: #{message} Fix it, then \
+run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.|
         )
       end
     end
@@ -169,7 +169,8 @@ Fix it, then run `procodile restart -p #{@process.name}`.|
     private def daemon_process_hint : String
       return "" unless @last_exit_status == 0
 
-      "This does not look like a long-running process.\nIf this command is meant to run once, it may not be suitable as a normal Procfile process."
+      "This does not look like a long-running process.
+If this command is meant to run once, it may not be suitable as a normal Procfile process."
     end
 
     #
@@ -323,7 +324,7 @@ Fix it, then run `procodile restart -p #{@process.name}`.|
             :process_failed_permanently,
             @process.name,
             "Process '#{@process.name}' failed repeatedly and will not be respawned \
-automatically. Fix it, then run `procodile restart -p #{@process.name}`.
+automatically. Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.
 #{daemon_process_hint}"
           )
 
@@ -341,7 +342,7 @@ automatically. Fix it, then run `procodile restart -p #{@process.name}`.
           :process_failed_permanently,
           @process.name,
           "Process '#{@process.name}' stopped and automatic respawning is disabled. \
-Fix it, then run `procodile restart -p #{@process.name}`.
+Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.
 #{daemon_process_hint}"
         )
 
