@@ -151,7 +151,8 @@ module Procodile
         @supervisor.report_issue(
           :scheduled_run_failed,
           @process.name,
-          %|Scheduled process '#{@process.name}' failed to start: #{message}. Fix it, then run `procodile restart -p #{@process.name}`.|
+          %|Scheduled process '#{@process.name}' failed to start: #{message}
+Fix it, then run `procodile restart -p #{@process.name}`.|
         )
       else
         @failed_at = Time.local
@@ -159,7 +160,8 @@ module Procodile
         @supervisor.report_issue(
           :process_failed_permanently,
           @process.name,
-          %|Process '#{@process.name}' failed to start: #{message}. Fix it, then run `procodile restart -p #{@process.name}`.|
+          %|Process '#{@process.name}' failed to start: #{message}
+Fix it, then run `procodile restart -p #{@process.name}`.|
         )
       end
     end
