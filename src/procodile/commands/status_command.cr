@@ -46,12 +46,11 @@ module Procodile
           puts status
         when .simple?
           if status.messages.empty?
-            message = status.instances.map { |p, i| "#{p}[#{i.size}]" }
+            prefix = status.runtime_issues.empty? ? "OK" : "Runtime Issues"
 
-            puts "OK || #{message.join(", ")}"
+            puts %<#{prefix} || #{status.instances.map { |p, i| "#{p}[#{i.size}]" }.join(", ")}>
           else
-            message = status.messages.join(", ")
-            puts "Issues || #{message}"
+            puts "Issues || #{status.messages.join(", ")}"
           end
         else
           print_header(status)
