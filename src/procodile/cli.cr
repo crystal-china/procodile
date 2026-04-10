@@ -52,7 +52,9 @@ module Procodile
         begin
           self.class.commands[command].callable.call
         ensure
-          print_runtime_issues(command) if command != "help" && supervisor_running?
+          if command == "start" || (command != "help" && supervisor_running?)
+            print_runtime_issues(command)
+          end
         end
       else
         raise Error.new("Invalid command `#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
@@ -60,9 +62,15 @@ module Procodile
     end
 
     private def print_runtime_issues(command : String) : Nil
-      sleep 150.milliseconds if {"start", "stop", "restart"}.includes?(command)
-
-      status = status_reply
+      status = case command
+               when "start"
+                 runtime_issue_status_reply(timeout: 5.seconds)
+               when "stop", "restart", "reload", "check_concurrency"
+                 runtime_issue_status_reply(timeout: 1.second)
+               else
+                 # status, log, help, console, run, exec
+                 status_reply
+               end
 
       return if status.runtime_issues.empty?
 
@@ -75,8 +83,27 @@ module Procodile
       # Do not block the actual command if issue reporting fails.
     end
 
+    private def runtime_issue_status_reply(timeout : Time::Span, interval : Time::Span = 100.milliseconds) : ControlClient::ReplyOfStatusCommand
+      deadline = Time.instant + timeout
+      last_error = nil
+
+      loop do
+        begin
+          return status_reply
+        rescue ex : Error | Socket::Error | IO::Error
+          last_error = ex
+        end
+
+        if Time.instant >= deadline
+          raise last_error || Error.new("Timed out while waiting for runtime issues to become available.")
+        end
+
+        sleep interval
+      end
+    end
+
     # 新增：检查 control socket 是否可连接（带短暂等待，避免启动竞态）
-    private def control_socket_ready?(timeout : Time::Span = 300.milliseconds, interval : Time::Span = 25.milliseconds) : Bool
+    private def control_socket_ready?(*, timeout : Time::Span = 300.milliseconds, interval : Time::Span = 25.milliseconds) : Bool
       sock_path = @config.sock_path
       deadline = Time.instant + timeout
 
@@ -110,7 +137,6 @@ module Procodile
 
       return false unless ::Process.exists?(pid.to_i64)
 
-      # 当前实现，这个检测其实是非必须的。
       control_socket_ready?
     end
 
