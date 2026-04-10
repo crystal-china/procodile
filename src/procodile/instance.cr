@@ -135,8 +135,6 @@ module Procodile
       @started_at = Time.local
       @finished_at = nil
       @process.last_started_at = @started_at
-    rescue ex : Error
-      raise ex
     rescue ex
       if @process.scheduled?
         @supervisor.report_issue(
@@ -155,7 +153,6 @@ module Procodile
 #{shell_wrap_hint}|
         )
       end
-
       Procodile.log(
         description,
         "Failed to start: #{ex.message}",
