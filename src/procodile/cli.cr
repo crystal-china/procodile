@@ -82,6 +82,8 @@ module Procodile
         STDERR.puts " - #{issue.message}".colorize.red
       end
       STDERR.puts
+      STDERR.puts %(If a failing command needs shell features, try wrapping it explicitly, for example: `bash -lc "your-command arg1 arg2"`.).colorize.red
+      STDERR.puts
     rescue ex : Error | Socket::Error | IO::Error
       # Do not block the actual command if issue reporting fails.
     end
