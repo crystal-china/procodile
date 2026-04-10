@@ -62,6 +62,7 @@ module Procodile
         puts "Procodile Version   #{status.version.colorize.blue}"
         puts "Application Root    #{status.root.colorize.blue}"
         puts "Supervisor PID      #{(status.supervisor["pid"]).to_s.colorize.blue}"
+        puts "Proxy Enabled       #{(status.supervisor["proxy_enabled"] ? "yes" : "no").colorize.blue}"
 
         if (time = status.supervisor["started_at"])
           time = Time.unix(time)

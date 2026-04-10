@@ -110,7 +110,7 @@ module Procodile
     getter messages : Array(Supervisor::Message)
     getter root : String
     getter app_name : String
-    getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
+    getter supervisor : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
     getter instances : Hash(String, Array(Instance::Config))
     getter processes : Array(ControlClient::ProcessStatus)
     getter runtime_issues : Array(Supervisor::RuntimeIssue)
@@ -129,7 +129,7 @@ module Procodile
       @messages : Array(Supervisor::Message),
       @root : String,
       @app_name : String,
-      @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
+      @supervisor : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool),
       @instances : Hash(String, Array(Instance::Config)),
       @processes : Array(ControlClient::ProcessStatus),
       @runtime_issues : Array(Supervisor::RuntimeIssue),

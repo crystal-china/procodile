@@ -235,12 +235,13 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    def to_hash : NamedTuple(started_at: Int64?, pid: Int64)
+    def to_hash : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
       started_at = @started_at
 
       {
-        started_at: started_at ? started_at.to_unix : nil,
-        pid:        ::Process.pid,
+        started_at:    started_at ? started_at.to_unix : nil,
+        pid:           ::Process.pid,
+        proxy_enabled: !!@run_options.proxy?,
       }
     end
 
