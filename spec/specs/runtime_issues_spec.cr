@@ -165,6 +165,64 @@ YAML
     end
   end
 
+  it "prints runtime issues after restart when a running process cannot restart because the env file is missing" do
+    app_root = File.join("/tmp", "procodile-restart-missing-env-runtime-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "ok.sh"),
+      <<-'SH'
+#!/usr/bin/env bash
+sleep 10
+SH
+    )
+    File.chmod(File.join(app_root, "ok.sh"), 0o755)
+
+    File.write(File.join(app_root, "Procfile"), "app1: bash ok.sh\n")
+    File.write(File.join(app_root, ".env"), "FOO=bar\n")
+
+    config = Procodile::Config.new(root: app_root)
+    run_options = Procodile::Supervisor::RunOptions.new(
+      env_file: ".env",
+      foreground: false
+    )
+    supervisor = Procodile::Supervisor.new(config, run_options)
+
+    begin
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).map(&.process.name).should eq(["app1"])
+
+      wait_until(2.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app1" && instance.running? }
+      end.should be_true
+
+      FileUtils.rm_rf(File.join(app_root, ".env"))
+
+      restart_status, restart_output = run_cli_command(app_root, "restart")
+      restart_status.success?.should be_true
+      restart_output.should contain("Active issues:")
+      restart_output.should contain("Process 'app1' failed to start: The file #{File.join(app_root, ".env")} could not be found.")
+
+      wait_until(2.seconds, 50.milliseconds) do
+        supervisor.runtime_issues.any?(&.type.process_failed_permanently?)
+      end.should be_true
+    ensure
+      supervisor.processes.each_value do |instances|
+        instances.each(&.stop)
+      end
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.processes.values.flatten.none?(&.running?)
+      end
+
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
   it "reports process start failures, keeps the supervisor alive, and clears the issue after restart" do
     app_root = File.join("/tmp", "procodile-process-start-failure-#{Random.rand(1_000_000)}")
     FileUtils.mkdir_p(File.join(app_root, "pids"))
