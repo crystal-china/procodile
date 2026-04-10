@@ -98,7 +98,7 @@ module Procodile
         end
 
         status.processes.each_with_index do |process, index|
-          port = process.proxy_port ? "#{process.proxy_address}:#{process.proxy_port}" : "none"
+          proxy_listener = process.proxy_port ? "#{process.proxy_address}:#{process.proxy_port}" : "none"
           instances = status.instances[process.name]
           scheduled = !process.schedule.nil?
 
@@ -118,7 +118,7 @@ module Procodile
             puts "#{"||".colorize(process.log_color)} Quantity            #{process.quantity}"
             puts "#{"||".colorize(process.log_color)} Respawning          #{process.max_respawns} every #{process.respawn_window} seconds"
             puts "#{"||".colorize(process.log_color)} Restart mode        #{process.restart_mode}"
-            puts "#{"||".colorize(process.log_color)} Address/Port        #{port}"
+            puts "#{"||".colorize(process.log_color)} Proxy Listener      #{proxy_listener}"
           end
 
           if process.removed? && instances.any?(&.status.running?)
