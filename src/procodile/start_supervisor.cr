@@ -22,7 +22,7 @@ module Procodile
         file = path.absolute? ? env_file : File.join(config.root, env_file)
 
         unless File.exists?(file)
-          raise Error.new "The file #{env_file} could not be found."
+          raise Error.new "The file #{env_file} could not be found in #{config.root}"
         end
       end
 
