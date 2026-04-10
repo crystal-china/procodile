@@ -49,10 +49,13 @@ module Procodile
 
     def dispatch(command : String) : Nil
       if self.class.commands.has_key?(command)
+        command_succeeded = false
+
         begin
           self.class.commands[command].callable.call
+          command_succeeded = true
         ensure
-          if command == "start" || (command != "help" && supervisor_running?)
+          if command_succeeded && (command == "start" || (command != "help" && supervisor_running?))
             print_runtime_issues(command)
           end
         end
