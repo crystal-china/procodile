@@ -39,6 +39,16 @@ module Procodile
             true
           end
         else
+          if code.to_i == 500 && reply
+            message = begin
+              String.from_json(reply)
+            rescue JSON::ParseException
+              reply
+            end
+
+            raise Error.new(message)
+          end
+
           raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
