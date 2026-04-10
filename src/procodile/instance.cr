@@ -136,23 +136,7 @@ module Procodile
       @finished_at = nil
       @process.last_started_at = @started_at
     rescue ex
-      if @process.scheduled?
-        @supervisor.report_issue(
-          :scheduled_run_failed,
-          @process.name,
-          %|Scheduled process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`.
-#{shell_wrap_hint}|
-        )
-      else
-        @failed_at = Time.local
-
-        @supervisor.report_issue(
-          :process_failed_permanently,
-          @process.name,
-          %|Process '#{@process.name}' failed to start: #{ex.message}. Fix it, then run `procodile restart -p #{@process.name}`.
-#{shell_wrap_hint}|
-        )
-      end
+      report_start_failure(ex.message.to_s)
       Procodile.log(
         description,
         "Failed to start: #{ex.message}",
@@ -162,8 +146,22 @@ module Procodile
       log_destination.close if log_destination && !log_destination.closed?
     end
 
-    private def shell_wrap_hint : String
-      %|Wrap it in a shell and try again? For example: `bash -lc "#{@process.command}"`.|
+    protected def report_start_failure(message : String) : Nil
+      if @process.scheduled?
+        @supervisor.report_issue(
+          :scheduled_run_failed,
+          @process.name,
+          %|Scheduled process '#{@process.name}' failed to start: #{message}. Fix it, then run `procodile restart -p #{@process.name}`.|
+        )
+      else
+        @failed_at = Time.local
+
+        @supervisor.report_issue(
+          :process_failed_permanently,
+          @process.name,
+          %|Process '#{@process.name}' failed to start: #{message}. Fix it, then run `procodile restart -p #{@process.name}`.|
+        )
+      end
     end
 
     private def daemon_process_hint : String
@@ -235,7 +233,19 @@ module Procodile
         self
       when "start-term"
         new_instance = @process.create_instance(@supervisor)
-        new_instance.start
+        begin
+          new_instance.start
+        rescue ex : Error
+          new_instance.report_start_failure(ex.message.to_s)
+
+          Procodile.log(
+            new_instance.description,
+            "Failed to start during restart: #{ex.message}",
+            @process.log_color
+          )
+
+          return nil
+        end
 
         stop
 
@@ -253,7 +263,17 @@ module Procodile
 
           @supervisor.remove_instance(self)
 
-          new_instance.start
+          begin
+            new_instance.start
+          rescue ex : Error
+            new_instance.report_start_failure(ex.message.to_s)
+
+            Procodile.log(
+              new_instance.description,
+              "Failed to start during restart: #{ex.message}",
+              @process.log_color
+            )
+          end
         end
 
         new_instance
