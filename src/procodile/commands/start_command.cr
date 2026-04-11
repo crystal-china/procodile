@@ -82,12 +82,12 @@ module Procodile
             "Choose ports to allocate to processes"
           ) do |processes|
             cli.options.port_allocations = processes.split(",")
-                                           .each_with_object({} of String => Int32) do |line, hash|
-              abort "No port specified, e.g. app1:3001,app2:3002" unless line.includes?(":")
+              .each_with_object({} of String => Int32) do |line, hash|
+                abort "No port specified, e.g. app1:3001,app2:3002" unless line.includes?(":")
 
-              process, port = line.split(":")
-              hash[process] = port.to_i
-            end
+                process, port = line.split(":")
+                hash[process] = port.to_i
+              end
           end
 
           opts.on(

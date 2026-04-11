@@ -33,8 +33,7 @@ module Procodile
 
         process_names = process_names_from_cli_option
         scheduled_processes = scheduled_processes_from_names(process_names)
-        disabled_scheduling_message = "Future scheduling was disabled for \
-#{scheduled_processes.map(&.name).join(", ")}."
+        disabled_scheduling_message = "Future scheduling was disabled for #{scheduled_processes.map(&.name).join(", ")}."
         instances = ControlClient.run(
           @config.sock_path,
           "stop",

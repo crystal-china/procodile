@@ -33,7 +33,7 @@ Cannot start unless things are clean."
 
       if options.foreground? || Procodile::Daemon.child?
         Procodile::Daemon.detach_child! if Procodile::Daemon.child?
-        
+
         File.write(config.supervisor_pid_path, ::Process.pid)
 
         Supervisor.new(config, run_options).start(after_start)
