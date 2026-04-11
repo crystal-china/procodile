@@ -534,24 +534,12 @@ Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.nam
       !stopping? && (respawns + 1) <= @process.max_respawns
     end
 
-    #
-    # Return an array of environment variables that should be set
-    #
+    # Build the final environment for this instance by combining the process
+    # environment and Procodile-managed instance variables.
     private def environment_variables : Hash(String, String)
-      vars = @process.environment_variables
+      vars = @process.environment_variables(@supervisor)
 
-      if (env_file = @supervisor.run_options.env_file)
-        path = Path.new(env_file)
-        file = path.absolute? ? env_file : File.join(@process.config.root, env_file)
-
-        begin
-          vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
-        rescue ex : LuckyEnv::MissingFileError
-          raise Error.new ex.message
-        end
-      end
-
-      vars = vars.merge({
+      vars.merge({
         "PROC_NAME" => self.description,
         "PID_FILE"  => self.pid_file_path,
         "APP_ROOT"  => @process.config.root,

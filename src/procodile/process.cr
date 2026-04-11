@@ -34,25 +34,27 @@ module Procodile
       !@schedule.nil?
     end
 
-    #
-    # Return all environment variables for this process
-    #
-    def environment_variables : Hash(String, String)
-      global_variables = @config.environment_variables
+    # Return the configured environment variables for this process by combining
+    # configured global env, the optional --env-file, and process-specific overrides.
+    # Precedence: process local env > process env > --env-file > global local env > global env.
+    def environment_variables(supervisor : Supervisor) : Hash(String, String)
+      vars = @config.environment_variables
 
-      process_vars = if (process = @config.process_options[@name]?)
-                       process.env || {} of String => String
-                     else
-                       {} of String => String
-                     end
+      if (env_file = supervisor.run_options.env_file)
+        path = Path.new(env_file)
+        file = path.absolute? ? env_file : File.join(@config.root, env_file)
 
-      process_local_vars = if (local_process = @config.local_process_options[@name]?)
-                             local_process.env || {} of String => String
-                           else
-                             {} of String => String
-                           end
+        begin
+          vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
+        rescue ex : LuckyEnv::MissingFileError
+          raise Error.new ex.message
+        end
+      end
 
-      global_variables.merge(process_vars.merge(process_local_vars))
+      process_vars = @config.process_options[@name]?.try(&.env) || {} of String => String
+      process_local_vars = @config.local_process_options[@name]?.try(&.env) || {} of String => String
+
+      vars.merge(process_vars.merge(process_local_vars))
     end
 
     #
