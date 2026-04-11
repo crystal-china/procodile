@@ -345,8 +345,9 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         report_issue(
           :scheduled_run_failed,
           process_name,
-          "Scheduled process '#{process_name}' failed with exit status \
-#{instance.process.last_exit_status || -1}. Fix it, then run `#{@config.suggested_command("restart -p #{process_name}")}`."
+          "Scheduled process '#{process_name}' failed with exit \
+status #{instance.process.last_exit_status || -1}. Fix it, then \
+run `#{@config.suggested_command("restart -p #{process_name}")}`."
         )
       end
     end
