@@ -50,7 +50,7 @@ module Procodile
           end
 
           opts.on(
-            "--env [ENV_FILE]",
+            "--env-file [ENV_FILE]",
             "Read from env file, default: (.env)"
           ) do |env_file|
             cli.options.env_file = env_file.presence || ".env"

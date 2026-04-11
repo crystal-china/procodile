@@ -34,6 +34,8 @@ module Procodile
     end
     getter loaded_at : Time?
     getter root : String
+
+    # 这个返回的是 options 里面的全局 env
     getter environment_variables : Hash(String, String) do
       option_env = options.env || {} of String => String
       local_option_env = local_options.env || {} of String => String
