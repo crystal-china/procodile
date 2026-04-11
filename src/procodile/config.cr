@@ -319,7 +319,7 @@ conflicts with '#{existing_name}' (case-insensitively).")
   struct Config::GlobalOption
     include YAML::Serializable
 
-    property name : String
+    property name : String?
     property root : String
     property procfile : String?
   end

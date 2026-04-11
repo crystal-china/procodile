@@ -91,7 +91,16 @@ module Procodile
   global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
 
   global_config = if File.file?(global_config_path)
-                    Array(Config::GlobalOption).from_yaml(File.read(global_config_path))
+                    global_config_yaml = File.read(global_config_path)
+                    global_config_node = YAML.parse(global_config_yaml)
+
+                    if global_config_node.raw.is_a?(Array)
+                      Array(Config::GlobalOption).from_yaml(global_config_yaml)
+                    elsif global_config_node.raw.is_a?(Hash)
+                      [Config::GlobalOption.from_yaml(global_config_yaml)]
+                    else
+                      raise Error.new("Invalid global configuration format in #{global_config_path}")
+                    end
                   else
                     [] of Config::GlobalOption
                   end
