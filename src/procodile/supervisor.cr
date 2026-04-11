@@ -426,8 +426,8 @@ run `#{@config.suggested_command("restart -p #{process_name}")}`."
           :invalid_schedule,
           name,
           "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. \
-Use 6 space-separated fields: second minute hour day month weekday. In Procfile, \
-write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
+Use 5 or 6 space-separated fields: minute hour day month weekday, with an optional leading second field. \
+In Procfile, write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
 or set `processes.#{name}.at: \"*/10 * * * * *\"` in options. Fix it, then run `#{@config.suggested_command("reload")}` \
 or `#{@config.suggested_command("restart -p #{name}")}`."
         )
