@@ -221,7 +221,7 @@ Procfile. It will be removed when it is stopped."
       if procfile_schedule && options_schedule
         Procodile.log(
           "system",
-          "#{name} defines schedule in both Procfile and Procfile.options/.local; using options value #{options_schedule.inspect}"
+          "#{name} defines schedule in both Procfile and the options files; using the options value #{options_schedule.inspect}"
         )
       end
 
