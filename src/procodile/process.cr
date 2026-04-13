@@ -43,12 +43,7 @@ module Procodile
       if (env_file = supervisor.run_options.env_file)
         path = Path.new(env_file)
         file = path.absolute? ? env_file : File.join(@config.root, env_file)
-
-        begin
-          vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
-        rescue ex : LuckyEnv::MissingFileError
-          raise Error.new ex.message
-        end
+        vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
       end
 
       process_vars = @config.process_options[@name]?.try(&.env) || {} of String => String
