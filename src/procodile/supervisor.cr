@@ -70,10 +70,7 @@ module Procodile
 
       @started_at = Time.local
     rescue e
-      Procodile.log "system", "Error: #{e.class} (#{e.message})"
-
-      e.backtrace.each { |bt| Procodile.log "system", "=> #{bt})" }
-
+      Procodile.log_exception("system", "Supervisor startup failed", e)
       stop(Supervisor::Options.new(stop_supervisor: true))
     ensure
       loop { supervise; sleep 3.seconds }
@@ -372,6 +369,8 @@ run `#{@config.suggested_command("restart -p #{process_name}")}`."
 
         stop_supervisor
       end
+    rescue ex
+      Procodile.log_exception("system", "Supervisor loop failed", ex)
     end
 
     private def sync_scheduled_processes : Nil

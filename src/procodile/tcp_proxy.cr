@@ -126,10 +126,7 @@ module Procodile
     end
 
     private def log_exception(ex : Exception) : Nil
-      Procodile.log "proxy", "Exception: #{ex.class}: #{ex.message}"
-      if (bt = ex.backtrace)
-        Procodile.log "proxy", bt.first(5).join("\n")
-      end
+      Procodile.log_exception("proxy", "Exception", ex, backtrace_limit: 5)
     end
   end
 end
