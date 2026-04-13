@@ -125,7 +125,7 @@ module Procodile
           end
         end
       else
-        instances = process_names_to_instances(processes)
+        instances = process_names_to_instances(processes).reject { |instance| instance.process.scheduled? }
 
         Procodile.log "system", "Stopping #{instances.size} process(es)"
 
