@@ -5,6 +5,7 @@ require "./signal_handler"
 module Procodile
   class Supervisor
     SCHEDULED_SKIP_ISSUE_THRESHOLD = 3
+    PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
 
     @started_at : Time?
     # 要执行的任务，key 是 name, value 是 crontab
@@ -509,7 +510,7 @@ or `#{@config.suggested_command("restart -p #{name}")}`."
     private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
       selected = if process_names
                    process_names.compact_map do |name|
-                     process_name = name.split('.', 2).first
+                     process_name = resolve_process_and_instance(name).first
                      @config.processes[process_name]?
                    end
                  else
@@ -690,26 +691,36 @@ or `#{@config.suggested_command("restart -p #{name}")}`."
 
     private def process_names_to_instances(names : Array(String)) : Array(Instance)
       names.each_with_object([] of Instance) do |name, array|
-        if name =~ /\A(.*)\.(\d+)\z/ # app1.1
-          process_name, id = $1, $2
+        process_name, instance_id = resolve_process_and_instance(name)
 
-          @processes.each do |process, instances|
-            next unless process.name == process_name
+        # 如果进程不在 Procfile 中，用原始 name 在 @processes 中查找（已被移除的进程）
+        target_name = process_name || name
 
-            instances.each do |instance|
-              next unless instance.id == id.to_i
+        @processes.each do |process, instances|
+          next unless process.name == target_name
 
-              array << instance
-            end
-          end
-        else
-          @processes.each do |process, instances|
-            next unless process.name == name
-
+          if instance_id
+            instances.each { |instance| array << instance if instance.id == instance_id }
+          else
             instances.each { |instance| array << instance }
           end
         end
       end
+    end
+
+    # 解析用户输入的名称，返回 (进程名, instance_id) 元组
+    # - instance_id 为 nil 表示匹配所有实例
+    private def resolve_process_and_instance(name : String) : Tuple(String?, Int32?)
+      return {name, nil} if @config.processes.has_key?(name)
+
+      if (match = name.match(PROCESS_INSTANCE_REGEX)) # app1.1
+        process_name = match[1]
+        instance_id = match[2].to_i32
+
+        return {process_name, instance_id} if @config.processes.has_key?(process_name)
+      end
+
+      {nil, nil}
     end
 
     private def all_instances_stopped? : Bool
