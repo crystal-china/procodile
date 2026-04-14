@@ -543,7 +543,7 @@ Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.nam
     private def environment_variables : Hash(String, String)
       vars = @process.environment_variables(@supervisor)
 
-      vars.merge({
+      vars = vars.merge({
         "PROC_NAME" => self.description,
         "PID_FILE"  => self.pid_file_path,
         "APP_ROOT"  => @process.config.root,
