@@ -274,6 +274,67 @@ RUBY
     end
   end
 
+  it "does not restart a currently running scheduled process when restarted by process name" do
+    app_root = File.join(Dir.current, "spec/tmp/procodile-sched-restart-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "scheduled_task.rb"),
+      <<-'RUBY'
+File.open("schedule.out", "a") do |file|
+  file.puts "#{Process.pid}:start"
+end
+
+sleep 3
+RUBY
+    )
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      %Q("job__AT__*/1 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = Procodile::Supervisor.new(config)
+    process = config.processes["job"]
+
+    begin
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).should be_empty
+
+      wait_until(8.seconds, 100.milliseconds) do
+        supervisor.processes[process]?.try(&.count(&.running?)) == 1
+      end.should be_true
+
+      running_before = supervisor.processes[process].select(&.running?)
+      running_before.size.should eq(1)
+      running_instance = running_before.first
+
+      Procodile::ControlClient.run(config.sock_path, "restart", processes: ["job"])
+
+      sleep 1.2.seconds
+
+      running_after = supervisor.processes[process].select(&.running?)
+      running_after.size.should eq(1)
+      running_after.first.description.should eq(running_instance.description)
+    ensure
+      File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      supervisor.reload_config
+
+      supervisor.processes.each_value do |instances|
+        instances.each(&.stop)
+      end
+
+      wait_until(5.seconds, 100.milliseconds) do
+        supervisor.processes.values.flatten.none?(&.running?)
+      end
+
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
   it "uses the new schedule immediately after reload" do
     app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-reload-#{Random.rand(1_000_000)}")
     FileUtils.mkdir_p(File.join(app_root, "pids"))

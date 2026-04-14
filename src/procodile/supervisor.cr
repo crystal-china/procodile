@@ -163,7 +163,9 @@ module Procodile
 
         Procodile.log "system", "Restarting all #{@config.app_name} processes"
       else
-        instances = process_names_to_instances(processes)
+        instances = process_names_to_instances(processes).reject do |instance|
+          instance.process.scheduled? && processes.includes?(instance.process.name)
+        end
 
         Procodile.log "system", "Restarting #{instances.size} process(es)"
       end
@@ -427,7 +429,7 @@ run `#{@config.suggested_command("restart -p #{process_name}")}`."
           :invalid_schedule,
           name,
           "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. \
-Use 5 or 6 space-separated fields: minute hour day month weekday, with an optional leading second field. \
+Use 5 or 6 space-separated fields: seconds(optional) minute hour day month weekday. \
 In Procfile, write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
 or set `processes.#{name}.at: \"*/10 * * * * *\"` in the options files. Fix it, then run `#{@config.suggested_command("reload")}` \
 or `#{@config.suggested_command("restart -p #{name}")}`."
