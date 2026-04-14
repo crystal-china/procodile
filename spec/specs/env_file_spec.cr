@@ -16,16 +16,14 @@ end
 private def procodile_test_binary : String
   binary = "/tmp/procodile-env-spec-bin"
 
-  unless File.exists?(binary)
-    status = ::Process.run(
-      "crystal",
-      ["build", "src/procodile.cr", "-o", binary],
-      output: Process::Redirect::Close,
-      error: Process::Redirect::Inherit,
-      env: {"CRYSTAL_CACHE_DIR" => "/tmp/crystal-cache"}
-    )
-    raise "failed to build procodile test binary" unless status.success?
-  end
+  status = ::Process.run(
+    "crystal",
+    ["build", "src/procodile.cr", "-o", binary],
+    output: Process::Redirect::Close,
+    error: Process::Redirect::Inherit,
+    env: {"CRYSTAL_CACHE_DIR" => "/tmp/crystal-cache"}
+  )
+  raise "failed to build procodile test binary" unless status.success?
 
   binary
 end
@@ -42,7 +40,7 @@ private def wait_for_control_socket(sock_path : String, timeout : Time::Span = 5
 end
 
 describe "env file support" do
-  it "overrides global env but not process-specific env" do
+  it "overrides global env and is overridden by process-specific env" do
     app_root = File.join("/tmp", "procodile-env-file-#{Random.rand(1_000_000)}")
     FileUtils.mkdir_p(File.join(app_root, "pids"))
 
@@ -105,7 +103,7 @@ ENV
 
       env_output = File.read(output_file)
       env_output.should contain("FRUIT=orange")
-      env_output.should contain("VEGETABLE=onion")
+      env_output.should contain("VEGETABLE=carrot")
       env_output.should contain("ANIMAL=cat")
       env_output.should contain("PROC_NAME=app1.1")
       env_output.should contain("APP_ROOT=#{app_root}")
@@ -162,7 +160,7 @@ SH
     File.write(File.join(app_root, "Procfile"), "app1: /bin/sleep 2\n")
 
     begin
-      status, output = run_procodile_command(app_root, "start", "-e", ".env")
+      status, output = run_procodile_command(app_root, "start", "--env-file", ".env")
 
       status.success?.should be_true
       output.should contain("Started Procodile supervisor with PID")
@@ -197,7 +195,7 @@ SH
       config = Procodile::Config.new(root: app_root)
       process = ::Process.new(
         procodile_test_binary,
-        ["-r", app_root, "start", "-f", "-e", ".env"],
+        ["-r", app_root, "start", "-f", "--env-file", ".env"],
         output: output,
         error: output
       )
