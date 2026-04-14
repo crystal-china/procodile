@@ -340,12 +340,14 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       if stopped_by_user || instance.process.last_exit_status == 0
         resolve_issue(:scheduled_run_failed, process_name)
       else
+        last_exit_status = instance.process.last_exit_status || -1
+        suggested_command = @config.suggested_command("restart -p #{process_name}")
+
         report_issue(
           :scheduled_run_failed,
           process_name,
           "Scheduled process '#{process_name}' failed with exit \
-status #{instance.process.last_exit_status || -1}. Fix it, then \
-run `#{@config.suggested_command("restart -p #{process_name}")}`."
+status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
         )
       end
     end
