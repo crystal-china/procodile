@@ -123,9 +123,7 @@ module Procodile
           end
         end
       else
-        instances = process_names_to_instances(processes).reject do |instance|
-          instance.process.scheduled? && processes.includes?(instance.process.name)
-        end
+        instances = long_running_instances(processes)
 
         Procodile.log "system", "Stopping #{instances.size} process(es)"
 
@@ -164,9 +162,7 @@ module Procodile
 
         Procodile.log "system", "Restarting all #{@config.app_name} processes"
       else
-        instances = process_names_to_instances(processes).reject do |instance|
-          instance.process.scheduled? && processes.includes?(instance.process.name)
-        end
+        instances = long_running_instances(processes)
 
         Procodile.log "system", "Restarting #{instances.size} process(es)"
       end
@@ -735,6 +731,12 @@ or `#{@config.suggested_command("restart -p #{name}")}`."
       @signal_handler.wakeup
 
       log_listener_reader
+    end
+
+    private def long_running_instances(processes : Array(String))
+      process_names_to_instances(processes).reject do |instance|
+        instance.process.scheduled? && processes.includes?(instance.process.name)
+      end
     end
 
     # Supervisor message
