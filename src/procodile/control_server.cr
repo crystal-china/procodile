@@ -4,16 +4,10 @@ module Procodile
   class ControlServer
     def self.start(supervisor : Supervisor) : Nil
       spawn do
-        loop do
-          begin
-            socket = self.new(supervisor)
-            socket.listen
-            break
-          rescue ex
-            Procodile.log_exception("control", "Control server failed", ex)
-            sleep 1.second
-          end
-        end
+        socket = self.new(supervisor)
+        socket.listen
+      rescue ex
+        Procodile.log_exception("control", "Control server failed", ex)
       end
     end
 
