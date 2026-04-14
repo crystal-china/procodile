@@ -1,0 +1,60 @@
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: crystallang/crystal:latest-alpine
+    steps:
+      - name: Cache shards
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/shards
+          key: ${{ runner.os }}-arm64-shards-${{ hashFiles('shard.yml') }}
+          restore-keys: ${{ runner.os }}-arm64-shards-
+
+      - name: Download source
+        uses: actions/checkout@v4
+
+      - name: Check formatting
+        run: crystal tool format --check
+
+      - name: Install shards
+        run: shards check || shards install --without-development
+
+      - name: Disable git safe repository checks
+        run: git config --global --add safe.directory '*'
+
+      - name: Install test runtime dependencies
+        run: apk add --no-cache ruby
+
+      - name: Run tests
+        run: crystal spec --order=random --error-on-warnings
+
+      - name: Collect package information
+        run: |
+          echo "BINARY_NAME=bin/$(cat shard.yml |grep targets -A1|tail -n1 |sed 's#[ :]##g')" >> $GITHUB_ENV
+          echo "PKG_ARCH=arm64" >> $GITHUB_ENV
+          echo "PLATFORM=unknown-linux-musl.tar.gz" >> $GITHUB_ENV
+          echo "BUILD_ARGS=--static --link-flags=\"-s -Wl,-z,relro,-z,now\"" >> $GITHUB_ENV
+
+      - name: Set asset name
+        run: |
+          echo "ASSERT_NAME=${{env.BINARY_NAME}}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
+
+      - name: Build release binary
+        id: release
+        run: |
+          echo "ASSERT_NAME=${{env.ASSERT_NAME}}" >> $GITHUB_OUTPUT
+          shards build --production --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast ${{env.BUILD_ARGS}}
+          tar zcvf ${{env.ASSERT_NAME}} ${{env.BINARY_NAME}} LICENSE
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{steps.release.outputs.ASSERT_NAME}}
