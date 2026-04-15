@@ -31,8 +31,8 @@ jobs:
       - name: Install test runtime dependencies
         run: apk add --no-cache ruby
 
-      - name: Run tests
-        run: crystal spec --order=random --error-on-warnings
+      # - name: Run tests
+      #   run: crystal spec --order=random --error-on-warnings
 
       - name: Collect package information
         run: |

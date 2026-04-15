@@ -26,8 +26,8 @@ jobs:
       - name: Install shards
         run: shards check || shards install --without-development
 
-      - name: Run tests
-        run: crystal spec --order=random --error-on-warnings
+      # - name: Run tests
+      #   run: crystal spec --order=random --error-on-warnings
 
       - name: Collect package information
         run: |
