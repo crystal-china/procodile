@@ -14,4 +14,13 @@ module Procodile
       STDOUT.flush
     end
   end
+
+  def self.log_exception(name : String, prefix : String, ex : Exception, *, backtrace_limit : Int32? = nil) : Nil
+    log name, "#{prefix}: #{ex.class}: #{ex.message}"
+
+    if (backtrace = ex.backtrace)
+      lines = backtrace_limit ? backtrace.first(backtrace_limit.not_nil!) : backtrace
+      lines.each { |line| log name, "=> #{line}" }
+    end
+  end
 end

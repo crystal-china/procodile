@@ -6,6 +6,8 @@ module Procodile
       spawn do
         socket = self.new(supervisor)
         socket.listen
+      rescue ex
+        Procodile.log_exception("control", "Control server failed", ex)
       end
     end
 
@@ -33,6 +35,10 @@ module Procodile
           client.puts response
         end
       end
+    rescue ex
+      Procodile.log "control", "Error handling client: #{ex.class}: #{ex.message}"
+    ensure
+      client.close
     end
   end
 end

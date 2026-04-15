@@ -4,6 +4,29 @@ module Procodile
       macro included
         options :start do |opts, cli|
           opts.on(
+            "-d",
+            "--dev",
+            "Run in development mode"
+          ) do
+            cli.options.respawn = false
+            cli.options.foreground = true
+            cli.options.stop_when_none = true
+            cli.options.proxy = true
+          end
+
+          opts.on(
+            "-f",
+            "--foreground",
+            "Run the supervisor in the foreground"
+          ) do
+            cli.options.foreground = true
+          end
+
+          opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
+            cli.options.proxy = true
+          end
+
+          opts.on(
             "-p",
             "--processes a,b,c",
             "Only start the listed processes or process types"
@@ -17,6 +40,20 @@ module Procodile
             "Tag all started processes with the given tag"
           ) do |tag|
             cli.options.tag = tag
+          end
+
+          opts.on(
+            "--clean",
+            "Remove all previous pid and sock files before starting"
+          ) do
+            cli.options.clean = true
+          end
+
+          opts.on(
+            "--env-file [ENV_FILE]",
+            "Read from env file, default: (.env)"
+          ) do |env_file|
+            cli.options.env_file = env_file.presence || ".env"
           end
 
           opts.on(
@@ -34,36 +71,10 @@ module Procodile
           end
 
           opts.on(
-            "-f",
-            "--foreground",
-            "Run the supervisor in the foreground"
-          ) do
-            cli.options.foreground = true
-          end
-
-          opts.on(
-            "--clean",
-            "Remove all previous pid and sock files before starting"
-          ) do
-            cli.options.clean = true
-          end
-
-          opts.on(
             "--no-respawn",
             "Disable respawning for all processes"
           ) do
             cli.options.respawn = false
-          end
-
-          opts.on(
-            "--stop-when-none",
-            "Stop the supervisor when all processes are stopped"
-          ) do
-            cli.options.stop_when_none = true
-          end
-
-          opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
-            cli.options.proxy = true
           end
 
           opts.on(
@@ -80,27 +91,17 @@ module Procodile
           end
 
           opts.on(
-            "-d",
-            "--dev",
-            "Run in development mode"
+            "--stop-when-none",
+            "Stop the supervisor when all processes are stopped"
           ) do
-            cli.options.respawn = false
-            cli.options.foreground = true
             cli.options.stop_when_none = true
-            cli.options.proxy = true
-          end
-
-          opts.on(
-            "-e [ENV_FILE]",
-            "--env [ENV_FILE]",
-            "Read from env file, default: (.env)"
-          ) do |env_file|
-            cli.options.env_file = env_file.presence || ".env"
           end
         end
       end
 
       private def start : Nil
+        process_names = configured_process_names_from_cli_option
+
         if !supervisor_running?
           raise Error.new "Supervisor is not running and cannot be started \
 because --no-supervisor is set" if @options.start_supervisor? == false
@@ -109,7 +110,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
           # processes can be begin being processed
           Supervisor.start(@config, @options) do |supervisor|
             supervisor.start_processes(
-              process_names_from_cli_option,
+              process_names,
               Supervisor::Options.new(tag: @options.tag)
             ) unless @options.start_processes? == false
           end
@@ -136,7 +137,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
         instance_configs = ControlClient.run(
           @config.sock_path,
           "start_processes",
-          processes: process_names_from_cli_option,
+          processes: process_names,
           tag: @options.tag,
           port_allocations: @options.port_allocations,
         ).as Array(Instance::Config)

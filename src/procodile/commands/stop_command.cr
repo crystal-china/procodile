@@ -31,19 +31,38 @@ module Procodile
       private def stop : Nil
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
+        process_names = process_names_from_cli_option
+        scheduled_processes = scheduled_processes_from_names(process_names)
+        disabled_scheduling_message = "Future scheduling was disabled \
+for #{scheduled_processes.map(&.name).join(", ")}."
         instances = ControlClient.run(
           @config.sock_path,
           "stop",
-          processes: process_names_from_cli_option,
+          processes: process_names,
           stop_supervisor: @options.stop_supervisor?,
         ).as(Array(Instance::Config))
 
+        # 没有任何 Instance::Config 被 stop
         if instances.empty?
-          puts "No processes were stopped."
+          if process_names
+            if scheduled_processes.any?
+              puts disabled_scheduling_message
+            else
+              if process_names.size == 1
+                raise Error.new "No running process matches '#{process_names.first}'."
+              else
+                raise Error.new "No running processes match: #{process_names.join(", ")}."
+              end
+            end
+          else
+            puts "No processes were stopped."
+          end
         else
           instances.each do |instance|
             puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
           end
+
+          puts disabled_scheduling_message if scheduled_processes.any?
         end
 
         puts "Supervisor will be stopped when processes are stopped." if @options.stop_supervisor?

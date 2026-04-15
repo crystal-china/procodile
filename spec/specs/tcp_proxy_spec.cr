@@ -51,11 +51,6 @@ YAML
 
     config = Procodile::Config.new(root: app_root)
     run_options = Procodile::Supervisor::RunOptions.new(
-      respawn: nil,
-      stop_when_none: nil,
-      force_single_log: nil,
-      port_allocations: nil,
-      env_file: nil,
       proxy: true,
       foreground: false
     )

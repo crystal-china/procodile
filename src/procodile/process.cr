@@ -8,6 +8,11 @@ module Procodile
 
     getter config : Config
     getter name : String
+    property schedule : String?
+    property last_started_at : Time?
+    property last_finished_at : Time?
+    property last_exit_status : Int32?
+    property last_run_duration : Float64?
 
     property command : String
     property options : Procodile::Process::Option
@@ -21,28 +26,30 @@ module Procodile
       @name : String,
       @command : String,
       @options : Procodile::Process::Option = Procodile::Process::Option.new,
+      @schedule : String? = nil,
     )
     end
 
-    #
-    # Return all environment variables for this process
-    #
-    def environment_variables : Hash(String, String)
-      global_variables = @config.environment_variables
+    def scheduled? : Bool
+      !@schedule.nil?
+    end
 
-      process_vars = if (process = @config.process_options[@name]?)
-                       process.env || {} of String => String
-                     else
-                       {} of String => String
-                     end
+    # Return the configured environment variables for this process by combining
+    # configured global env, the optional --env-file, and process-specific overrides.
+    # Precedence: process local env > process env > --env-file > global local env > global env.
+    def environment_variables(supervisor : Supervisor) : Hash(String, String)
+      vars = @config.environment_variables
 
-      process_local_vars = if (local_process = @config.local_process_options[@name]?)
-                             local_process.env || {} of String => String
-                           else
-                             {} of String => String
-                           end
+      if (env_file = supervisor.run_options.env_file)
+        path = Path.new(env_file)
+        file = path.absolute? ? env_file : File.join(@config.root, env_file)
+        vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
+      end
 
-      global_variables.merge(process_vars.merge(process_local_vars))
+      process_vars = @config.process_options[@name]?.try(&.env) || {} of String => String
+      process_local_vars = @config.local_process_options[@name]?.try(&.env) || {} of String => String
+
+      vars.merge(process_vars.merge(process_local_vars))
     end
 
     #
@@ -164,6 +171,11 @@ module Procodile
     def to_struct : ControlClient::ProcessStatus
       ControlClient::ProcessStatus.new(
         name: self.name,
+        schedule: self.schedule,
+        last_started_at: @last_started_at ? @last_started_at.not_nil!.to_unix : nil,
+        last_finished_at: @last_finished_at ? @last_finished_at.not_nil!.to_unix : nil,
+        last_exit_status: @last_exit_status,
+        last_run_duration: @last_run_duration,
         log_color: self.log_color,
         quantity: self.quantity,
         max_respawns: self.max_respawns,
@@ -236,6 +248,8 @@ struct Procodile::Process::Option
 
   # Return the network protocol for this process
   property network_protocol : String?
+
+  property at : String?
 
   property env : Hash(String, String) = {} of String => String
 

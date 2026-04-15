@@ -11,15 +11,22 @@ module Procodile
       Colorize::ColorANSI::Blue,    # 34 蓝
     ]
 
-    getter process_list : Hash(String, String) { load_process_list_from_file }
+    PROCFILE_SCHEDULE_SEPARATOR_REGEX = /__AT__/
+    PROCFILE_SCHEDULE_ENTRY_REGEX     = /\A(.+?)(?:#{PROCFILE_SCHEDULE_SEPARATOR_REGEX})(.+)\z/
+
+    getter procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?)) { parse_procfile_entries }
+    getter process_list : Hash(String, String) { procfile_entries[:commands] }
+    getter process_schedules : Hash(String, String?) { procfile_entries[:schedules] }
     getter processes : Hash(String, Procodile::Process) { {} of String => Procodile::Process }
 
     getter options : Config::Option { load_options_from_file }
     getter local_options : Config::Option { load_local_options_from_file }
     getter process_options : Hash(String, Procodile::Process::Option) do
+      validate_process_option_keys(options.processes, options_path)
       options.processes || {} of String => Procodile::Process::Option
     end
     getter local_process_options : Hash(String, Procodile::Process::Option) do
+      validate_process_option_keys(local_options.processes, local_options_path)
       local_options.processes || {} of String => Procodile::Process::Option
     end
     getter app_name : String do
@@ -27,6 +34,8 @@ module Procodile
     end
     getter loaded_at : Time?
     getter root : String
+
+    # Return the configured environment variables from options
     getter environment_variables : Hash(String, String) do
       option_env = options.env || {} of String => String
       local_option_env = local_options.env || {} of String => String
@@ -68,7 +77,9 @@ module Procodile
       @process_options = nil
       @local_process_options = nil
 
+      @procfile_entries = nil
       @process_list = nil
+      @process_schedules = nil
       @environment_variables = nil
       @loaded_at = nil
 
@@ -80,12 +91,15 @@ module Procodile
             # This command is already in our list. Add it.
             if process.command != command
               process.command = command
+
               Procodile.log "system", "#{name} command has changed. Updated."
             end
 
             process.options = options_for_process(name)
+            process.schedule = schedule_for_process(name)
           else
             Procodile.log "system", "#{name} has been added to the Procfile. Adding it."
+
             processes[name] = create_process(name, command, COLORS[processes.size.divmod(COLORS.size)[1]])
           end
         end
@@ -96,6 +110,7 @@ module Procodile
           if (p = processes[process_name])
             p.removed = true
             processes.delete(process_name)
+
             Procodile.log "system", "#{process_name} has been removed in the \
 Procfile. It will be removed when it is stopped."
           end
@@ -103,6 +118,10 @@ Procfile. It will be removed when it is stopped."
       end
 
       @loaded_at = Time.local
+    end
+
+    def suggested_command(command : String) : String
+      "#{suggested_command_prefix} #{command}"
     end
 
     def user : String?
@@ -166,17 +185,50 @@ Procfile. It will be removed when it is stopped."
       "#{procfile_path}.local"
     end
 
+    private def suggested_command_prefix : String
+      current_root = Dir.current
+      return "procodile" if @root == current_root
+
+      suggested_root = if @root.starts_with?(current_root + "/")
+                         @root[current_root.size + 1..]
+                       else
+                         @root
+                       end
+
+      "procodile -r #{suggested_root}"
+    end
+
     private def create_process(
       name : String,
       command : String,
       log_color : Colorize::ColorANSI,
     ) : Procodile::Process
-      process = Procodile::Process.new(self, name, command, options_for_process(name))
+      process = Procodile::Process.new(
+        self,
+        name,
+        command,
+        options_for_process(name),
+        schedule_for_process(name)
+      )
       process.log_color = log_color
       process
     end
 
-    private def load_process_list_from_file : Hash(String, String)
+    private def schedule_for_process(name : String) : String?
+      options_schedule = options_for_process(name).at
+      procfile_schedule = process_schedules[name]?
+
+      if procfile_schedule && options_schedule
+        Procodile.log(
+          "system",
+          "#{name} defines schedule in both Procfile and the options files; using the options value #{options_schedule.inspect}"
+        )
+      end
+
+      options_schedule || procfile_schedule
+    end
+
+    private def parse_procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?))
       content = File.read(procfile_path)
 
       if content.blank?
@@ -184,7 +236,34 @@ Procfile. It will be removed when it is stopped."
 Did you forget to add commands, or was it empty by mistake?"
       end
 
-      Hash(String, String).from_yaml(content)
+      raw_entries = Hash(String, String).from_yaml(content)
+      commands = {} of String => String
+      schedules = {} of String => String?
+
+      raw_entries.each do |raw_name, command|
+        name, schedule = parse_process_name_and_schedule(raw_name)
+        existing_name = commands.keys.find { |key| key.compare(name, case_insensitive: true) == 0 }
+
+        if existing_name
+          raise Error.new("Duplicate process name '#{name}' in Procfile: \
+conflicts with '#{existing_name}' (case-insensitively).")
+        end
+
+        commands[name] = command
+        schedules[name] = schedule
+      end
+
+      {commands: commands, schedules: schedules}
+    end
+
+    private def parse_process_name_and_schedule(raw_name : String) : Tuple(String, String?)
+      match = raw_name.match(PROCFILE_SCHEDULE_ENTRY_REGEX)
+
+      if match
+        {match[1], match[2].strip}
+      else
+        {raw_name, nil}
+      end
     end
 
     private def load_options_from_file : Config::Option
@@ -200,6 +279,19 @@ Did you forget to add commands, or was it empty by mistake?"
         Config::Option.from_yaml(File.read(local_options_path))
       else
         Config::Option.new
+      end
+    end
+
+    private def validate_process_option_keys(
+      process_options : Hash(String, Procodile::Process::Option)?,
+      source_path : String,
+    ) : Nil
+      return unless process_options
+
+      process_options.each_key do |name|
+        if !process_list.has_key?(name)
+          raise Error.new("Unknown process '#{name}' in #{source_path}.")
+        end
       end
     end
   end
@@ -227,7 +319,7 @@ Did you forget to add commands, or was it empty by mistake?"
   struct Config::GlobalOption
     include YAML::Serializable
 
-    property name : String
+    property name : String?
     property root : String
     property procfile : String?
   end

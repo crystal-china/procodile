@@ -39,10 +39,20 @@ module Procodile
             true
           end
         else
+          if code.to_i == 500 && reply
+            message = begin
+              String.from_json(reply)
+            rescue JSON::ParseException
+              reply
+            end
+
+            raise Error.new(message)
+          end
+
           raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
-        raise Error.new "Control server disconnected. data: #{data.inspect}"
+        raise Error.new "Control server disconnected. Check procodile.log for details."
       end
     end
 
@@ -55,6 +65,11 @@ module Procodile
     include JSON::Serializable
 
     getter name : String
+    getter schedule : String?
+    getter last_started_at : Int64?
+    getter last_finished_at : Int64?
+    getter last_exit_status : Int32?
+    getter last_run_duration : Float64?
     getter log_color : Colorize::ColorANSI
     getter quantity : Int32
     getter max_respawns : Int32
@@ -68,6 +83,11 @@ module Procodile
 
     def initialize(
       @name : String,
+      @schedule : String?,
+      @last_started_at : Int64?,
+      @last_finished_at : Int64?,
+      @last_exit_status : Int32?,
+      @last_run_duration : Float64?,
       @log_color : Colorize::ColorANSI,
       @quantity : Int32,
       @max_respawns : Int32,
@@ -90,9 +110,10 @@ module Procodile
     getter messages : Array(Supervisor::Message)
     getter root : String
     getter app_name : String
-    getter supervisor : NamedTuple(started_at: Int64?, pid: Int64)
+    getter supervisor : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
     getter instances : Hash(String, Array(Instance::Config))
     getter processes : Array(ControlClient::ProcessStatus)
+    getter runtime_issues : Array(Supervisor::RuntimeIssue)
     getter environment_variables : Hash(String, String)
     getter procfile_path : String
     getter options_path : String
@@ -108,9 +129,10 @@ module Procodile
       @messages : Array(Supervisor::Message),
       @root : String,
       @app_name : String,
-      @supervisor : NamedTuple(started_at: Int64?, pid: Int64),
+      @supervisor : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool),
       @instances : Hash(String, Array(Instance::Config)),
       @processes : Array(ControlClient::ProcessStatus),
+      @runtime_issues : Array(Supervisor::RuntimeIssue),
       @environment_variables : Hash(String, String),
       @procfile_path : String,
       @options_path : String,

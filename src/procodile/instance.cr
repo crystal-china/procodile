@@ -7,7 +7,10 @@ module Procodile
   class Instance
     @stopping_at : Time?
     @started_at : Time?
+    @finished_at : Time?
     @failed_at : Time?
+    @last_exit_status : Int32?
+    @last_run_duration : Float64?
 
     property port : Int32?
     property process : Procodile::Process
@@ -82,18 +85,30 @@ module Procodile
 
       @tag = @supervisor.tag.dup if @supervisor.tag
 
-      argv = ::Process.parse_arguments(@process.command)
-
       process = ::Process.new(
-        argv[0],
-        argv[1..],
+        ::Process.parse_arguments(@process.command),
         chdir: @process.config.root,
         env: environment_variables,
         output: log_destination,
         error: log_destination
       )
 
-      spawn { process.wait }
+      spawn do
+        begin
+          status = process.wait
+          @last_exit_status = status.exit_code?
+
+          if @process.scheduled?
+            if (started_at = @started_at)
+              @last_run_duration = (Time.local - started_at).total_seconds
+            end
+
+            @supervisor.finish_scheduled_instance(self)
+          end
+        rescue ex
+          Procodile.log_exception(description, "Process wait failed", ex)
+        end
+      end
 
       @pid = process.pid
 
@@ -111,6 +126,8 @@ module Procodile
         @process.log_color
       )
 
+      @supervisor.resolve_issue(:process_failed_permanently, @process.name) unless @process.scheduled?
+
       if self.process.log_path && io.nil?
         Procodile.log(
           description,
@@ -120,6 +137,44 @@ module Procodile
       end
 
       @started_at = Time.local
+      @finished_at = nil
+      @process.last_started_at = @started_at
+    rescue ex
+      report_start_failure(ex.message.to_s)
+      Procodile.log(
+        description,
+        "Failed to start: #{ex.message}",
+        @process.log_color
+      )
+    ensure
+      log_destination.close if log_destination && !log_destination.closed?
+    end
+
+    protected def report_start_failure(message : String) : Nil
+      if @process.scheduled?
+        @supervisor.report_issue(
+          :scheduled_run_failed,
+          @process.name,
+          %|Scheduled process '#{@process.name}' failed to start: #{message} Fix it, \
+then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.|
+        )
+      else
+        @failed_at = Time.local
+
+        @supervisor.report_issue(
+          :process_failed_permanently,
+          @process.name,
+          %|Process '#{@process.name}' failed to start: #{message} Fix it, then \
+run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.|
+        )
+      end
+    end
+
+    private def daemon_process_hint : String
+      return "" unless @last_exit_status == 0
+
+      "This does not look like a long-running process.
+If this command is meant to run once, it may not be suitable as a normal Procfile process."
     end
 
     #
@@ -185,7 +240,19 @@ module Procodile
         self
       when "start-term"
         new_instance = @process.create_instance(@supervisor)
-        new_instance.start
+        begin
+          new_instance.start
+        rescue ex : Error
+          new_instance.report_start_failure(ex.message.to_s)
+
+          Procodile.log(
+            new_instance.description,
+            "Failed to start during restart: #{ex.message}",
+            @process.log_color
+          )
+
+          return nil
+        end
 
         stop
 
@@ -203,7 +270,17 @@ module Procodile
 
           @supervisor.remove_instance(self)
 
-          new_instance.start
+          begin
+            new_instance.start
+          rescue ex : Error
+            new_instance.report_start_failure(ex.message.to_s)
+
+            Procodile.log(
+              new_instance.description,
+              "Failed to start during restart: #{ex.message}",
+              @process.log_color
+            )
+          end
         end
 
         new_instance
@@ -214,6 +291,7 @@ module Procodile
     # Check the status of this process and handle as appropriate.
     #
     def check : Nil
+      return if @process.scheduled?
       return if failed?
 
       # Everything is OK. The process is running.
@@ -246,8 +324,15 @@ module Procodile
             @process.log_color
           )
 
-          @failed_at = Time.local
+          @supervisor.report_issue(
+            :process_failed_permanently,
+            @process.name,
+            "Process '#{@process.name}' failed repeatedly and will not be respawned \
+automatically. Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.
+#{daemon_process_hint}"
+          )
 
+          @failed_at = Time.local
           tidy
         end
       else
@@ -257,8 +342,15 @@ module Procodile
           @process.log_color
         )
 
-        @failed_at = Time.local
+        @supervisor.report_issue(
+          :process_failed_permanently,
+          @process.name,
+          "Process '#{@process.name}' stopped and automatic respawning is disabled. \
+Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.
+#{daemon_process_hint}"
+        )
 
+        @failed_at = Time.local
         tidy
       end
     end
@@ -268,6 +360,7 @@ module Procodile
     #
     def to_struct : Instance::Config
       started_at = @started_at
+      last_finished_at = @finished_at
 
       Instance::Config.new(
         description: self.description,
@@ -275,6 +368,9 @@ module Procodile
         respawns: self.respawns,
         status: self.status,
         started_at: started_at ? started_at.to_unix : nil,
+        last_finished_at: last_finished_at ? last_finished_at.to_unix : nil,
+        last_exit_status: @last_exit_status,
+        last_run_duration: @last_run_duration,
         tag: self.tag,
         port: @port,
         foreground: @supervisor.run_use_foreground?
@@ -339,6 +435,18 @@ module Procodile
     def on_stop : Nil
       @started_at = nil
       @stopped = true
+
+      tidy
+    end
+
+    def on_scheduled_finish : Nil
+      @finished_at = Time.local
+      @pid = nil
+      @stopping_at = nil
+      @failed_at = nil
+      @process.last_finished_at = @finished_at
+      @process.last_exit_status = @last_exit_status
+      @process.last_run_duration = @last_run_duration
 
       tidy
     end
@@ -430,17 +538,10 @@ module Procodile
       !stopping? && (respawns + 1) <= @process.max_respawns
     end
 
-    #
-    # Return an array of environment variables that should be set
-    #
+    # Build the final environment for this instance by combining the process
+    # environment and Procodile-managed instance variables.
     private def environment_variables : Hash(String, String)
-      vars = @process.environment_variables
-
-      if (env_file = @supervisor.run_options.env_file)
-        path = Path.new(env_file)
-        file = path.absolute? ? env_file : File.join(@process.config.root, env_file)
-        vars = vars.merge(LuckyEnv::Parser.new.read_file(file))
-      end
+      vars = @process.environment_variables(@supervisor)
 
       vars = vars.merge({
         "PROC_NAME" => self.description,
@@ -458,6 +559,7 @@ module Procodile
     #
     private def update_pid : Bool
       pid_from_file = self.pid_from_file
+
       if pid_from_file && pid_from_file != @pid
         @pid = pid_from_file
         @started_at = File.info(self.pid_file_path).modification_time
@@ -507,6 +609,9 @@ module Procodile
     getter respawns : Int32
     getter status : Instance::Status
     getter started_at : Int64?
+    getter last_finished_at : Int64?
+    getter last_exit_status : Int32?
+    getter last_run_duration : Float64?
     getter tag : String?
     getter port : Int32?
     getter? foreground : Bool
@@ -517,6 +622,9 @@ module Procodile
       @respawns : Int32,
       @status : Instance::Status,
       @started_at : Int64?,
+      @last_finished_at : Int64?,
+      @last_exit_status : Int32?,
+      @last_run_duration : Float64?,
       @tag : String?,
       @port : Int32?,
 

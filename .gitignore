@@ -10,3 +10,4 @@ Procfile.*
 /new_pids
 *.pid
 .tool-versions
+procodile.wiki
