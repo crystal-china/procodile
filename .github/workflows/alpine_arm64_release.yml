@@ -41,7 +41,8 @@ jobs:
 
       - name: Set asset name
         run: |
-          echo "ASSET_NAME=${{env.BINARY_NAME}}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
+          asset_basename=$(basename "${{env.BINARY_NAME}}")
+          echo "ASSET_NAME=${asset_basename}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
 
       - name: Package release asset
         id: release

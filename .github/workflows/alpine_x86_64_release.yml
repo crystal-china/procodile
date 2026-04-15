@@ -43,14 +43,15 @@ jobs:
 
       - name: Set asset name
         run: |
-          echo "ASSERT_NAME=${{env.BINARY_NAME}}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
+          asset_basename=$(basename "${{env.BINARY_NAME}}")
+          echo "ASSET_NAME=${asset_basename}-${{github.ref_name}}-${{env.PKG_ARCH}}-${{env.PLATFORM}}" >> $GITHUB_ENV
 
       - name: Build release binary
         id: release
         run: |
-          echo "ASSERT_NAME=${{env.ASSERT_NAME}}" >> $GITHUB_OUTPUT
+          echo "ASSET_NAME=${{env.ASSET_NAME}}" >> $GITHUB_OUTPUT
           shards build --production --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast ${{env.BUILD_ARGS}}
-          tar zcvf ${{env.ASSERT_NAME}} ${{env.BINARY_NAME}} LICENSE
+          tar zcvf ${{env.ASSET_NAME}} ${{env.BINARY_NAME}} LICENSE
 
       - name: Release
         uses: softprops/action-gh-release@v2
