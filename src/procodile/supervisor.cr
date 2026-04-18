@@ -424,6 +424,8 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
         end
 
         clear_scheduled_skip_state(name)
+        suggested_restart_command = @config.suggested_command("restart -p #{name}")
+
         report_issue(
           :invalid_schedule,
           name,
@@ -431,7 +433,7 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
 Use 5 or 6 space-separated fields: seconds(optional) minute hour day month weekday. \
 In Procfile, write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
 or set `processes.#{name}.at: \"*/10 * * * * *\"` in the options files. Fix it, then run `#{@config.suggested_command("reload")}` \
-or `#{@config.suggested_command("restart -p #{name}")}`."
+or `#{suggested_restart_command}`."
         )
         Procodile.log "system", "Invalid cron schedule '#{schedule}' for #{name}: #{ex.message}"
         return
@@ -708,17 +710,12 @@ or `#{@config.suggested_command("restart -p #{name}")}`."
 
     # 解析用户输入的名称，返回 (进程名, instance_id) 元组
     # - instance_id 为 nil 表示匹配所有实例
-    private def resolve_process_and_instance(name : String) : Tuple(String?, Int32?)
-      return {name, nil} if @config.processes.has_key?(name)
-
-      if (match = name.match(PROCESS_INSTANCE_REGEX)) # app1.1
-        process_name = match[1]
-        instance_id = match[2].to_i32
-
-        return {process_name, instance_id} if @config.processes.has_key?(process_name)
+    private def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
+      if (match = name.match(PROCESS_INSTANCE_REGEX))
+        {match[1], match[2].to_i32}
+      else
+        {name, nil}
       end
-
-      {nil, nil}
     end
 
     private def all_instances_stopped? : Bool
