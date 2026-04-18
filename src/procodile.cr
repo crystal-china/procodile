@@ -44,6 +44,7 @@ module Procodile
   command = probe_argv[0]?
   valid_command = cli.class.commands[command]?
   # actual_run_command = cli.class.commands[command]? ? command : "help"
+  remaining_args = [] of String
 
   OptionParser.parse do |opt|
     # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
@@ -85,7 +86,19 @@ module Procodile
     opt.missing_option do |flag|
       abort "Missing option for #{flag}\n\n#{opt}"
     end
+
+    opt.unknown_args do |args|
+      remaining_args = args
+    end
   end
+
+  command_args = if valid_command && remaining_args.size > 1
+                   remaining_args[1..]
+                 else
+                   [] of String
+                 end
+
+  cli.options.command_args = command_args
 
   # Get the global configuration file data
   global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
@@ -144,6 +157,10 @@ module Procodile
   end
 
   begin
+    if valid_command && command.in?({"start", "restart", "stop"}) && command_args.any?
+      raise Error.new "Invalid argument(s) for `#{command}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
+    end
+
     if valid_command && valid_command != "help"
       cli.config = Config.new(ap.root || "", ap.procfile)
 

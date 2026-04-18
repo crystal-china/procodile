@@ -241,6 +241,7 @@ module Procodile
       property tag : String?
       property port_allocations : Hash(String, Int32)?
       property processes : String? # A String split by comma.
+      property command_args : Array(String)?
       property lines : Int32?
       property process : String?
 

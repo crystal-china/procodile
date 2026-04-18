@@ -25,6 +25,16 @@ private def run_cli_command(app_root : String, *args : String) : {::Process::Sta
 end
 
 describe "runtime issues" do
+  it "rejects stray positional arguments for start, restart, and stop" do
+    {"start", "restart", "stop"}.each do |command|
+      status, output = run_cli_command("/tmp", command, "app1")
+
+      status.success?.should be_false
+      output.should contain("Invalid argument(s) for `#{command}`: app1")
+      output.should contain("Use `-p/--processes` to target processes.")
+    end
+  end
+
   it "prints invalid schedule issues after CLI commands and clears them after reload with a valid schedule" do
     app_root = File.join("/tmp", "procodile-invalid-schedule-#{Random.rand(1_000_000)}")
     FileUtils.mkdir_p(File.join(app_root, "pids"))
