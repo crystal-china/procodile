@@ -183,7 +183,7 @@ YAML
       File.join(app_root, "ok.sh"),
       <<-'SH'
 #!/usr/bin/env bash
-sleep 10
+sleep 60
 SH
     )
     File.chmod(File.join(app_root, "ok.sh"), 0o755)
@@ -332,7 +332,7 @@ PROCFILE
       File.join(app_root, "ok.sh"),
       <<-'SH'
 #!/usr/bin/env bash
-sleep 10
+sleep 60
 SH
     )
     File.chmod(File.join(app_root, "ok.sh"), 0o755)
