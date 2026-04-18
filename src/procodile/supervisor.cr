@@ -460,6 +460,16 @@ or `#{suggested_restart_command}`."
 
         next unless scheduled_job_active?(name, schedule, signal)
 
+        if (process = @config.processes[name]?) && (delay = scheduled_delay_seconds(process)) > 0
+          select
+          when signal.receive
+            next
+          when timeout delay.seconds
+          end
+        end
+
+        next unless scheduled_job_active?(name, schedule, signal)
+
         run_scheduled_process(name)
       end
     end
@@ -730,6 +740,13 @@ or `#{suggested_restart_command}`."
       @signal_handler.wakeup
 
       log_listener_reader
+    end
+
+    protected def scheduled_delay_seconds(process : Process) : Int32
+      random_delay = process.random_delay
+      return 0 if random_delay <= 0
+
+      Random.rand(random_delay + 1)
     end
 
     private def long_running_instances(processes : Array(String))

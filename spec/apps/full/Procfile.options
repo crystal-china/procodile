@@ -17,3 +17,4 @@ processes:
     proxy_address: 127.0.0.1
     proxy_port: 2018
     network_protocol: tcp
+    random_delay: 10

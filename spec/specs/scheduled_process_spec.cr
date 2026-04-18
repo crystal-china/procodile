@@ -1,5 +1,11 @@
 require "../spec_helper"
 
+private class DeterministicJitterSupervisor < Procodile::Supervisor
+  protected def scheduled_delay_seconds(process : Procodile::Process) : Int32
+    process.random_delay
+  end
+end
+
 private def wait_for_control_socket(sock_path : String) : Bool
   wait_until(5.seconds, 50.milliseconds) do
     begin
@@ -269,6 +275,60 @@ RUBY
       end.should be_true
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
+      supervisor.reload_config
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
+  it "delays scheduled runs by random_delay seconds" do
+    app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-random-delay-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "scheduled_task.rb"),
+      <<-'RUBY'
+File.open("schedule.out", "a") do |file|
+  file.puts Time.local.to_unix_ms
+end
+RUBY
+    )
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      %Q("job__AT__*/1 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+    )
+
+    File.write(
+      File.join(app_root, "Procfile.options"),
+      <<-YAML
+processes:
+  job:
+    random_delay: 2
+YAML
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    supervisor = DeterministicJitterSupervisor.new(config)
+    process = config.processes["job"]
+
+    begin
+      supervisor.start_processes(nil).should be_empty
+
+      started_at = Time.local
+
+      sleep 1.5.seconds
+      process.last_started_at.should be_nil
+
+      wait_until(4.seconds, 100.milliseconds) do
+        !process.last_started_at.nil?
+      end.should be_true
+
+      first_run_at = process.last_started_at.not_nil!
+      (first_run_at - started_at).should be >= 2.seconds
+    ensure
+      File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
       FileUtils.rm_rf(app_root)
     end

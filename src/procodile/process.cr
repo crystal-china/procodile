@@ -34,6 +34,10 @@ module Procodile
       !@schedule.nil?
     end
 
+    def random_delay : Int32
+      @options.random_delay || 0
+    end
+
     # Return the configured environment variables for this process by combining
     # configured global env, the optional --env-file, and process-specific overrides.
     # Precedence: process local env > process env > --env-file > global local env > global env.
@@ -250,6 +254,7 @@ struct Procodile::Process::Option
   property network_protocol : String?
 
   property at : String?
+  property random_delay : Int32?
 
   property env : Hash(String, String) = {} of String => String
 

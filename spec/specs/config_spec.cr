@@ -123,6 +123,7 @@ describe Procodile::Config do
       config.options_for_process("proc1").should be_a Procodile::Process::Option
       config.options_for_process("proc1").quantity.should eq 2
       config.options_for_process("proc1").restart_mode.should eq Signal::USR2
+      config.options_for_process("proc1").random_delay.should eq 10
       config.options_for_process("proc2").should be_a Procodile::Process::Option
       config.options_for_process("proc2").should eq Procodile::Process::Option.new
     end
@@ -154,6 +155,7 @@ processes:
     proxy_address: 127.0.0.1
     proxy_port: 2018
     network_protocol: tcp
+    random_delay: 10
 "
 
     it "should add missing processes" do

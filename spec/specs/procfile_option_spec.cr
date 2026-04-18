@@ -20,6 +20,7 @@ describe Procodile::Config::Option do
     process_option.proxy_address = "127.0.0.1"
     process_option.proxy_port = 2018
     process_option.network_protocol = "tcp"
+    process_option.random_delay = 10
 
     procfile_option.processes.should eq({"proc1" => process_option})
   end
