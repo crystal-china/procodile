@@ -504,10 +504,6 @@ or `#{suggested_restart_command}`."
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
-    private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
-      @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]? == signal
-    end
-
     private def scheduled_process_finished(instance : Instance) : Nil
       @scheduled_running.delete(instance.process.name)
     end
@@ -515,41 +511,6 @@ or `#{suggested_restart_command}`."
     private def clear_scheduled_skip_state(name : String) : Nil
       @scheduled_skip_counts.delete(name)
       resolve_issue(:scheduled_run_skipped_repeatedly, name)
-    end
-
-    private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
-      selected = if process_names
-                   process_names.compact_map do |name|
-                     process_name = resolve_process_and_instance(name).first
-                     @config.processes[process_name]?
-                   end
-                 else
-                   @config.processes.values
-                 end
-
-      selected.select(&.scheduled?)
-    end
-
-    private def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        @disabled_scheduled_jobs.delete(process.name)
-      end
-    end
-
-    private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        @disabled_scheduled_jobs.add(process.name)
-      end
-    end
-
-    private def signal_scheduled_job(name : String) : Nil
-      return unless (signal = @scheduled_job_signals[name]?)
-
-      # 非阻塞 send，避免重复 signal 卡住
-      select
-      when signal.send(nil)
-      else
-      end
     end
 
     private def watch_for_output : Nil
@@ -740,13 +701,6 @@ or `#{suggested_restart_command}`."
       @signal_handler.wakeup
 
       log_listener_reader
-    end
-
-    protected def scheduled_delay_seconds(process : Process) : Int32
-      random_delay = process.random_delay
-      return 0 if random_delay <= 0
-
-      Random.rand(random_delay + 1)
     end
 
     private def long_running_instances(processes : Array(String))
