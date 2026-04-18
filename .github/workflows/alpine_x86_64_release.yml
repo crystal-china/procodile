@@ -29,10 +29,10 @@ jobs:
         run: git config --global --add safe.directory '*'
 
       - name: Install test runtime dependencies
-        run: apk add --no-cache ruby
+        run: apk add --no-cache bash ruby
 
-      # - name: Run tests
-      #   run: crystal spec --order=random --error-on-warnings
+      - name: Run tests
+        run: crystal spec --order=random --error-on-warnings
 
       - name: Collect package information
         run: |
