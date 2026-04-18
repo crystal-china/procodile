@@ -123,7 +123,7 @@ module Procodile
           end
 
           if process.removed? && instances.any?(&.status.running?)
-            puts "#{"||".colorize(process.log_color)} Status              Removed from Procfile, still running"
+            puts "#{"||".colorize(process.log_color)} Status              Removed from Procfile, still running (will be removed after it exits)"
           end
 
           if instances.empty?
