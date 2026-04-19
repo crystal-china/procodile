@@ -9,8 +9,6 @@ module Procodile
     PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
 
     @started_at : Time?
-    # 要执行的任务，key 是 name, value 是 crontab
-    @scheduled_jobs : Hash(String, String) = {} of String => String
     # 检测是不是当前正在运行
     @scheduled_running : Set(String) = Set(String).new
     @scheduled_skip_counts : Hash(String, Int32) = {} of String => Int32

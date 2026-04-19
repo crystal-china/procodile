@@ -2,6 +2,8 @@ module Procodile
   class ScheduleManager
     # 用于唤醒旧 watcher 立即退出，避免软退出
     getter scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
+    # 要执行的任务，key 是 name, value 是 crontab
+    getter scheduled_jobs : Hash(String, String) = {} of String => String
 
     def initialize(@supervisor : Supervisor)
     end
@@ -22,6 +24,10 @@ module Procodile
       else
       end
     end
+
+    def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
+      scheduled_jobs[name]? == schedule && scheduled_job_signals[name]? == signal
+    end
   end
 
   class Supervisor
@@ -35,11 +41,11 @@ module Procodile
 
       # keys 先返回一个独立的 Array(String)，后面 each 遍历的是这个数组，不是原 hash。
       # 因此，这里遍历时删除哈希元素是安全的。
-      @scheduled_jobs.keys.each do |name|
+      schedule_manager.scheduled_jobs.keys.each do |name|
         next if wanted.has_key?(name)
 
         schedule_manager.signal_scheduled_job(name)
-        @scheduled_jobs.delete(name)
+        schedule_manager.scheduled_jobs.delete(name)
         schedule_manager.@scheduled_job_signals.delete(name)
         resolve_issue(:invalid_schedule, name)
         resolve_issue(:scheduled_run_failed, name)
@@ -47,10 +53,10 @@ module Procodile
       end
 
       wanted.each do |name, schedule|
-        next if @scheduled_jobs[name]? == schedule && schedule_manager.scheduled_job_signals[name]?
+        next if schedule_manager.scheduled_jobs[name]? == schedule && schedule_manager.scheduled_job_signals[name]?
 
         schedule_manager.signal_scheduled_job(name)
-        @scheduled_jobs[name] = schedule
+        schedule_manager.scheduled_jobs[name] = schedule
         # 这里的 signal 不是“精确计数消息”，因此不是 new，而是使用 new(1)
         # 1 表示，不管 watcher 是啥状态（哪怕还没有阻塞在 receive），我也能把信号先放进去。
         # 然后下一次 select 的时候马上会收到。
@@ -70,7 +76,7 @@ module Procodile
         resolve_issue(:invalid_schedule, name)
       rescue ex
         if schedule_manager.scheduled_job_signals[name]? == signal
-          @scheduled_jobs.delete(name)
+          schedule_manager.scheduled_jobs.delete(name)
           schedule_manager.scheduled_job_signals.delete(name)
         end
 
@@ -92,7 +98,7 @@ or `#{suggested_restart_command}`."
       previous_next_time = Time.local - 1.minute
 
       loop do
-        break unless scheduled_job_active?(name, schedule, signal)
+        break unless schedule_manager.scheduled_job_active?(name, schedule, signal)
 
         now = Time.local
         next_time = parser.next(now)
@@ -109,7 +115,7 @@ or `#{suggested_restart_command}`."
         when timeout sleep_time
         end
 
-        next unless scheduled_job_active?(name, schedule, signal)
+        next unless schedule_manager.scheduled_job_active?(name, schedule, signal)
 
         if (process = @config.processes[name]?) && (delay = schedule_manager.scheduled_delay_seconds(process)) > 0
           select
@@ -119,7 +125,7 @@ or `#{suggested_restart_command}`."
           end
         end
 
-        next unless scheduled_job_active?(name, schedule, signal)
+        next unless schedule_manager.scheduled_job_active?(name, schedule, signal)
 
         run_scheduled_process(name)
       end
@@ -201,10 +207,6 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
       processes.each do |process|
         @disabled_scheduled_jobs.add(process.name)
       end
-    end
-
-    private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
-      @scheduled_jobs[name]? == schedule && schedule_manager.scheduled_job_signals[name]? == signal
     end
   end
 end
