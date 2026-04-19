@@ -18,6 +18,29 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
+    def finish_scheduled_instance(instance : Instance) : Nil
+      stopped_by_user = instance.stopping?
+      process_name = instance.process.name
+
+      instance.on_scheduled_finish
+      @supervisor.remove_instance(instance)
+      scheduled_process_finished(instance)
+
+      if stopped_by_user || instance.process.last_exit_status == 0
+        @supervisor.resolve_issue(:scheduled_run_failed, process_name)
+      else
+        last_exit_status = instance.process.last_exit_status || -1
+        suggested_command = config.suggested_command("restart -p #{process_name}")
+
+        @supervisor.report_issue(
+          :scheduled_run_failed,
+          process_name,
+          "Scheduled process '#{process_name}' failed with exit \
+status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
+        )
+      end
+    end
+
     protected def sync_scheduled_processes : Nil
       wanted = config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
@@ -201,31 +224,6 @@ or `#{suggested_restart_command}`."
                  end
 
       selected.select(&.scheduled?)
-    end
-  end
-
-  class Supervisor
-    def finish_scheduled_instance(instance : Instance) : Nil
-      stopped_by_user = instance.stopping?
-      process_name = instance.process.name
-
-      instance.on_scheduled_finish
-      remove_instance(instance)
-      schedule_manager.scheduled_process_finished(instance)
-
-      if stopped_by_user || instance.process.last_exit_status == 0
-        resolve_issue(:scheduled_run_failed, process_name)
-      else
-        last_exit_status = instance.process.last_exit_status || -1
-        suggested_command = @config.suggested_command("restart -p #{process_name}")
-
-        report_issue(
-          :scheduled_run_failed,
-          process_name,
-          "Scheduled process '#{process_name}' failed with exit \
-status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
-        )
-      end
     end
   end
 end

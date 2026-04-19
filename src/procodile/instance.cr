@@ -106,7 +106,7 @@ module Procodile
               @last_run_duration = (Time.local - started_at).total_seconds
             end
 
-            @supervisor.finish_scheduled_instance(self)
+            @supervisor.schedule_manager.finish_scheduled_instance(self)
           end
         rescue ex
           Procodile.log_exception(description, "Process wait failed", ex)
