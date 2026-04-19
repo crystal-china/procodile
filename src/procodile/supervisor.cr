@@ -5,7 +5,6 @@ require "./schedule_manager"
 
 module Procodile
   class Supervisor
-    SCHEDULED_SKIP_ISSUE_THRESHOLD = 3
     PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
 
     @started_at : Time?

@@ -1,5 +1,7 @@
 module Procodile
   class ScheduleManager
+    SCHEDULED_SKIP_ISSUE_THRESHOLD = 3
+
     # 用于唤醒旧 watcher 立即退出，避免软退出
     getter scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
     # 要执行的任务，key 是 name, value 是 crontab
@@ -51,6 +53,36 @@ module Procodile
         scheduled_job_signals[name] = signal
         spawn @supervisor.watch_scheduled_process(name, schedule, signal)
       end
+    end
+
+    protected def run_scheduled_process(name : String) : Nil
+      process = @supervisor.config.processes[name]?
+      return unless process && process.scheduled?
+
+      if scheduled_running.includes?(name)
+        skip_count = scheduled_skip_counts[name] = (scheduled_skip_counts[name]? || 0) + 1
+
+        if skip_count >= SCHEDULED_SKIP_ISSUE_THRESHOLD
+          @supervisor.report_issue(
+            :scheduled_run_skipped_repeatedly,
+            name,
+            "Scheduled process '#{name}' skipped #{skip_count} runs because the previous run is still active. Consider increasing the schedule interval or shortening the task runtime."
+          )
+        end
+
+        Procodile.log "system", "Skipping scheduled run for #{name}; previous run is still active"
+        return
+      end
+
+      clear_scheduled_skip_state(name)
+      scheduled_running.add(name)
+
+      Procodile.log "system", "Running scheduled process #{name}"
+
+      process.create_instance(@supervisor).start
+    rescue ex
+      scheduled_running.delete(name)
+      Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
     protected def scheduled_delay_seconds(process : Process) : Int32
@@ -167,38 +199,8 @@ or `#{suggested_restart_command}`."
 
         next unless schedule_manager.scheduled_job_active?(name, schedule, signal)
 
-        run_scheduled_process(name)
+        schedule_manager.run_scheduled_process(name)
       end
-    end
-
-    private def run_scheduled_process(name : String) : Nil
-      process = @config.processes[name]?
-      return unless process && process.scheduled?
-
-      if schedule_manager.scheduled_running.includes?(name)
-        skip_count = schedule_manager.scheduled_skip_counts[name] = (schedule_manager.scheduled_skip_counts[name]? || 0) + 1
-
-        if skip_count >= SCHEDULED_SKIP_ISSUE_THRESHOLD
-          report_issue(
-            :scheduled_run_skipped_repeatedly,
-            name,
-            "Scheduled process '#{name}' skipped #{skip_count} runs because the previous run is still active. Consider increasing the schedule interval or shortening the task runtime."
-          )
-        end
-
-        Procodile.log "system", "Skipping scheduled run for #{name}; previous run is still active"
-        return
-      end
-
-      schedule_manager.clear_scheduled_skip_state(name)
-      schedule_manager.scheduled_running.add(name)
-
-      Procodile.log "system", "Running scheduled process #{name}"
-
-      process.create_instance(self).start
-    rescue ex
-      schedule_manager.scheduled_running.delete(name)
-      Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
     def finish_scheduled_instance(instance : Instance) : Nil
