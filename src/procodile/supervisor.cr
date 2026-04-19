@@ -195,7 +195,7 @@ module Procodile
 
       @config.reload
       @tcp_proxy.try &.sync_processes(@config.processes.values)
-      schedule_manager.sync_scheduled_processes
+      schedule_manager.reload_schedules
     end
 
     def check_concurrency(
