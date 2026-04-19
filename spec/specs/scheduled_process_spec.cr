@@ -1,8 +1,15 @@
 require "../spec_helper"
 
-private class DeterministicJitterSupervisor < Procodile::Supervisor
+private class DeterministicScheduleManager < Procodile::ScheduleManager
   protected def scheduled_delay_seconds(process : Procodile::Process) : Int32
     process.random_delay
+  end
+end
+
+private class DeterministicJitterSupervisor < Procodile::Supervisor
+  def initialize(config : Procodile::Config)
+    super(config)
+    @schedule_manager = DeterministicScheduleManager.new(self)
   end
 end
 
