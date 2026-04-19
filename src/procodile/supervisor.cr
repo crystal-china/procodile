@@ -79,7 +79,7 @@ module Procodile
       instances_started = [] of Instance
 
       reload_config
-      enable_scheduled_processes(schedule_manager.scheduled_processes_for(process_names))
+      schedule_manager.enable_scheduled_processes(schedule_manager.scheduled_processes_for(process_names))
       schedule_manager.sync_scheduled_processes
 
       @config.processes.each do |name, process|
@@ -103,7 +103,7 @@ module Procodile
       reload_config
 
       processes = options.processes
-      disable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
+      schedule_manager.disable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
       schedule_manager.sync_scheduled_processes
       instances_stopped = [] of Instance
 
@@ -143,7 +143,7 @@ module Procodile
       processes = options.processes
 
       reload_config
-      enable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
+      schedule_manager.enable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
       schedule_manager.sync_scheduled_processes
 
       if processes.nil?

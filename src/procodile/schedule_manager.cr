@@ -70,6 +70,18 @@ module Procodile
       end
     end
 
+    protected def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
+      processes.each do |process|
+        disabled_scheduled_jobs.delete(process.name)
+      end
+    end
+
+    protected def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
+      processes.each do |process|
+        disabled_scheduled_jobs.add(process.name)
+      end
+    end
+
     protected def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
       scheduled_jobs[name]? == schedule && scheduled_job_signals[name]? == signal
     end
@@ -209,18 +221,6 @@ or `#{suggested_restart_command}`."
           "Scheduled process '#{process_name}' failed with exit \
 status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
         )
-      end
-    end
-
-    private def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        schedule_manager.disabled_scheduled_jobs.delete(process.name)
-      end
-    end
-
-    private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        schedule_manager.disabled_scheduled_jobs.add(process.name)
       end
     end
   end
