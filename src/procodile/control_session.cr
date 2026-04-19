@@ -23,7 +23,7 @@ module Procodile
     private def stop(options : ControlSession::Options) : String
       instances = @supervisor.stop(
         Supervisor::Options.new(
-          processes: options.processes,
+          process_names: options.processes,
           stop_supervisor: options.stop_supervisor
         )
       )
@@ -34,7 +34,7 @@ module Procodile
     private def restart(options : ControlSession::Options) : String
       instances = @supervisor.restart(
         Supervisor::Options.new(
-          processes: options.processes,
+          process_names: options.processes,
           tag: options.tag
         )
       )
