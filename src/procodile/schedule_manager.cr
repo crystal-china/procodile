@@ -2,6 +2,13 @@ module Procodile
   class ScheduleManager
     def initialize(@supervisor : Supervisor)
     end
+
+    protected def scheduled_delay_seconds(process : Process) : Int32
+      random_delay = process.random_delay
+      return 0 if random_delay <= 0
+
+      Random.rand(random_delay + 1)
+    end
   end
 
   class Supervisor
@@ -91,7 +98,7 @@ or `#{suggested_restart_command}`."
 
         next unless scheduled_job_active?(name, schedule, signal)
 
-        if (process = @config.processes[name]?) && (delay = scheduled_delay_seconds(process)) > 0
+        if (process = @config.processes[name]?) && (delay = schedule_manager.scheduled_delay_seconds(process)) > 0
           select
           when signal.receive
             next
@@ -195,13 +202,6 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
 
     private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
       @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]? == signal
-    end
-
-    protected def scheduled_delay_seconds(process : Process) : Int32
-      random_delay = process.random_delay
-      return 0 if random_delay <= 0
-
-      Random.rand(random_delay + 1)
     end
   end
 end
