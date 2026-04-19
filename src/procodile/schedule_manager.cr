@@ -217,7 +217,7 @@ or `#{suggested_restart_command}`."
       selected = if process_names
                    process_names.compact_map do |name|
                      process_name = @supervisor.resolve_process_and_instance(name).first
-                     @supervisor.@config.processes[process_name]?
+                     config.processes[process_name]?
                    end
                  else
                    config.processes.values
