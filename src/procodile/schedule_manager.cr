@@ -4,6 +4,12 @@ module Procodile
     getter scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
     # 要执行的任务，key 是 name, value 是 crontab
     getter scheduled_jobs : Hash(String, String) = {} of String => String
+    # 检测是不是当前正在运行
+    getter scheduled_running : Set(String) = Set(String).new
+    # 加入这个 Set 的 process 不再调度
+    getter disabled_scheduled_jobs : Set(String) = Set(String).new
+    # 因为 scheduled task 未执行完成，因此连续跳过的次数
+    getter scheduled_skip_counts : Hash(String, Int32) = {} of String => Int32
 
     def initialize(@supervisor : Supervisor)
     end
@@ -25,8 +31,17 @@ module Procodile
       end
     end
 
-    def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
+    protected def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
       scheduled_jobs[name]? == schedule && scheduled_job_signals[name]? == signal
+    end
+
+    protected def scheduled_process_finished(instance : Instance) : Nil
+      scheduled_running.delete(instance.process.name)
+    end
+
+    protected def clear_scheduled_skip_state(name : String) : Nil
+      @scheduled_skip_counts.delete(name)
+      @supervisor.resolve_issue(:scheduled_run_skipped_repeatedly, name)
     end
   end
 
@@ -34,7 +49,7 @@ module Procodile
     private def sync_scheduled_processes : Nil
       wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
-        next if @disabled_scheduled_jobs.includes?(name)
+        next if schedule_manager.disabled_scheduled_jobs.includes?(name)
 
         hash[name] = process.schedule.not_nil!
       end
@@ -49,7 +64,7 @@ module Procodile
         schedule_manager.@scheduled_job_signals.delete(name)
         resolve_issue(:invalid_schedule, name)
         resolve_issue(:scheduled_run_failed, name)
-        clear_scheduled_skip_state(name)
+        schedule_manager.clear_scheduled_skip_state(name)
       end
 
       wanted.each do |name, schedule|
@@ -80,7 +95,7 @@ module Procodile
           schedule_manager.scheduled_job_signals.delete(name)
         end
 
-        clear_scheduled_skip_state(name)
+        schedule_manager.clear_scheduled_skip_state(name)
         suggested_restart_command = @config.suggested_command("restart -p #{name}")
 
         report_issue(
@@ -135,8 +150,8 @@ or `#{suggested_restart_command}`."
       process = @config.processes[name]?
       return unless process && process.scheduled?
 
-      if @scheduled_running.includes?(name)
-        skip_count = @scheduled_skip_counts[name] = (@scheduled_skip_counts[name]? || 0) + 1
+      if schedule_manager.scheduled_running.includes?(name)
+        skip_count = schedule_manager.scheduled_skip_counts[name] = (schedule_manager.scheduled_skip_counts[name]? || 0) + 1
 
         if skip_count >= SCHEDULED_SKIP_ISSUE_THRESHOLD
           report_issue(
@@ -150,14 +165,14 @@ or `#{suggested_restart_command}`."
         return
       end
 
-      clear_scheduled_skip_state(name)
-      @scheduled_running.add(name)
+      schedule_manager.clear_scheduled_skip_state(name)
+      schedule_manager.scheduled_running.add(name)
 
       Procodile.log "system", "Running scheduled process #{name}"
 
       process.create_instance(self).start
     rescue ex
-      @scheduled_running.delete(name)
+      schedule_manager.scheduled_running.delete(name)
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
@@ -167,7 +182,7 @@ or `#{suggested_restart_command}`."
 
       instance.on_scheduled_finish
       remove_instance(instance)
-      scheduled_process_finished(instance)
+      schedule_manager.scheduled_process_finished(instance)
 
       if stopped_by_user || instance.process.last_exit_status == 0
         resolve_issue(:scheduled_run_failed, process_name)
@@ -199,13 +214,13 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
 
     private def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
       processes.each do |process|
-        @disabled_scheduled_jobs.delete(process.name)
+        schedule_manager.disabled_scheduled_jobs.delete(process.name)
       end
     end
 
     private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
       processes.each do |process|
-        @disabled_scheduled_jobs.add(process.name)
+        schedule_manager.disabled_scheduled_jobs.add(process.name)
       end
     end
   end

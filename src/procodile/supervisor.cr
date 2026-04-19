@@ -9,11 +9,6 @@ module Procodile
     PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
 
     @started_at : Time?
-    # 检测是不是当前正在运行
-    @scheduled_running : Set(String) = Set(String).new
-    @scheduled_skip_counts : Hash(String, Int32) = {} of String => Int32
-    # 加入这个 Set 的 process 不再调度
-    @disabled_scheduled_jobs : Set(String) = Set(String).new
     @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
 
     getter tag : String?
@@ -352,15 +347,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
     rescue ex
       Procodile.log_exception("system", "Supervisor loop failed", ex)
-    end
-
-    private def scheduled_process_finished(instance : Instance) : Nil
-      @scheduled_running.delete(instance.process.name)
-    end
-
-    private def clear_scheduled_skip_state(name : String) : Nil
-      @scheduled_skip_counts.delete(name)
-      resolve_issue(:scheduled_run_skipped_repeatedly, name)
     end
 
     private def watch_for_output : Nil
