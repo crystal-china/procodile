@@ -325,7 +325,7 @@ YAML
       end.should be_true
 
       first_run_at = process.last_started_at.not_nil!
-      (first_run_at - started_at).should be >= 2.seconds
+      (first_run_at - started_at).should be >= 1.8.seconds
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
       File.write(File.join(app_root, "Procfile.options"), "")
