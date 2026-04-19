@@ -42,7 +42,7 @@ module Procodile
         instance_configs = ControlClient.run(
           @config.sock_path,
           "restart",
-          processes: process_names,
+          process_names: process_names,
           tag: @options.tag,
         ).as Array(Tuple(Instance::Config?, Instance::Config?))
 

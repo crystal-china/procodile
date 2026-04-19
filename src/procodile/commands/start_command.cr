@@ -137,7 +137,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
         instance_configs = ControlClient.run(
           @config.sock_path,
           "start_processes",
-          processes: process_names,
+          process_names: process_names,
           tag: @options.tag,
           port_allocations: @options.port_allocations,
         ).as Array(Instance::Config)
