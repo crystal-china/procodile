@@ -14,6 +14,45 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
+    protected def sync_scheduled_processes : Nil
+      wanted = @supervisor.config.processes.each_with_object({} of String => String) do |(name, process), hash|
+        next unless process.scheduled?
+        next if disabled_scheduled_jobs.includes?(name)
+
+        hash[name] = process.schedule.not_nil!
+      end
+
+      # keys 先返回一个独立的 Array(String)，后面 each 遍历的是这个数组，不是原 hash。
+      # 因此，这里遍历时删除哈希元素是安全的。
+      scheduled_jobs.keys.each do |name|
+        next if wanted.has_key?(name)
+
+        signal_scheduled_job(name)
+        scheduled_jobs.delete(name)
+        scheduled_job_signals.delete(name)
+        @supervisor.resolve_issue(:invalid_schedule, name)
+        @supervisor.resolve_issue(:scheduled_run_failed, name)
+        clear_scheduled_skip_state(name)
+      end
+
+      wanted.each do |name, schedule|
+        next if scheduled_jobs[name]? == schedule && scheduled_job_signals[name]?
+
+        signal_scheduled_job(name)
+        scheduled_jobs[name] = schedule
+        # 这里的 signal 不是“精确计数消息”，因此不是 new，而是使用 new(1)
+        # 1 表示，不管 watcher 是啥状态（哪怕还没有阻塞在 receive），我也能把信号先放进去。
+        # 然后下一次 select 的时候马上会收到。
+        # 即：至少可以存进去一个待消费的退出信号，同时又不会无限堆积重复 signal（见 signal_scheduled_job 用法)
+        # 如果这里用 0 的话，如果 watcher 还在计算 next_time 的时候（即还没到 #watch_scheduled_process
+        # select receive 那一步），signal_scheduled_job 发送信号，因为 block 而会被丢弃，
+        # watcher 因为没收到信号，会继续睡下去。
+        signal = Channel(Nil).new(1)
+        scheduled_job_signals[name] = signal
+        spawn @supervisor.watch_scheduled_process(name, schedule, signal)
+      end
+    end
+
     protected def scheduled_delay_seconds(process : Process) : Int32
       random_delay = process.random_delay
       return 0 if random_delay <= 0
@@ -43,49 +82,23 @@ module Procodile
       @scheduled_skip_counts.delete(name)
       @supervisor.resolve_issue(:scheduled_run_skipped_repeatedly, name)
     end
+
+    protected def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
+      selected = if process_names
+                   process_names.compact_map do |name|
+                     process_name = @supervisor.resolve_process_and_instance(name).first
+                     @supervisor.@config.processes[process_name]?
+                   end
+                 else
+                   @supervisor.config.processes.values
+                 end
+
+      selected.select(&.scheduled?)
+    end
   end
 
   class Supervisor
-    private def sync_scheduled_processes : Nil
-      wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
-        next unless process.scheduled?
-        next if schedule_manager.disabled_scheduled_jobs.includes?(name)
-
-        hash[name] = process.schedule.not_nil!
-      end
-
-      # keys 先返回一个独立的 Array(String)，后面 each 遍历的是这个数组，不是原 hash。
-      # 因此，这里遍历时删除哈希元素是安全的。
-      schedule_manager.scheduled_jobs.keys.each do |name|
-        next if wanted.has_key?(name)
-
-        schedule_manager.signal_scheduled_job(name)
-        schedule_manager.scheduled_jobs.delete(name)
-        schedule_manager.@scheduled_job_signals.delete(name)
-        resolve_issue(:invalid_schedule, name)
-        resolve_issue(:scheduled_run_failed, name)
-        schedule_manager.clear_scheduled_skip_state(name)
-      end
-
-      wanted.each do |name, schedule|
-        next if schedule_manager.scheduled_jobs[name]? == schedule && schedule_manager.scheduled_job_signals[name]?
-
-        schedule_manager.signal_scheduled_job(name)
-        schedule_manager.scheduled_jobs[name] = schedule
-        # 这里的 signal 不是“精确计数消息”，因此不是 new，而是使用 new(1)
-        # 1 表示，不管 watcher 是啥状态（哪怕还没有阻塞在 receive），我也能把信号先放进去。
-        # 然后下一次 select 的时候马上会收到。
-        # 即：至少可以存进去一个待消费的退出信号，同时又不会无限堆积重复 signal（见 signal_scheduled_job 用法)
-        # 如果这里用 0 的话，如果 watcher 还在计算 next_time 的时候（即还没到 #watch_scheduled_process
-        # select receive 那一步），signal_scheduled_job 发送信号，因为 block 而会被丢弃，
-        # watcher 因为没收到信号，会继续睡下去。
-        signal = Channel(Nil).new(1)
-        schedule_manager.scheduled_job_signals[name] = signal
-        spawn watch_scheduled_process(name, schedule, signal)
-      end
-    end
-
-    private def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
+    protected def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
       begin
         parser = CronParser.new(schedule)
         resolve_issue(:invalid_schedule, name)
@@ -197,19 +210,6 @@ or `#{suggested_restart_command}`."
 status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
         )
       end
-    end
-
-    private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
-      selected = if process_names
-                   process_names.compact_map do |name|
-                     process_name = resolve_process_and_instance(name).first
-                     @config.processes[process_name]?
-                   end
-                 else
-                   @config.processes.values
-                 end
-
-      selected.select(&.scheduled?)
     end
 
     private def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil

@@ -79,8 +79,8 @@ module Procodile
       instances_started = [] of Instance
 
       reload_config
-      enable_scheduled_processes(scheduled_processes_for(process_names))
-      sync_scheduled_processes
+      enable_scheduled_processes(schedule_manager.scheduled_processes_for(process_names))
+      schedule_manager.sync_scheduled_processes
 
       @config.processes.each do |name, process|
         next if process_names && !process_names.includes?(name.to_s) # Not a process we want
@@ -103,8 +103,8 @@ module Procodile
       reload_config
 
       processes = options.processes
-      disable_scheduled_processes(scheduled_processes_for(processes))
-      sync_scheduled_processes
+      disable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
+      schedule_manager.sync_scheduled_processes
       instances_stopped = [] of Instance
 
       if processes.nil?
@@ -143,8 +143,8 @@ module Procodile
       processes = options.processes
 
       reload_config
-      enable_scheduled_processes(scheduled_processes_for(processes))
-      sync_scheduled_processes
+      enable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
+      schedule_manager.sync_scheduled_processes
 
       if processes.nil?
         instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
@@ -198,7 +198,7 @@ module Procodile
 
       @config.reload
       @tcp_proxy.try &.sync_processes(@config.processes.values)
-      sync_scheduled_processes
+      schedule_manager.sync_scheduled_processes
     end
 
     def check_concurrency(
@@ -517,7 +517,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     # 解析用户输入的名称，返回 (进程名, instance_id) 元组
     # - instance_id 为 nil 表示匹配所有实例
-    private def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
+    protected def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
       if (match = name.match(PROCESS_INSTANCE_REGEX))
         {match[1], match[2].to_i32}
       else
