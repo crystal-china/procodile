@@ -101,8 +101,8 @@ module Procodile
       reload_config
 
       processes = options.processes
-      schedule_manager.disable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
-      schedule_manager.sync_scheduled_processes
+      schedule_manager.stop_processes(processes)
+
       instances_stopped = [] of Instance
 
       if processes.nil?
@@ -141,8 +141,7 @@ module Procodile
       processes = options.processes
 
       reload_config
-      schedule_manager.enable_scheduled_processes(schedule_manager.scheduled_processes_for(processes))
-      schedule_manager.sync_scheduled_processes
+      schedule_manager.start_processes(processes)
 
       if processes.nil?
         instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
