@@ -18,6 +18,11 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
+    def start_processes(process_names : Array(String)?) : Nil
+      enable_scheduled_processes(scheduled_processes_for(process_names))
+      sync_scheduled_processes
+    end
+
     def sync_scheduled_processes : Nil
       wanted = config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?

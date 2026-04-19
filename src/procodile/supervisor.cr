@@ -78,8 +78,7 @@ module Procodile
       instances_started = [] of Instance
 
       reload_config
-      schedule_manager.enable_scheduled_processes(schedule_manager.scheduled_processes_for(process_names))
-      schedule_manager.sync_scheduled_processes
+      schedule_manager.start_processes(process_names)
 
       @config.processes.each do |name, process|
         next if process_names && !process_names.includes?(name.to_s) # Not a process we want
