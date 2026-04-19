@@ -1,5 +1,8 @@
 module Procodile
   class ScheduleManager
+    # 用于唤醒旧 watcher 立即退出，避免软退出
+    getter scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
+
     def initialize(@supervisor : Supervisor)
     end
 
@@ -8,6 +11,16 @@ module Procodile
       return 0 if random_delay <= 0
 
       Random.rand(random_delay + 1)
+    end
+
+    protected def signal_scheduled_job(name : String) : Nil
+      return unless (signal = @scheduled_job_signals[name]?)
+
+      # 非阻塞 send，避免重复 signal 卡住
+      select
+      when signal.send(nil)
+      else
+      end
     end
   end
 
@@ -25,18 +38,18 @@ module Procodile
       @scheduled_jobs.keys.each do |name|
         next if wanted.has_key?(name)
 
-        signal_scheduled_job(name)
+        schedule_manager.signal_scheduled_job(name)
         @scheduled_jobs.delete(name)
-        @scheduled_job_signals.delete(name)
+        schedule_manager.@scheduled_job_signals.delete(name)
         resolve_issue(:invalid_schedule, name)
         resolve_issue(:scheduled_run_failed, name)
         clear_scheduled_skip_state(name)
       end
 
       wanted.each do |name, schedule|
-        next if @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]?
+        next if @scheduled_jobs[name]? == schedule && schedule_manager.scheduled_job_signals[name]?
 
-        signal_scheduled_job(name)
+        schedule_manager.signal_scheduled_job(name)
         @scheduled_jobs[name] = schedule
         # 这里的 signal 不是“精确计数消息”，因此不是 new，而是使用 new(1)
         # 1 表示，不管 watcher 是啥状态（哪怕还没有阻塞在 receive），我也能把信号先放进去。
@@ -46,7 +59,7 @@ module Procodile
         # select receive 那一步），signal_scheduled_job 发送信号，因为 block 而会被丢弃，
         # watcher 因为没收到信号，会继续睡下去。
         signal = Channel(Nil).new(1)
-        @scheduled_job_signals[name] = signal
+        schedule_manager.scheduled_job_signals[name] = signal
         spawn watch_scheduled_process(name, schedule, signal)
       end
     end
@@ -56,9 +69,9 @@ module Procodile
         parser = CronParser.new(schedule)
         resolve_issue(:invalid_schedule, name)
       rescue ex
-        if @scheduled_job_signals[name]? == signal
+        if schedule_manager.scheduled_job_signals[name]? == signal
           @scheduled_jobs.delete(name)
-          @scheduled_job_signals.delete(name)
+          schedule_manager.scheduled_job_signals.delete(name)
         end
 
         clear_scheduled_skip_state(name)
@@ -190,18 +203,8 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
       end
     end
 
-    private def signal_scheduled_job(name : String) : Nil
-      return unless (signal = @scheduled_job_signals[name]?)
-
-      # 非阻塞 send，避免重复 signal 卡住
-      select
-      when signal.send(nil)
-      else
-      end
-    end
-
     private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
-      @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]? == signal
+      @scheduled_jobs[name]? == schedule && schedule_manager.scheduled_job_signals[name]? == signal
     end
   end
 end

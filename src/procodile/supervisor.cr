@@ -16,8 +16,6 @@ module Procodile
     @scheduled_skip_counts : Hash(String, Int32) = {} of String => Int32
     # 加入这个 Set 的 process 不再调度
     @disabled_scheduled_jobs : Set(String) = Set(String).new
-    # 用于唤醒旧 watcher 立即退出，避免软退出
-    @scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
     @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
 
     getter tag : String?
