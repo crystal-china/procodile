@@ -18,30 +18,7 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
-    def finish_scheduled_instance(instance : Instance) : Nil
-      stopped_by_user = instance.stopping?
-      process_name = instance.process.name
-
-      instance.on_scheduled_finish
-      @supervisor.remove_instance(instance)
-      scheduled_process_finished(instance)
-
-      if stopped_by_user || instance.process.last_exit_status == 0
-        @supervisor.resolve_issue(:scheduled_run_failed, process_name)
-      else
-        last_exit_status = instance.process.last_exit_status || -1
-        suggested_command = config.suggested_command("restart -p #{process_name}")
-
-        @supervisor.report_issue(
-          :scheduled_run_failed,
-          process_name,
-          "Scheduled process '#{process_name}' failed with exit \
-status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
-        )
-      end
-    end
-
-    protected def sync_scheduled_processes : Nil
+    def sync_scheduled_processes : Nil
       wanted = config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
         next if disabled_scheduled_jobs.includes?(name)
@@ -80,7 +57,55 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
       end
     end
 
-    protected def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
+    def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
+      processes.each do |process|
+        disabled_scheduled_jobs.delete(process.name)
+      end
+    end
+
+    def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
+      processes.each do |process|
+        disabled_scheduled_jobs.add(process.name)
+      end
+    end
+
+    def finish_scheduled_instance(instance : Instance) : Nil
+      stopped_by_user = instance.stopping?
+      process_name = instance.process.name
+
+      instance.on_scheduled_finish
+      @supervisor.remove_instance(instance)
+      scheduled_process_finished(instance)
+
+      if stopped_by_user || instance.process.last_exit_status == 0
+        @supervisor.resolve_issue(:scheduled_run_failed, process_name)
+      else
+        last_exit_status = instance.process.last_exit_status || -1
+        suggested_command = config.suggested_command("restart -p #{process_name}")
+
+        @supervisor.report_issue(
+          :scheduled_run_failed,
+          process_name,
+          "Scheduled process '#{process_name}' failed with exit \
+status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
+        )
+      end
+    end
+
+    def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
+      selected = if process_names
+                   process_names.compact_map do |name|
+                     process_name = @supervisor.resolve_process_and_instance(name).first
+                     config.processes[process_name]?
+                   end
+                 else
+                   config.processes.values
+                 end
+
+      selected.select(&.scheduled?)
+    end
+
+    private def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
       begin
         parser = CronParser.new(schedule)
         @supervisor.resolve_issue(:invalid_schedule, name)
@@ -141,7 +166,7 @@ or `#{suggested_restart_command}`."
       end
     end
 
-    protected def run_scheduled_process(name : String) : Nil
+    private def run_scheduled_process(name : String) : Nil
       process = config.processes[name]?
       return unless process && process.scheduled?
 
@@ -171,14 +196,20 @@ or `#{suggested_restart_command}`."
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 
-    protected def scheduled_delay_seconds(process : Process) : Int32
-      random_delay = process.random_delay
-      return 0 if random_delay <= 0
-
-      Random.rand(random_delay + 1)
+    private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
+      scheduled_jobs[name]? == schedule && scheduled_job_signals[name]? == signal
     end
 
-    protected def signal_scheduled_job(name : String) : Nil
+    private def scheduled_process_finished(instance : Instance) : Nil
+      scheduled_running.delete(instance.process.name)
+    end
+
+    private def clear_scheduled_skip_state(name : String) : Nil
+      @scheduled_skip_counts.delete(name)
+      @supervisor.resolve_issue(:scheduled_run_skipped_repeatedly, name)
+    end
+
+    private def signal_scheduled_job(name : String) : Nil
       return unless (signal = @scheduled_job_signals[name]?)
 
       # 非阻塞 send，避免重复 signal 卡住
@@ -188,42 +219,11 @@ or `#{suggested_restart_command}`."
       end
     end
 
-    protected def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        disabled_scheduled_jobs.delete(process.name)
-      end
-    end
+    private def scheduled_delay_seconds(process : Process) : Int32
+      random_delay = process.random_delay
+      return 0 if random_delay <= 0
 
-    protected def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        disabled_scheduled_jobs.add(process.name)
-      end
-    end
-
-    protected def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
-      scheduled_jobs[name]? == schedule && scheduled_job_signals[name]? == signal
-    end
-
-    protected def scheduled_process_finished(instance : Instance) : Nil
-      scheduled_running.delete(instance.process.name)
-    end
-
-    protected def clear_scheduled_skip_state(name : String) : Nil
-      @scheduled_skip_counts.delete(name)
-      @supervisor.resolve_issue(:scheduled_run_skipped_repeatedly, name)
-    end
-
-    protected def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
-      selected = if process_names
-                   process_names.compact_map do |name|
-                     process_name = @supervisor.resolve_process_and_instance(name).first
-                     config.processes[process_name]?
-                   end
-                 else
-                   config.processes.values
-                 end
-
-      selected.select(&.scheduled?)
+      Random.rand(random_delay + 1)
     end
   end
 end
