@@ -1,6 +1,5 @@
 require "./start_supervisor"
 require "./supervisor"
-require "./schedule_manager"
 require "./tcp_proxy"
 require "lucky_env"
 

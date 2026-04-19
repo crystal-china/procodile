@@ -1,6 +1,7 @@
 require "./logger"
 require "./control_server"
 require "./signal_handler"
+require "./schedule_manager"
 
 module Procodile
   class Supervisor
@@ -26,6 +27,7 @@ module Procodile
     getter run_options : Supervisor::RunOptions
     getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
     getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
+    @schedule_manager : Procodile::ScheduleManager?
     @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     def initialize(
@@ -35,6 +37,7 @@ module Procodile
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
+      @schedule_manager = ScheduleManager.new(self)
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(Supervisor::Options.new(stop_supervisor: true)) }
@@ -231,6 +234,10 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
 
       result
+    end
+
+    def schedule_manager : ScheduleManager
+      @schedule_manager.not_nil!
     end
 
     def to_hash : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)

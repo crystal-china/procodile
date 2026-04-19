@@ -1,5 +1,9 @@
 module Procodile
-  # class ScheduleManager
+  class ScheduleManager
+    def initialize(@supervisor : Supervisor)
+    end
+  end
+
   class Supervisor
     private def sync_scheduled_processes : Nil
       wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
