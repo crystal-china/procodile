@@ -147,12 +147,12 @@ module Procodile
 
     def check_instance_quantities(
                  type : Supervisor::CheckInstanceQuantitiesType = :both,
-                 processes : Array(String)? = nil,
+                 process_names : Array(String)? = nil,
                ) : Hash(Symbol, Array(Instance))
       status = {:started => [] of Instance, :stopped => [] of Instance}
 
       config.processes.each do |_, process|
-        next if processes && !processes.includes?(process.name)
+        next if process_names && !process_names.includes?(process.name)
         next if process.scheduled?
 
         instances = @supervisor.processes[process]? || [] of Instance
