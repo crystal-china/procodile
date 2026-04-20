@@ -18,21 +18,17 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
-    def start_processes(process_names : Array(String)?) : Nil
+    def enable_schedules(process_names : Array(String)?) : Nil
       enable_scheduled_processes(scheduled_processes_for(process_names))
-      sync_scheduled_processes
+      reload_schedules
     end
 
-    def stop_processes(process_names : Array(String)?) : Nil
+    def disable_schedules(process_names : Array(String)?) : Nil
       disable_scheduled_processes(scheduled_processes_for(process_names))
-      sync_scheduled_processes
+      reload_schedules
     end
 
     def reload_schedules : Nil
-      sync_scheduled_processes
-    end
-
-    private def sync_scheduled_processes : Nil
       wanted = config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
         next if disabled_scheduled_jobs.includes?(name)
@@ -109,7 +105,7 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
     def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
       selected = if process_names
                    process_names.compact_map do |name|
-                     process_name = @supervisor.resolve_process_and_instance(name).first
+                     process_name = ProcessSelector.parse(name).first
                      config.processes[process_name]?
                    end
                  else

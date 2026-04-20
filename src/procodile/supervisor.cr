@@ -1,14 +1,18 @@
 require "./logger"
 require "./control_server"
 require "./signal_handler"
+require "./process_selector"
+require "./process_manager"
 require "./schedule_manager"
 
 module Procodile
   class Supervisor
-    PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
+    @process_manager : Procodile::ProcessManager?
+    @schedule_manager : Procodile::ScheduleManager?
 
     @started_at : Time?
     @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
+    @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -17,8 +21,6 @@ module Procodile
     getter run_options : Supervisor::RunOptions
     getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
     getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
-    @schedule_manager : Procodile::ScheduleManager?
-    @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     def initialize(
       @config : Config,
@@ -27,6 +29,8 @@ module Procodile
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
+
+      @process_manager = ProcessManager.new(self)
       @schedule_manager = ScheduleManager.new(self)
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
@@ -75,24 +79,9 @@ module Procodile
       options : Supervisor::Options = Supervisor::Options.new,
     ) : Array(Instance)
       @tag = options.tag
-      instances_started = [] of Instance
-
       reload_config
-      schedule_manager.start_processes(process_names)
-
-      @config.processes.each do |name, process|
-        next if process_names && !process_names.includes?(name.to_s) # Not a process we want
-        next if process.scheduled?
-        next if @processes[process]? && !@processes[process].empty? # Process type already running
-
-        instances = process.generate_instances(self)
-        instances.each do |instance|
-          instance.start
-          instances_started << instance if instance.pid
-        end
-      end
-
-      instances_started
+      schedule_manager.enable_schedules(process_names)
+      process_manager.start_processes(process_names)
     end
 
     def stop(options : Supervisor::Options = Supervisor::Options.new) : Array(Instance)
@@ -101,31 +90,9 @@ module Procodile
       reload_config
 
       process_names = options.process_names
-      schedule_manager.stop_processes(process_names)
 
-      instances_stopped = [] of Instance
-
-      if process_names.nil?
-        Procodile.log "system", "Stopping all #{@config.app_name} processes"
-
-        @processes.each do |_, instances|
-          instances.each do |instance|
-            instance.stop
-            instances_stopped << instance
-          end
-        end
-      else
-        instances = long_running_instances(process_names)
-
-        Procodile.log "system", "Stopping #{instances.size} process(es)"
-
-        instances.each do |instance|
-          instance.stop
-          instances_stopped << instance
-        end
-      end
-
-      instances_stopped
+      schedule_manager.disable_schedules(process_names)
+      process_manager.stop_processes(process_names)
     end
 
     def run_use_foreground? : Bool
@@ -135,49 +102,12 @@ module Procodile
     def restart(
       options : Supervisor::Options = Supervisor::Options.new,
     ) : Array(Array(Instance | Nil))
-      wg = WaitGroup.new
       @tag = options.tag
-      instances_restarted = [] of Array(Instance?)
       process_names = options.process_names
 
       reload_config
-      schedule_manager.start_processes(process_names)
-
-      if process_names.nil?
-        instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
-          next if process.removed?
-          next if process.scheduled?
-
-          array.concat(process_instances)
-        end
-
-        Procodile.log "system", "Restarting all #{@config.app_name} processes"
-      else
-        instances = long_running_instances(process_names)
-
-        Procodile.log "system", "Restarting #{instances.size} process(es)"
-      end
-
-      # Stop any processes that are no longer wanted at this point
-      stopped = check_instance_quantities(:stopped, process_names)[:stopped].map { |i| [i, nil] }
-      instances_restarted.concat stopped
-
-      instances.each do |instance|
-        next if instance.stopping?
-
-        new_instance = instance.restart(wg)
-        instances_restarted << [instance, new_instance]
-      end
-
-      # Start any processes that are needed at this point
-      checked = check_instance_quantities(:started, process_names)[:started].map { |i| [nil, i] }
-      instances_restarted.concat checked
-
-      # 确保所有的 @reader 设定完毕，再启动 log listener
-      # 这个代码仍旧有机会造成 UNIXSever 立即退出，但是没有任何 backtrace, 原因未知
-      wg.wait
-
-      instances_restarted
+      schedule_manager.enable_schedules(process_names)
+      process_manager.restart_processes(process_names)
     end
 
     def stop_supervisor : Nil
@@ -205,7 +135,7 @@ module Procodile
 
       reload_config unless options.reload == false
 
-      result = check_instance_quantities
+      result = process_manager.reconcile_instance_quantities
 
       if result[:started].empty? && result[:stopped].empty?
         Procodile.log "system", "Process concurrency looks good"
@@ -224,7 +154,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    def schedule_manager : ScheduleManager
+    protected def process_manager : ProcessManager
+      @process_manager.not_nil!
+    end
+
+    protected def schedule_manager : ScheduleManager
       @schedule_manager.not_nil!
     end
 
@@ -236,42 +170,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         pid:           ::Process.pid,
         proxy_enabled: !!@run_options.proxy?,
       }
-    end
-
-    def messages : Array(Message)
-      messages = [] of Message
-
-      processes.each do |process, process_instances|
-        next if process.scheduled?
-
-        if process.removed? && process_instances.any?(&.status.running?)
-          messages << Message.new(
-            type: :removed_but_running,
-            process: process.name,
-          )
-        end
-
-        unless process.correct_quantity?(process_instances.size)
-          messages << Message.new(
-            type: :incorrect_quantity,
-            process: process.name,
-            current: process_instances.size,
-            desired: process.quantity,
-          )
-        end
-
-        process_instances.each do |instance|
-          if instance.should_be_running? && !instance.status.running?
-            messages << Message.new(
-              type: :not_running,
-              instance: instance.description,
-              status: instance.status,
-            )
-          end
-        end
-      end
-
-      messages
     end
 
     def runtime_issues : Array(RuntimeIssue)
@@ -296,7 +194,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       "#{type.to_s.underscore}:#{process_name}"
     end
 
-    private def clear_runtime_issues_for_process(process_name : String) : Nil
+    def clear_runtime_issues_for_process(process_name : String) : Nil
       RuntimeIssueType.values.each do |type|
         resolve_issue(type, process_name)
       end
@@ -326,10 +224,10 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
-      remove_stopped_instances
+      process_manager.remove_stopped_instances
 
       # Remove removed processes
-      remove_removed_processes
+      process_manager.remove_removed_processes
 
       # Check all instances that we manage and let them do their things.
       @processes.each do |_, instances|
@@ -422,106 +320,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       reader.close rescue nil
     end
 
-    private def check_instance_quantities(
-      type : Supervisor::CheckInstanceQuantitiesType = :both,
-      processes : Array(String)? = nil,
-    ) : Hash(Symbol, Array(Instance))
-      status = {:started => [] of Instance, :stopped => [] of Instance}
-
-      @config.processes.each do |_, process|
-        next if processes && !processes.includes?(process.name)
-        next if process.scheduled?
-
-        instances = @processes[process]? || [] of Instance
-
-        if (type.both? || type.stopped?) && instances.size > process.quantity
-          quantity_to_stop = instances.size - process.quantity
-          stopped_instances = instances.first(quantity_to_stop)
-
-          Procodile.log "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
-
-          stopped_instances.each(&.stop)
-          status[:stopped].concat(stopped_instances)
-        end
-
-        if (type.both? || type.started?) && instances.size < process.quantity
-          quantity_needed = process.quantity - instances.size
-          started_instances = process.generate_instances(self, quantity_needed)
-
-          Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
-
-          # 现在如果进程第一次启动就炸了，会 rescue 并 report_issue, 而不像之前那样，
-          # 直接异常向上抛出，并让 supervisor 一起炸掉。
-          # 因此，这里需要额外限制，没有 pid 的进程（炸掉的进程）不要加入显示为 started.
-          started_instances.each do |instance|
-            instance.start
-            status[:started] << instance if instance.pid
-          end
-        end
-      end
-
-      status
-    end
-
-    private def remove_stopped_instances : Nil
-      @processes.each do |_, instances|
-        instances.reject! do |instance|
-          if instance.stopping? && !instance.running?
-            instance.on_stop
-
-            true
-          else
-            false
-          end
-        end
-      end
-    end
-
-    private def remove_removed_processes : Nil
-      @processes.reject! do |process, instances|
-        if process.removed? && instances.empty?
-          clear_runtime_issues_for_process(process.name)
-
-          if (tcp_proxy = @tcp_proxy)
-            tcp_proxy.remove_process(process)
-          end
-
-          true
-        else
-          false
-        end
-      end
-    end
-
-    private def process_names_to_instances(names : Array(String)) : Array(Instance)
-      names.each_with_object([] of Instance) do |name, array|
-        process_name, instance_id = resolve_process_and_instance(name)
-
-        # 如果进程不在 Procfile 中，用原始 name 在 @processes 中查找（已被移除的进程）
-        target_name = process_name || name
-
-        @processes.each do |process, instances|
-          next unless process.name == target_name
-
-          if instance_id
-            instances.each { |instance| array << instance if instance.id == instance_id }
-          else
-            instances.each { |instance| array << instance }
-          end
-        end
-      end
-    end
-
-    # 解析用户输入的名称，返回 (进程名, instance_id) 元组
-    # - instance_id 为 nil 表示匹配所有实例
-    protected def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
-      if (match = name.match(PROCESS_INSTANCE_REGEX))
-        {match[1], match[2].to_i32}
-      else
-        {name, nil}
-      end
-    end
-
     private def all_instances_stopped? : Bool
       @processes.all? do |_, instances|
         instances.reject(&.failed?).empty?
@@ -534,53 +332,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @signal_handler.wakeup
 
       log_listener_reader
-    end
-
-    private def long_running_instances(processes : Array(String))
-      process_names_to_instances(processes).reject do |instance|
-        instance.process.scheduled? && processes.includes?(instance.process.name)
-      end
-    end
-
-    # Supervisor message
-    struct Message
-      # Message type
-      enum Type
-        NotRunning
-        IncorrectQuantity
-        RemovedButRunning
-      end
-
-      include JSON::Serializable
-
-      getter type : Type
-      getter process : String?
-      getter current : Int32?
-      getter desired : Int32?
-      getter instance : String?
-      getter status : Instance::Status?
-
-      def initialize(
-        @type : Type,
-        @process : String? = nil,
-        @current : Int32? = nil,
-        @desired : Int32? = nil,
-        @instance : String? = nil,
-        @status : Instance::Status? = nil,
-      )
-      end
-
-      def to_s(io : IO) : Nil
-        case type
-        in .not_running?
-          io.print "#{instance} is not running (#{status})"
-        in .incorrect_quantity?
-          io.print "#{process} has #{current} instances (should have #{desired})"
-        in .removed_but_running?
-          io.print "#{process} has been removed from the Procfile but is still running; \
-run `procodile stop -p #{process}` to stop it"
-        end
-      end
     end
 
     enum RuntimeIssueType
@@ -606,12 +357,6 @@ run `procodile stop -p #{process}` to stop it"
       )
       end
     end
-  end
-
-  enum Supervisor::CheckInstanceQuantitiesType
-    Both
-    Started
-    Stopped
   end
 
   struct Supervisor::RunOptions

@@ -107,7 +107,7 @@ module Procodile
     include JSON::Serializable
 
     getter version : String
-    getter messages : Array(Supervisor::Message)
+    getter messages : Array(ProcessManager::Message)
     getter root : String
     getter app_name : String
     getter supervisor : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
@@ -126,7 +126,7 @@ module Procodile
 
     def initialize(
       @version : String,
-      @messages : Array(Supervisor::Message),
+      @messages : Array(ProcessManager::Message),
       @root : String,
       @app_name : String,
       @supervisor : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool),

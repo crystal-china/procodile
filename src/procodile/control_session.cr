@@ -84,7 +84,7 @@ module Procodile
 
       result = ControlClient::ReplyOfStatusCommand.new(
         version: VERSION,
-        messages: @supervisor.messages,
+        messages: @supervisor.process_manager.messages,
         root: @supervisor.config.root,
         app_name: @supervisor.config.app_name,
         supervisor: @supervisor.to_hash,
@@ -127,7 +127,7 @@ module Procodile
             "500 #{e.message}"
           end
         else
-          "404 Invaid command"
+          "404 Invalid command"
         end
       end
     {% end %}
