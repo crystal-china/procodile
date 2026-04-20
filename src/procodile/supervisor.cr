@@ -91,31 +91,9 @@ module Procodile
       reload_config
 
       process_names = options.process_names
+
       schedule_manager.stop_processes(process_names)
-
-      instances_stopped = [] of Instance
-
-      if process_names.nil?
-        Procodile.log "system", "Stopping all #{@config.app_name} processes"
-
-        @processes.each do |_, instances|
-          instances.each do |instance|
-            instance.stop
-            instances_stopped << instance
-          end
-        end
-      else
-        instances = process_manager.long_running_instances(process_names)
-
-        Procodile.log "system", "Stopping #{instances.size} process(es)"
-
-        instances.each do |instance|
-          instance.stop
-          instances_stopped << instance
-        end
-      end
-
-      instances_stopped
+      process_manager.stop_processes(process_names)
     end
 
     def run_use_foreground? : Bool
@@ -125,49 +103,12 @@ module Procodile
     def restart(
       options : Supervisor::Options = Supervisor::Options.new,
     ) : Array(Array(Instance | Nil))
-      wg = WaitGroup.new
       @tag = options.tag
-      instances_restarted = [] of Array(Instance?)
       process_names = options.process_names
 
       reload_config
       schedule_manager.start_processes(process_names)
-
-      if process_names.nil?
-        instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
-          next if process.removed?
-          next if process.scheduled?
-
-          array.concat(process_instances)
-        end
-
-        Procodile.log "system", "Restarting all #{@config.app_name} processes"
-      else
-        instances = process_manager.long_running_instances(process_names)
-
-        Procodile.log "system", "Restarting #{instances.size} process(es)"
-      end
-
-      # Stop any processes that are no longer wanted at this point
-      stopped = process_manager.check_instance_quantities(:stopped, process_names)[:stopped].map { |i| [i, nil] }
-      instances_restarted.concat stopped
-
-      instances.each do |instance|
-        next if instance.stopping?
-
-        new_instance = instance.restart(wg)
-        instances_restarted << [instance, new_instance]
-      end
-
-      # Start any processes that are needed at this point
-      checked = process_manager.check_instance_quantities(:started, process_names)[:started].map { |i| [nil, i] }
-      instances_restarted.concat checked
-
-      # 确保所有的 @reader 设定完毕，再启动 log listener
-      # 这个代码仍旧有机会造成 UNIXSever 立即退出，但是没有任何 backtrace, 原因未知
-      wg.wait
-
-      instances_restarted
+      process_manager.restart_processes(process_names, options.tag)
     end
 
     def stop_supervisor : Nil

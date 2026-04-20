@@ -5,6 +5,73 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
+    def stop_processes(process_names : Array(String)?) : Array(Instance)
+      instances_stopped = [] of Instance
+
+      if process_names.nil?
+        Procodile.log "system", "Stopping all #{config.app_name} processes"
+
+        @supervisor.processes.each do |_, instances|
+          instances.each do |instance|
+            instance.stop
+            instances_stopped << instance
+          end
+        end
+      else
+        instances = long_running_instances(process_names)
+
+        Procodile.log "system", "Stopping #{instances.size} process(es)"
+
+        instances.each do |instance|
+          instance.stop
+          instances_stopped << instance
+        end
+      end
+
+      instances_stopped
+    end
+
+    def restart_processes(process_names : Array(String)?, tag : String?) : Array(Array(Instance | Nil))
+      wg = WaitGroup.new
+      instances_restarted = [] of Array(Instance?)
+
+      if process_names.nil?
+        instances = @supervisor.processes.each_with_object([] of Instance) do |(process, process_instances), array|
+          next if process.removed?
+          next if process.scheduled?
+
+          array.concat(process_instances)
+        end
+
+        Procodile.log "system", "Restarting all #{config.app_name} processes"
+      else
+        instances = long_running_instances(process_names)
+
+        Procodile.log "system", "Restarting #{instances.size} process(es)"
+      end
+
+      # Stop any processes that are no longer wanted at this point
+      stopped = check_instance_quantities(:stopped, process_names)[:stopped].map { |i| [i, nil] }
+      instances_restarted.concat stopped
+
+      instances.each do |instance|
+        next if instance.stopping?
+
+        new_instance = instance.restart(wg)
+        instances_restarted << [instance, new_instance]
+      end
+
+      # Start any processes that are needed at this point
+      checked = check_instance_quantities(:started, process_names)[:started].map { |i| [nil, i] }
+      instances_restarted.concat checked
+
+      # 确保所有的 @reader 设定完毕，再启动 log listener
+      # 这个代码仍旧有机会造成 UNIXSever 立即退出，但是没有任何 backtrace, 原因未知
+      wg.wait
+
+      instances_restarted
+    end
+
     def start_processes(process_names : Array(String)?) : Array(Instance)
       instances_started = [] of Instance
 
