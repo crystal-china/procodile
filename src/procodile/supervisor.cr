@@ -135,7 +135,7 @@ module Procodile
 
       reload_config unless options.reload == false
 
-      result = process_manager.check_instance_quantities
+      result = process_manager.reconcile_instance_quantities
 
       if result[:started].empty? && result[:stopped].empty?
         Procodile.log "system", "Process concurrency looks good"
@@ -434,12 +434,6 @@ run `procodile stop -p #{process}` to stop it"
       )
       end
     end
-  end
-
-  enum Supervisor::CheckInstanceQuantitiesType
-    Both
-    Started
-    Stopped
   end
 
   struct Supervisor::RunOptions
