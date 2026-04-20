@@ -20,19 +20,15 @@ module Procodile
 
     def enable_schedules(process_names : Array(String)?) : Nil
       enable_scheduled_processes(scheduled_processes_for(process_names))
-      sync_scheduled_processes
+      reload_schedules
     end
 
     def disable_schedules(process_names : Array(String)?) : Nil
       disable_scheduled_processes(scheduled_processes_for(process_names))
-      sync_scheduled_processes
+      reload_schedules
     end
 
     def reload_schedules : Nil
-      sync_scheduled_processes
-    end
-
-    private def sync_scheduled_processes : Nil
       wanted = config.processes.each_with_object({} of String => String) do |(name, process), hash|
         next unless process.scheduled?
         next if disabled_scheduled_jobs.includes?(name)
