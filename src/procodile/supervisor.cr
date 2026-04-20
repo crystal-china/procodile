@@ -1,13 +1,12 @@
 require "./logger"
 require "./control_server"
 require "./signal_handler"
+require "./process_selector"
 require "./process_manager"
 require "./schedule_manager"
 
 module Procodile
   class Supervisor
-    PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
-
     @process_manager : Procodile::ProcessManager?
     @schedule_manager : Procodile::ScheduleManager?
 
@@ -355,16 +354,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @readers.delete(reader)
       @log_reader_workers.delete(reader)
       reader.close rescue nil
-    end
-
-    # 解析用户输入的名称，返回 (进程名, instance_id) 元组
-    # - instance_id 为 nil 表示匹配所有实例
-    protected def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
-      if (match = name.match(PROCESS_INSTANCE_REGEX))
-        {match[1], match[2].to_i32}
-      else
-        {name, nil}
-      end
     end
 
     private def all_instances_stopped? : Bool

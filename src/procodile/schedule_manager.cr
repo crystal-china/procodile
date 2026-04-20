@@ -109,7 +109,7 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
     def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
       selected = if process_names
                    process_names.compact_map do |name|
-                     process_name = @supervisor.resolve_process_and_instance(name).first
+                     process_name = ProcessSelector.parse(name).first
                      config.processes[process_name]?
                    end
                  else
