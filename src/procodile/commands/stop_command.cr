@@ -38,7 +38,7 @@ for #{scheduled_processes.map(&.name).join(", ")}."
         instances = ControlClient.run(
           @config.sock_path,
           "stop",
-          processes: process_names,
+          process_names: process_names,
           stop_supervisor: @options.stop_supervisor?,
         ).as(Array(Instance::Config))
 

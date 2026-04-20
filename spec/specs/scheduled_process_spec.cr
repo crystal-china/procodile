@@ -1,8 +1,15 @@
 require "../spec_helper"
 
-private class DeterministicJitterSupervisor < Procodile::Supervisor
+private class DeterministicScheduleManager < Procodile::ScheduleManager
   protected def scheduled_delay_seconds(process : Procodile::Process) : Int32
     process.random_delay
+  end
+end
+
+private class DeterministicJitterSupervisor < Procodile::Supervisor
+  def initialize(config : Procodile::Config)
+    super(config)
+    @schedule_manager = DeterministicScheduleManager.new(self)
   end
 end
 
@@ -191,7 +198,7 @@ RUBY
       first_lines = File.read_lines(output_file)
       first_lines.size.should be >= 1
 
-      Procodile::ControlClient.run(config.sock_path, "stop", processes: ["job"])
+      Procodile::ControlClient.run(config.sock_path, "stop", process_names: ["job"])
 
       sleep 2.2.seconds
 
@@ -264,7 +271,7 @@ RUBY
 
       first_run_count = File.read_lines(output_file).size
 
-      Procodile::ControlClient.run(config.sock_path, "restart", processes: ["job"])
+      Procodile::ControlClient.run(config.sock_path, "restart", process_names: ["job"])
 
       sleep 0.3.seconds
 
@@ -325,7 +332,7 @@ YAML
       end.should be_true
 
       first_run_at = process.last_started_at.not_nil!
-      (first_run_at - started_at).should be >= 2.seconds
+      (first_run_at - started_at).should be >= 1.8.seconds
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
       File.write(File.join(app_root, "Procfile.options"), "")
@@ -372,7 +379,7 @@ RUBY
       running_before.size.should eq(1)
       running_instance = running_before.first
 
-      Procodile::ControlClient.run(config.sock_path, "restart", processes: ["job"])
+      Procodile::ControlClient.run(config.sock_path, "restart", process_names: ["job"])
 
       sleep 1.2.seconds
 

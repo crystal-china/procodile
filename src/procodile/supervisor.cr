@@ -1,22 +1,13 @@
 require "./logger"
 require "./control_server"
 require "./signal_handler"
+require "./schedule_manager"
 
 module Procodile
   class Supervisor
-    SCHEDULED_SKIP_ISSUE_THRESHOLD = 3
     PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
 
     @started_at : Time?
-    # 要执行的任务，key 是 name, value 是 crontab
-    @scheduled_jobs : Hash(String, String) = {} of String => String
-    # 检测是不是当前正在运行
-    @scheduled_running : Set(String) = Set(String).new
-    @scheduled_skip_counts : Hash(String, Int32) = {} of String => Int32
-    # 加入这个 Set 的 process 不再调度
-    @disabled_scheduled_jobs : Set(String) = Set(String).new
-    # 用于唤醒旧 watcher 立即退出，避免软退出
-    @scheduled_job_signals : Hash(String, Channel(Nil)) = {} of String => Channel(Nil)
     @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
 
     getter tag : String?
@@ -26,6 +17,7 @@ module Procodile
     getter run_options : Supervisor::RunOptions
     getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
     getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
+    @schedule_manager : Procodile::ScheduleManager?
     @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     def initialize(
@@ -35,6 +27,7 @@ module Procodile
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
+      @schedule_manager = ScheduleManager.new(self)
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(Supervisor::Options.new(stop_supervisor: true)) }
@@ -85,8 +78,7 @@ module Procodile
       instances_started = [] of Instance
 
       reload_config
-      enable_scheduled_processes(scheduled_processes_for(process_names))
-      sync_scheduled_processes
+      schedule_manager.start_processes(process_names)
 
       @config.processes.each do |name, process|
         next if process_names && !process_names.includes?(name.to_s) # Not a process we want
@@ -108,12 +100,12 @@ module Procodile
 
       reload_config
 
-      processes = options.processes
-      disable_scheduled_processes(scheduled_processes_for(processes))
-      sync_scheduled_processes
+      process_names = options.process_names
+      schedule_manager.stop_processes(process_names)
+
       instances_stopped = [] of Instance
 
-      if processes.nil?
+      if process_names.nil?
         Procodile.log "system", "Stopping all #{@config.app_name} processes"
 
         @processes.each do |_, instances|
@@ -123,7 +115,7 @@ module Procodile
           end
         end
       else
-        instances = long_running_instances(processes)
+        instances = long_running_instances(process_names)
 
         Procodile.log "system", "Stopping #{instances.size} process(es)"
 
@@ -146,13 +138,12 @@ module Procodile
       wg = WaitGroup.new
       @tag = options.tag
       instances_restarted = [] of Array(Instance?)
-      processes = options.processes
+      process_names = options.process_names
 
       reload_config
-      enable_scheduled_processes(scheduled_processes_for(processes))
-      sync_scheduled_processes
+      schedule_manager.start_processes(process_names)
 
-      if processes.nil?
+      if process_names.nil?
         instances = @processes.each_with_object([] of Instance) do |(process, process_instances), array|
           next if process.removed?
           next if process.scheduled?
@@ -162,13 +153,13 @@ module Procodile
 
         Procodile.log "system", "Restarting all #{@config.app_name} processes"
       else
-        instances = long_running_instances(processes)
+        instances = long_running_instances(process_names)
 
         Procodile.log "system", "Restarting #{instances.size} process(es)"
       end
 
       # Stop any processes that are no longer wanted at this point
-      stopped = check_instance_quantities(:stopped, processes)[:stopped].map { |i| [i, nil] }
+      stopped = check_instance_quantities(:stopped, process_names)[:stopped].map { |i| [i, nil] }
       instances_restarted.concat stopped
 
       instances.each do |instance|
@@ -179,7 +170,7 @@ module Procodile
       end
 
       # Start any processes that are needed at this point
-      checked = check_instance_quantities(:started, processes)[:started].map { |i| [nil, i] }
+      checked = check_instance_quantities(:started, process_names)[:started].map { |i| [nil, i] }
       instances_restarted.concat checked
 
       # 确保所有的 @reader 设定完毕，再启动 log listener
@@ -204,7 +195,7 @@ module Procodile
 
       @config.reload
       @tcp_proxy.try &.sync_processes(@config.processes.values)
-      sync_scheduled_processes
+      schedule_manager.reload_schedules
     end
 
     def check_concurrency(
@@ -231,6 +222,10 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
 
       result
+    end
+
+    def schedule_manager : ScheduleManager
+      @schedule_manager.not_nil!
     end
 
     def to_hash : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
@@ -329,29 +324,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
     end
 
-    def finish_scheduled_instance(instance : Instance) : Nil
-      stopped_by_user = instance.stopping?
-      process_name = instance.process.name
-
-      instance.on_scheduled_finish
-      remove_instance(instance)
-      scheduled_process_finished(instance)
-
-      if stopped_by_user || instance.process.last_exit_status == 0
-        resolve_issue(:scheduled_run_failed, process_name)
-      else
-        last_exit_status = instance.process.last_exit_status || -1
-        suggested_command = @config.suggested_command("restart -p #{process_name}")
-
-        report_issue(
-          :scheduled_run_failed,
-          process_name,
-          "Scheduled process '#{process_name}' failed with exit \
-status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
-        )
-      end
-    end
-
     private def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
       remove_stopped_instances
@@ -372,184 +344,6 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
       end
     rescue ex
       Procodile.log_exception("system", "Supervisor loop failed", ex)
-    end
-
-    private def sync_scheduled_processes : Nil
-      wanted = @config.processes.each_with_object({} of String => String) do |(name, process), hash|
-        next unless process.scheduled?
-        next if @disabled_scheduled_jobs.includes?(name)
-
-        hash[name] = process.schedule.not_nil!
-      end
-
-      # keys 先返回一个独立的 Array(String)，后面 each 遍历的是这个数组，不是原 hash。
-      # 因此，这里遍历时删除哈希元素是安全的。
-      @scheduled_jobs.keys.each do |name|
-        next if wanted.has_key?(name)
-
-        signal_scheduled_job(name)
-        @scheduled_jobs.delete(name)
-        @scheduled_job_signals.delete(name)
-        resolve_issue(:invalid_schedule, name)
-        resolve_issue(:scheduled_run_failed, name)
-        clear_scheduled_skip_state(name)
-      end
-
-      wanted.each do |name, schedule|
-        next if @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]?
-
-        signal_scheduled_job(name)
-        @scheduled_jobs[name] = schedule
-        # 这里的 signal 不是“精确计数消息”，因此不是 new，而是使用 new(1)
-        # 1 表示，不管 watcher 是啥状态（哪怕还没有阻塞在 receive），我也能把信号先放进去。
-        # 然后下一次 select 的时候马上会收到。
-        # 即：至少可以存进去一个待消费的退出信号，同时又不会无限堆积重复 signal（见 signal_scheduled_job 用法)
-        # 如果这里用 0 的话，如果 watcher 还在计算 next_time 的时候（即还没到 #watch_scheduled_process
-        # select receive 那一步），signal_scheduled_job 发送信号，因为 block 而会被丢弃，
-        # watcher 因为没收到信号，会继续睡下去。
-        signal = Channel(Nil).new(1)
-        @scheduled_job_signals[name] = signal
-        spawn watch_scheduled_process(name, schedule, signal)
-      end
-    end
-
-    private def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
-      begin
-        parser = CronParser.new(schedule)
-        resolve_issue(:invalid_schedule, name)
-      rescue ex
-        if @scheduled_job_signals[name]? == signal
-          @scheduled_jobs.delete(name)
-          @scheduled_job_signals.delete(name)
-        end
-
-        clear_scheduled_skip_state(name)
-        suggested_restart_command = @config.suggested_command("restart -p #{name}")
-
-        report_issue(
-          :invalid_schedule,
-          name,
-          "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. \
-Use 5 or 6 space-separated fields: seconds(optional) minute hour day month weekday. \
-In Procfile, write `#{name}__AT__*/10 * * * * *: your-command` (`__AT__` has two underscores on both sides), \
-or set `processes.#{name}.at: \"*/10 * * * * *\"` in the options files. Fix it, then run `#{@config.suggested_command("reload")}` \
-or `#{suggested_restart_command}`."
-        )
-        Procodile.log "system", "Invalid cron schedule '#{schedule}' for #{name}: #{ex.message}"
-        return
-      end
-      previous_next_time = Time.local - 1.minute
-
-      loop do
-        break unless scheduled_job_active?(name, schedule, signal)
-
-        now = Time.local
-        next_time = parser.next(now)
-        next_time = parser.next(next_time) if next_time <= now
-        next_time = parser.next(next_time) if next_time == previous_next_time
-        previous_next_time = next_time
-
-        sleep_time = next_time - now
-        sleep_time = 0.seconds if sleep_time.negative? # 这个和前面的 if 都是防御性代码。
-
-        select
-        when signal.receive
-          break
-        when timeout sleep_time
-        end
-
-        next unless scheduled_job_active?(name, schedule, signal)
-
-        if (process = @config.processes[name]?) && (delay = scheduled_delay_seconds(process)) > 0
-          select
-          when signal.receive
-            next
-          when timeout delay.seconds
-          end
-        end
-
-        next unless scheduled_job_active?(name, schedule, signal)
-
-        run_scheduled_process(name)
-      end
-    end
-
-    private def run_scheduled_process(name : String) : Nil
-      process = @config.processes[name]?
-      return unless process && process.scheduled?
-
-      if @scheduled_running.includes?(name)
-        skip_count = @scheduled_skip_counts[name] = (@scheduled_skip_counts[name]? || 0) + 1
-
-        if skip_count >= SCHEDULED_SKIP_ISSUE_THRESHOLD
-          report_issue(
-            :scheduled_run_skipped_repeatedly,
-            name,
-            "Scheduled process '#{name}' skipped #{skip_count} runs because the previous run is still active. Consider increasing the schedule interval or shortening the task runtime."
-          )
-        end
-
-        Procodile.log "system", "Skipping scheduled run for #{name}; previous run is still active"
-        return
-      end
-
-      clear_scheduled_skip_state(name)
-      @scheduled_running.add(name)
-
-      Procodile.log "system", "Running scheduled process #{name}"
-
-      process.create_instance(self).start
-    rescue ex
-      @scheduled_running.delete(name)
-      Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
-    end
-
-    private def scheduled_job_active?(name : String, schedule : String, signal : Channel(Nil)) : Bool
-      @scheduled_jobs[name]? == schedule && @scheduled_job_signals[name]? == signal
-    end
-
-    private def scheduled_process_finished(instance : Instance) : Nil
-      @scheduled_running.delete(instance.process.name)
-    end
-
-    private def clear_scheduled_skip_state(name : String) : Nil
-      @scheduled_skip_counts.delete(name)
-      resolve_issue(:scheduled_run_skipped_repeatedly, name)
-    end
-
-    private def scheduled_processes_for(process_names : Array(String)?) : Array(Procodile::Process)
-      selected = if process_names
-                   process_names.compact_map do |name|
-                     process_name = resolve_process_and_instance(name).first
-                     @config.processes[process_name]?
-                   end
-                 else
-                   @config.processes.values
-                 end
-
-      selected.select(&.scheduled?)
-    end
-
-    private def enable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        @disabled_scheduled_jobs.delete(process.name)
-      end
-    end
-
-    private def disable_scheduled_processes(processes : Array(Procodile::Process)) : Nil
-      processes.each do |process|
-        @disabled_scheduled_jobs.add(process.name)
-      end
-    end
-
-    private def signal_scheduled_job(name : String) : Nil
-      return unless (signal = @scheduled_job_signals[name]?)
-
-      # 非阻塞 send，避免重复 signal 卡住
-      select
-      when signal.send(nil)
-      else
-      end
     end
 
     private def watch_for_output : Nil
@@ -720,7 +514,7 @@ or `#{suggested_restart_command}`."
 
     # 解析用户输入的名称，返回 (进程名, instance_id) 元组
     # - instance_id 为 nil 表示匹配所有实例
-    private def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
+    protected def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
       if (match = name.match(PROCESS_INSTANCE_REGEX))
         {match[1], match[2].to_i32}
       else
@@ -740,13 +534,6 @@ or `#{suggested_restart_command}`."
       @signal_handler.wakeup
 
       log_listener_reader
-    end
-
-    protected def scheduled_delay_seconds(process : Process) : Int32
-      random_delay = process.random_delay
-      return 0 if random_delay <= 0
-
-      Random.rand(random_delay + 1)
     end
 
     private def long_running_instances(processes : Array(String))
@@ -852,13 +639,13 @@ run `procodile stop -p #{process}` to stop it"
 
   # 这种写法允许以任意方式初始化 Supervisor::Options
   struct Supervisor::Options
-    getter processes : Array(String)?
+    getter process_names : Array(String)?
     getter stop_supervisor : Bool?
     getter tag : String?
     getter reload : Bool?
 
     def initialize(
-      @processes : Array(String)? = nil,
+      @process_names : Array(String)? = nil,
       @stop_supervisor : Bool? = nil,
       @tag : String? = nil,
       @reload : Bool? = nil,

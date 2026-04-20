@@ -13,7 +13,7 @@ module Procodile
       end
 
       instances = @supervisor.start_processes(
-        options.processes,
+        options.process_names,
         Supervisor::Options.new(tag: options.tag)
       )
 
@@ -23,7 +23,7 @@ module Procodile
     private def stop(options : ControlSession::Options) : String
       instances = @supervisor.stop(
         Supervisor::Options.new(
-          processes: options.processes,
+          process_names: options.process_names,
           stop_supervisor: options.stop_supervisor
         )
       )
@@ -34,7 +34,7 @@ module Procodile
     private def restart(options : ControlSession::Options) : String
       instances = @supervisor.restart(
         Supervisor::Options.new(
-          processes: options.processes,
+          process_names: options.process_names,
           tag: options.tag
         )
       )
@@ -136,7 +136,7 @@ module Procodile
   struct ControlSession::Options
     include JSON::Serializable
 
-    getter processes : Array(String)? = [] of String
+    getter process_names : Array(String)?
     getter tag : String?
     getter port_allocations : Hash(String, Int32)?
     getter reload : Bool?

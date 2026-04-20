@@ -151,7 +151,7 @@ YAML
       output.should contain("Process 'app1' failed repeatedly and will not be respawned automatically")
 
       File.write(File.join(app_root, "Procfile"), "app1: bash ok.sh\n")
-      supervisor.restart(Procodile::Supervisor::Options.new(processes: ["app1"]))
+      supervisor.restart(Procodile::Supervisor::Options.new(process_names: ["app1"]))
 
       wait_until(2.seconds, 50.milliseconds) do
         supervisor.runtime_issues.none?(&.type.process_failed_permanently?)
