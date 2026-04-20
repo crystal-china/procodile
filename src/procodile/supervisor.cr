@@ -31,9 +31,9 @@ module Procodile
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
 
-      @process_manager = ProcessManager.new(self)
-      @schedule_manager = ScheduleManager.new(self)
       @issue_tracker = IssueTracker.new
+      @process_manager = ProcessManager.new(self, issue_tracker)
+      @schedule_manager = ScheduleManager.new(self, issue_tracker)
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(Supervisor::Options.new(stop_supervisor: true)) }
