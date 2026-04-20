@@ -80,24 +80,9 @@ module Procodile
       options : Supervisor::Options = Supervisor::Options.new,
     ) : Array(Instance)
       @tag = options.tag
-      instances_started = [] of Instance
-
       reload_config
       schedule_manager.start_processes(process_names)
-
-      @config.processes.each do |name, process|
-        next if process_names && !process_names.includes?(name.to_s) # Not a process we want
-        next if process.scheduled?
-        next if @processes[process]? && !@processes[process].empty? # Process type already running
-
-        instances = process.generate_instances(self)
-        instances.each do |instance|
-          instance.start
-          instances_started << instance if instance.pid
-        end
-      end
-
-      instances_started
+      process_manager.start_processes(process_names)
     end
 
     def stop(options : Supervisor::Options = Supervisor::Options.new) : Array(Instance)

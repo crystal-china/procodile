@@ -1,6 +1,26 @@
 module Procodile
   class ProcessManager
+    delegate config, to: @supervisor
+
     def initialize(@supervisor : Supervisor)
+    end
+
+    def start_processes(process_names : Array(String)?) : Array(Instance)
+      instances_started = [] of Instance
+
+      config.processes.each do |name, process|
+        next if process_names && !process_names.includes?(name.to_s) # Not a process we want
+        next if process.scheduled?
+        next if @supervisor.processes[process]? && !@supervisor.processes[process].empty? # Process type already running
+
+        instances = process.generate_instances(@supervisor)
+        instances.each do |instance|
+          instance.start
+          instances_started << instance if instance.pid
+        end
+      end
+
+      instances_started
     end
 
     def long_running_instances(processes : Array(String))
