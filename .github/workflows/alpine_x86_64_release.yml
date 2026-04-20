@@ -32,7 +32,7 @@ jobs:
         run: apk add --no-cache bash ruby
 
       - name: Run tests
-        run: crystal spec --order=random --error-on-warnings
+        run: scripts/test.sh
 
       - name: Collect package information
         run: |
