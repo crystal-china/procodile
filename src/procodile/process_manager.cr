@@ -120,31 +120,6 @@ module Procodile
       instances_started
     end
 
-    def long_running_instances(processes : Array(String))
-      process_names_to_instances(processes).reject do |instance|
-        instance.process.scheduled? && processes.includes?(instance.process.name)
-      end
-    end
-
-    def process_names_to_instances(names : Array(String)) : Array(Instance)
-      names.each_with_object([] of Instance) do |name, array|
-        process_name, instance_id = ProcessSelector.parse(name)
-
-        # 如果进程不在 Procfile 中，用原始 name 在 @processes 中查找（已被移除的进程）
-        target_name = process_name || name
-
-        @supervisor.processes.each do |process, instances|
-          next unless process.name == target_name
-
-          if instance_id
-            instances.each { |instance| array << instance if instance.id == instance_id }
-          else
-            instances.each { |instance| array << instance }
-          end
-        end
-      end
-    end
-
     def reconcile_instance_quantities(process_names : Array(String)? = nil) : Hash(Symbol, Array(Instance))
       stopped = stop_excess_instances(process_names)
       started = start_missing_instances(process_names)
@@ -153,47 +128,6 @@ module Procodile
         :started => started,
         :stopped => stopped,
       }
-    end
-
-    def start_missing_instances(process_names : Array(String)? = nil) : Array(Instance)
-      started = [] of Instance
-
-      each_target_long_running_process(process_names) do |process, instances|
-        next unless instances.size < process.quantity
-
-        quantity_needed = process.quantity - instances.size
-        started_instances = process.generate_instances(@supervisor, quantity_needed)
-
-        Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
-
-        # 现在如果进程第一次启动就炸了，会 rescue 并 report_issue, 而不像之前那样，
-        # 直接异常向上抛出，并让 supervisor 一起炸掉。
-        # 因此，这里需要额外限制，没有 pid 的进程（炸掉的进程）不要加入显示为 started.
-        started_instances.each do |instance|
-          instance.start
-          started << instance if instance.pid
-        end
-      end
-
-      started
-    end
-
-    def stop_excess_instances(process_names : Array(String)? = nil) : Array(Instance)
-      stopped = [] of Instance
-
-      each_target_long_running_process(process_names) do |process, instances|
-        next unless instances.size > process.quantity
-
-        quantity_to_stop = instances.size - process.quantity
-        stopped_instances = instances.first(quantity_to_stop)
-
-        Procodile.log "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
-
-        stopped_instances.each(&.stop)
-        stopped.concat(stopped_instances)
-      end
-
-      stopped
     end
 
     def messages : Array(Message)
@@ -230,6 +164,72 @@ module Procodile
       end
 
       messages
+    end
+
+    private def long_running_instances(processes : Array(String))
+      process_names_to_instances(processes).reject do |instance|
+        instance.process.scheduled? && processes.includes?(instance.process.name)
+      end
+    end
+
+    private def process_names_to_instances(names : Array(String)) : Array(Instance)
+      names.each_with_object([] of Instance) do |name, array|
+        process_name, instance_id = ProcessSelector.parse(name)
+
+        # 如果进程不在 Procfile 中，用原始 name 在 @processes 中查找（已被移除的进程）
+        target_name = process_name || name
+
+        @supervisor.processes.each do |process, instances|
+          next unless process.name == target_name
+
+          if instance_id
+            instances.each { |instance| array << instance if instance.id == instance_id }
+          else
+            instances.each { |instance| array << instance }
+          end
+        end
+      end
+    end
+
+    private def start_missing_instances(process_names : Array(String)? = nil) : Array(Instance)
+      started = [] of Instance
+
+      each_target_long_running_process(process_names) do |process, instances|
+        next unless instances.size < process.quantity
+
+        quantity_needed = process.quantity - instances.size
+        started_instances = process.generate_instances(@supervisor, quantity_needed)
+
+        Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
+
+        # 现在如果进程第一次启动就炸了，会 rescue 并 report_issue, 而不像之前那样，
+        # 直接异常向上抛出，并让 supervisor 一起炸掉。
+        # 因此，这里需要额外限制，没有 pid 的进程（炸掉的进程）不要加入显示为 started.
+        started_instances.each do |instance|
+          instance.start
+          started << instance if instance.pid
+        end
+      end
+
+      started
+    end
+
+    private def stop_excess_instances(process_names : Array(String)? = nil) : Array(Instance)
+      stopped = [] of Instance
+
+      each_target_long_running_process(process_names) do |process, instances|
+        next unless instances.size > process.quantity
+
+        quantity_to_stop = instances.size - process.quantity
+        stopped_instances = instances.first(quantity_to_stop)
+
+        Procodile.log "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
+
+        stopped_instances.each(&.stop)
+        stopped.concat(stopped_instances)
+      end
+
+      stopped
     end
 
     private def each_target_long_running_process(process_names : Array(String)? = nil, &block : Procodile::Process, Array(Instance) ->)
