@@ -149,7 +149,7 @@ module Procodile
       end
 
       # Stop any processes that are no longer wanted at this point
-      stopped = check_instance_quantities(:stopped, process_names)[:stopped].map { |i| [i, nil] }
+      stopped = process_manager.check_instance_quantities(:stopped, process_names)[:stopped].map { |i| [i, nil] }
       instances_restarted.concat stopped
 
       instances.each do |instance|
@@ -160,7 +160,7 @@ module Procodile
       end
 
       # Start any processes that are needed at this point
-      checked = check_instance_quantities(:started, process_names)[:started].map { |i| [nil, i] }
+      checked = process_manager.check_instance_quantities(:started, process_names)[:started].map { |i| [nil, i] }
       instances_restarted.concat checked
 
       # 确保所有的 @reader 设定完毕，再启动 log listener
@@ -195,7 +195,7 @@ module Procodile
 
       reload_config unless options.reload == false
 
-      result = check_instance_quantities
+      result = process_manager.check_instance_quantities
 
       if result[:started].empty? && result[:stopped].empty?
         Procodile.log "system", "Process concurrency looks good"
@@ -414,47 +414,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @readers.delete(reader)
       @log_reader_workers.delete(reader)
       reader.close rescue nil
-    end
-
-    private def check_instance_quantities(
-      type : Supervisor::CheckInstanceQuantitiesType = :both,
-      processes : Array(String)? = nil,
-    ) : Hash(Symbol, Array(Instance))
-      status = {:started => [] of Instance, :stopped => [] of Instance}
-
-      @config.processes.each do |_, process|
-        next if processes && !processes.includes?(process.name)
-        next if process.scheduled?
-
-        instances = @processes[process]? || [] of Instance
-
-        if (type.both? || type.stopped?) && instances.size > process.quantity
-          quantity_to_stop = instances.size - process.quantity
-          stopped_instances = instances.first(quantity_to_stop)
-
-          Procodile.log "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
-
-          stopped_instances.each(&.stop)
-          status[:stopped].concat(stopped_instances)
-        end
-
-        if (type.both? || type.started?) && instances.size < process.quantity
-          quantity_needed = process.quantity - instances.size
-          started_instances = process.generate_instances(self, quantity_needed)
-
-          Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
-
-          # 现在如果进程第一次启动就炸了，会 rescue 并 report_issue, 而不像之前那样，
-          # 直接异常向上抛出，并让 supervisor 一起炸掉。
-          # 因此，这里需要额外限制，没有 pid 的进程（炸掉的进程）不要加入显示为 started.
-          started_instances.each do |instance|
-            instance.start
-            status[:started] << instance if instance.pid
-          end
-        end
-      end
-
-      status
     end
 
     private def remove_stopped_instances : Nil

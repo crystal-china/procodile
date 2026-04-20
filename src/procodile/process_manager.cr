@@ -47,5 +47,46 @@ module Procodile
         end
       end
     end
+
+    def check_instance_quantities(
+                 type : Supervisor::CheckInstanceQuantitiesType = :both,
+                 processes : Array(String)? = nil,
+               ) : Hash(Symbol, Array(Instance))
+      status = {:started => [] of Instance, :stopped => [] of Instance}
+
+      config.processes.each do |_, process|
+        next if processes && !processes.includes?(process.name)
+        next if process.scheduled?
+
+        instances = @supervisor.processes[process]? || [] of Instance
+
+        if (type.both? || type.stopped?) && instances.size > process.quantity
+          quantity_to_stop = instances.size - process.quantity
+          stopped_instances = instances.first(quantity_to_stop)
+
+          Procodile.log "system", "Stopping #{quantity_to_stop} #{process.name} process(es)"
+
+          stopped_instances.each(&.stop)
+          status[:stopped].concat(stopped_instances)
+        end
+
+        if (type.both? || type.started?) && instances.size < process.quantity
+          quantity_needed = process.quantity - instances.size
+          started_instances = process.generate_instances(@supervisor, quantity_needed)
+
+          Procodile.log "system", "Starting #{quantity_needed} more #{process.name} process(es)"
+
+          # 现在如果进程第一次启动就炸了，会 rescue 并 report_issue, 而不像之前那样，
+          # 直接异常向上抛出，并让 supervisor 一起炸掉。
+          # 因此，这里需要额外限制，没有 pid 的进程（炸掉的进程）不要加入显示为 started.
+          started_instances.each do |instance|
+            instance.start
+            status[:started] << instance if instance.pid
+          end
+        end
+      end
+
+      status
+    end
   end
 end
