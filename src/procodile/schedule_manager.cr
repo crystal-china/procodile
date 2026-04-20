@@ -18,12 +18,12 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
-    def start_processes(process_names : Array(String)?) : Nil
+    def enable_schedules(process_names : Array(String)?) : Nil
       enable_scheduled_processes(scheduled_processes_for(process_names))
       sync_scheduled_processes
     end
 
-    def stop_processes(process_names : Array(String)?) : Nil
+    def disable_schedules(process_names : Array(String)?) : Nil
       disable_scheduled_processes(scheduled_processes_for(process_names))
       sync_scheduled_processes
     end

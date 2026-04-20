@@ -80,7 +80,7 @@ module Procodile
     ) : Array(Instance)
       @tag = options.tag
       reload_config
-      schedule_manager.start_processes(process_names)
+      schedule_manager.enable_schedules(process_names)
       process_manager.start_processes(process_names)
     end
 
@@ -91,7 +91,7 @@ module Procodile
 
       process_names = options.process_names
 
-      schedule_manager.stop_processes(process_names)
+      schedule_manager.disable_schedules(process_names)
       process_manager.stop_processes(process_names)
     end
 
@@ -106,7 +106,7 @@ module Procodile
       process_names = options.process_names
 
       reload_config
-      schedule_manager.start_processes(process_names)
+      schedule_manager.enable_schedules(process_names)
       process_manager.restart_processes(process_names)
     end
 
