@@ -1,14 +1,19 @@
 require "./logger"
 require "./control_server"
 require "./signal_handler"
+require "./process_manager"
 require "./schedule_manager"
 
 module Procodile
   class Supervisor
     PROCESS_INSTANCE_REGEX         = /\A(.+)\.(\d+)\z/
 
+    @process_manager : Procodile::ProcessManager?
+    @schedule_manager : Procodile::ScheduleManager?
+
     @started_at : Time?
     @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
+    @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     getter tag : String?
     getter tcp_proxy : TCPProxy?
@@ -17,8 +22,6 @@ module Procodile
     getter run_options : Supervisor::RunOptions
     getter processes : Hash(Procodile::Process, Array(Instance)) = {} of Procodile::Process => Array(Instance)
     getter readers : Hash(IO::FileDescriptor, Instance) = {} of IO::FileDescriptor => Instance
-    @schedule_manager : Procodile::ScheduleManager?
-    @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     def initialize(
       @config : Config,
@@ -27,6 +30,8 @@ module Procodile
       @signal_handler = SignalHandler.new
       @signal_handler_chan = Channel(Nil).new
       @log_listener_chan = Channel(Nil).new
+
+      @process_manager = ProcessManager.new(self)
       @schedule_manager = ScheduleManager.new(self)
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
@@ -115,7 +120,7 @@ module Procodile
           end
         end
       else
-        instances = long_running_instances(process_names)
+        instances = process_manager.long_running_instances(process_names)
 
         Procodile.log "system", "Stopping #{instances.size} process(es)"
 
@@ -153,7 +158,7 @@ module Procodile
 
         Procodile.log "system", "Restarting all #{@config.app_name} processes"
       else
-        instances = long_running_instances(process_names)
+        instances = process_manager.long_running_instances(process_names)
 
         Procodile.log "system", "Restarting #{instances.size} process(es)"
       end
@@ -224,7 +229,11 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    def schedule_manager : ScheduleManager
+    private def process_manager : ProcessManager
+      @process_manager.not_nil!
+    end
+
+    protected def schedule_manager : ScheduleManager
       @schedule_manager.not_nil!
     end
 
@@ -493,25 +502,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       end
     end
 
-    private def process_names_to_instances(names : Array(String)) : Array(Instance)
-      names.each_with_object([] of Instance) do |name, array|
-        process_name, instance_id = resolve_process_and_instance(name)
-
-        # 如果进程不在 Procfile 中，用原始 name 在 @processes 中查找（已被移除的进程）
-        target_name = process_name || name
-
-        @processes.each do |process, instances|
-          next unless process.name == target_name
-
-          if instance_id
-            instances.each { |instance| array << instance if instance.id == instance_id }
-          else
-            instances.each { |instance| array << instance }
-          end
-        end
-      end
-    end
-
     # 解析用户输入的名称，返回 (进程名, instance_id) 元组
     # - instance_id 为 nil 表示匹配所有实例
     protected def resolve_process_and_instance(name : String) : Tuple(String, Int32?)
@@ -534,12 +524,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @signal_handler.wakeup
 
       log_listener_reader
-    end
-
-    private def long_running_instances(processes : Array(String))
-      process_names_to_instances(processes).reject do |instance|
-        instance.process.scheduled? && processes.includes?(instance.process.name)
-      end
     end
 
     # Supervisor message
