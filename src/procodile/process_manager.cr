@@ -31,6 +31,36 @@ module Procodile
       instances_stopped
     end
 
+    def remove_stopped_instances : Nil
+      @supervisor.processes.each do |_, instances|
+        instances.reject! do |instance|
+          if instance.stopping? && !instance.running?
+            instance.on_stop
+
+            true
+          else
+            false
+          end
+        end
+      end
+    end
+
+    def remove_removed_processes : Nil
+      @supervisor.processes.reject! do |process, instances|
+        if process.removed? && instances.empty?
+          @supervisor.clear_runtime_issues_for_process(process.name)
+
+          if (tcp_proxy = @supervisor.@tcp_proxy)
+            tcp_proxy.remove_process(process)
+          end
+
+          true
+        else
+          false
+        end
+      end
+    end
+
     def restart_processes(process_names : Array(String)?, tag : String?) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       instances_restarted = [] of Array(Instance?)

@@ -231,7 +231,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       "#{type.to_s.underscore}:#{process_name}"
     end
 
-    private def clear_runtime_issues_for_process(process_name : String) : Nil
+    def clear_runtime_issues_for_process(process_name : String) : Nil
       RuntimeIssueType.values.each do |type|
         resolve_issue(type, process_name)
       end
@@ -261,10 +261,10 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def supervise : Nil
       # Tell instances that have been stopped that they have been stopped
-      remove_stopped_instances
+      process_manager.remove_stopped_instances
 
       # Remove removed processes
-      remove_removed_processes
+      process_manager.remove_removed_processes
 
       # Check all instances that we manage and let them do their things.
       @processes.each do |_, instances|
@@ -355,36 +355,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @readers.delete(reader)
       @log_reader_workers.delete(reader)
       reader.close rescue nil
-    end
-
-    private def remove_stopped_instances : Nil
-      @processes.each do |_, instances|
-        instances.reject! do |instance|
-          if instance.stopping? && !instance.running?
-            instance.on_stop
-
-            true
-          else
-            false
-          end
-        end
-      end
-    end
-
-    private def remove_removed_processes : Nil
-      @processes.reject! do |process, instances|
-        if process.removed? && instances.empty?
-          clear_runtime_issues_for_process(process.name)
-
-          if (tcp_proxy = @tcp_proxy)
-            tcp_proxy.remove_process(process)
-          end
-
-          true
-        else
-          false
-        end
-      end
     end
 
     # 解析用户输入的名称，返回 (进程名, instance_id) 元组
