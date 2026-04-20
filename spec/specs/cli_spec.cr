@@ -1,6 +1,22 @@
 require "../spec_helper"
 require "../../src/procodile/cli"
 
+private def parse_command_options(
+  cli : Procodile::CLI,
+  command_name : String,
+  args : Array(String),
+) : Procodile::CLI::Options
+  cli.options = Procodile::CLI::Options.new
+  command = cli.class.commands[command_name]
+  argv = args.dup
+
+  OptionParser.parse(argv) do |opts|
+    command.options.call(opts, cli)
+  end
+
+  cli.options
+end
+
 describe Procodile::CLI do
   context "an application with a Procfile" do
     config = Procodile::Config.new(root: File.join(APPS_ROOT, "full"))
@@ -105,6 +121,18 @@ describe Procodile::CLI do
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
       # command.callable.call
+    end
+
+    it "parses tag for start" do
+      options = parse_command_options(cli, "start", ["--tag", "release-20260420"])
+
+      options.tag.should eq("release-20260420")
+    end
+
+    it "parses tag for restart" do
+      options = parse_command_options(cli, "restart", ["--tag", "release-20260420"])
+
+      options.tag.should eq("release-20260420")
     end
   end
 end

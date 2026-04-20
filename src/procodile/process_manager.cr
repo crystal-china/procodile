@@ -61,7 +61,7 @@ module Procodile
       end
     end
 
-    def restart_processes(process_names : Array(String)?, tag : String?) : Array(Array(Instance | Nil))
+    def restart_processes(process_names : Array(String)?) : Array(Array(Instance | Nil))
       wg = WaitGroup.new
       instances_restarted = [] of Array(Instance?)
 

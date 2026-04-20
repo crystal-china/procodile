@@ -108,7 +108,7 @@ module Procodile
 
       reload_config
       schedule_manager.start_processes(process_names)
-      process_manager.restart_processes(process_names, options.tag)
+      process_manager.restart_processes(process_names)
     end
 
     def stop_supervisor : Nil
