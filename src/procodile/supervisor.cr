@@ -2,6 +2,7 @@ require "./logger"
 require "./control_server"
 require "./signal_handler"
 require "./process_selector"
+require "./issue_tracker"
 require "./process_manager"
 require "./schedule_manager"
 
@@ -9,9 +10,9 @@ module Procodile
   class Supervisor
     @process_manager : Procodile::ProcessManager?
     @schedule_manager : Procodile::ScheduleManager?
+    @issue_tracker : IssueTracker?
 
     @started_at : Time?
-    @runtime_issues : Hash(String, Supervisor::RuntimeIssue) = {} of String => Supervisor::RuntimeIssue
     @log_reader_workers : Hash(IO::FileDescriptor, Bool) = {} of IO::FileDescriptor => Bool
 
     getter tag : String?
@@ -32,6 +33,7 @@ module Procodile
 
       @process_manager = ProcessManager.new(self)
       @schedule_manager = ScheduleManager.new(self)
+      @issue_tracker = IssueTracker.new
 
       @signal_handler.register(Signal::TERM) { stop_supervisor }
       @signal_handler.register(Signal::INT) { stop(Supervisor::Options.new(stop_supervisor: true)) }
@@ -158,14 +160,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    protected def process_manager : ProcessManager
-      @process_manager.not_nil!
-    end
-
-    protected def schedule_manager : ScheduleManager
-      @schedule_manager.not_nil!
-    end
-
     def to_hash : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
       started_at = @started_at
 
@@ -174,34 +168,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         pid:           ::Process.pid,
         proxy_enabled: !!@run_options.proxy?,
       }
-    end
-
-    def runtime_issues : Array(RuntimeIssue)
-      @runtime_issues.values.sort_by { |issue| {issue.process_name, issue.type.to_s} }
-    end
-
-    def report_issue(type : RuntimeIssueType, process_name : String, message : String) : Nil
-      key = runtime_issue_key(type, process_name)
-      @runtime_issues[key] = RuntimeIssue.new(
-        key: key,
-        type: type,
-        process_name: process_name,
-        message: message
-      )
-    end
-
-    def resolve_issue(type : RuntimeIssueType, process_name : String) : Nil
-      @runtime_issues.delete(runtime_issue_key(type, process_name))
-    end
-
-    private def runtime_issue_key(type : RuntimeIssueType, process_name : String) : String
-      "#{type.to_s.underscore}:#{process_name}"
-    end
-
-    def clear_runtime_issues_for_process(process_name : String) : Nil
-      RuntimeIssueType.values.each do |type|
-        resolve_issue(type, process_name)
-      end
     end
 
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
@@ -224,6 +190,18 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         key = @readers.key_for?(instance)
         @readers.delete(key) if key
       end
+    end
+
+    protected def process_manager : ProcessManager
+      @process_manager.not_nil!
+    end
+
+    protected def schedule_manager : ScheduleManager
+      @schedule_manager.not_nil!
+    end
+
+    protected def issue_tracker : IssueTracker
+      @issue_tracker.not_nil!
     end
 
     private def supervise : Nil
@@ -336,30 +314,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @signal_handler.wakeup
 
       log_listener_reader
-    end
-
-    enum RuntimeIssueType
-      ProcessFailedPermanently
-      ScheduledRunFailed
-      InvalidSchedule
-      ScheduledRunSkippedRepeatedly
-    end
-
-    struct RuntimeIssue
-      include JSON::Serializable
-
-      getter key : String
-      getter type : RuntimeIssueType
-      getter process_name : String
-      getter message : String
-
-      def initialize(
-        @key : String,
-        @type : RuntimeIssueType,
-        @process_name : String,
-        @message : String,
-      )
-      end
     end
   end
 

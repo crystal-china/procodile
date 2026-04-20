@@ -48,7 +48,7 @@ module Procodile
     def remove_removed_processes : Nil
       @supervisor.processes.reject! do |process, instances|
         if process.removed? && instances.empty?
-          @supervisor.clear_runtime_issues_for_process(process.name)
+          @supervisor.issue_tracker.clear_process(process.name)
 
           if (tcp_proxy = @supervisor.tcp_proxy)
             tcp_proxy.remove_process(process)

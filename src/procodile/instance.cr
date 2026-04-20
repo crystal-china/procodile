@@ -129,7 +129,7 @@ module Procodile
         @process.log_color
       )
 
-      @supervisor.resolve_issue(:process_failed_permanently, @process.name) unless @process.scheduled?
+      @supervisor.issue_tracker.resolve(:process_failed_permanently, @process.name) unless @process.scheduled?
 
       if self.process.log_path && io.nil?
         Procodile.log(
@@ -155,7 +155,7 @@ module Procodile
 
     protected def report_start_failure(message : String) : Nil
       if @process.scheduled?
-        @supervisor.report_issue(
+        @supervisor.issue_tracker.report(
           :scheduled_run_failed,
           @process.name,
           %|Scheduled process '#{@process.name}' failed to start: #{message} Fix it, \
@@ -164,7 +164,7 @@ then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.|
       else
         @failed_at = Time.local
 
-        @supervisor.report_issue(
+        @supervisor.issue_tracker.report(
           :process_failed_permanently,
           @process.name,
           %|Process '#{@process.name}' failed to start: #{message} Fix it, then \
@@ -326,12 +326,13 @@ If this command is meant to run once, it may not be suitable as a normal Procfil
             "It will not be respawned automatically any longer and will no longer be managed".colorize.red.to_s,
             @process.log_color
           )
+          suggested_command = @process.config.suggested_command("restart -p #{@process.name}")
 
-          @supervisor.report_issue(
+          @supervisor.issue_tracker.report(
             :process_failed_permanently,
             @process.name,
             "Process '#{@process.name}' failed repeatedly and will not be respawned \
-automatically. Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.
+automatically. Fix it, then run `#{suggested_command}`.
 #{daemon_process_hint}"
           )
 
@@ -345,11 +346,13 @@ automatically. Fix it, then run `#{@process.config.suggested_command("restart -p
           @process.log_color
         )
 
-        @supervisor.report_issue(
+        suggested_command = @process.config.suggested_command("restart -p #{@process.name}")
+
+        @supervisor.issue_tracker.report(
           :process_failed_permanently,
           @process.name,
           "Process '#{@process.name}' stopped and automatic respawning is disabled. \
-Fix it, then run `#{@process.config.suggested_command("restart -p #{@process.name}")}`.
+Fix it, then run `#{suggested_command}`.
 #{daemon_process_hint}"
         )
 
