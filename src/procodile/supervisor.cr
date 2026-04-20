@@ -45,6 +45,8 @@ module Procodile
     end
 
     def start(after_start : Proc(Supervisor, Nil)) : Nil
+      # ---------------- boot services ----------------
+
       Procodile.log "system", "Procodile supervisor started with PID #{::Process.pid}"
       Procodile.log "system", "Application root is #{@config.root}"
 
@@ -57,13 +59,15 @@ module Procodile
       # 先监听
       watch_for_output
 
+      # ---------------- boot proxy ----------------
+
       if @run_options.proxy?
         Procodile.log "system", "Proxy is enabled"
 
         @tcp_proxy = TCPProxy.start(self)
       end
 
-      # 再启动进程
+      # ---------------- boot processes ----------------
       after_start.call(self) # invoke supervisor.start_processes
 
       @started_at = Time.local
