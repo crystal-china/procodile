@@ -127,7 +127,7 @@ module Procodile
             "500 #{e.message}"
           end
         else
-          "404 Invaid command"
+          "404 Invalid command"
         end
       end
     {% end %}

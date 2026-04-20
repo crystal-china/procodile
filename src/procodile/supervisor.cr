@@ -155,7 +155,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    private def process_manager : ProcessManager
+    protected def process_manager : ProcessManager
       @process_manager.not_nil!
     end
 
