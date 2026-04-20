@@ -196,6 +196,42 @@ module Procodile
       stopped
     end
 
+    def messages : Array(Message)
+      messages = [] of Message
+
+      @supervisor.processes.each do |process, process_instances|
+        next if process.scheduled?
+
+        if process.removed? && process_instances.any?(&.status.running?)
+          messages << Message.new(
+            type: :removed_but_running,
+            process: process.name,
+          )
+        end
+
+        unless process.correct_quantity?(process_instances.size)
+          messages << Message.new(
+            type: :incorrect_quantity,
+            process: process.name,
+            current: process_instances.size,
+            desired: process.quantity,
+          )
+        end
+
+        process_instances.each do |instance|
+          if instance.should_be_running? && !instance.status.running?
+            messages << Message.new(
+              type: :not_running,
+              instance: instance.description,
+              status: instance.status,
+            )
+          end
+        end
+      end
+
+      messages
+    end
+
     private def each_target_long_running_process(process_names : Array(String)? = nil, &block : Procodile::Process, Array(Instance) ->)
       config.processes.each do |_, process|
         next if process_names && !process_names.includes?(process.name)
@@ -203,6 +239,46 @@ module Procodile
 
         instances = @supervisor.processes[process]? || [] of Instance
         yield process, instances
+      end
+    end
+
+    struct Message
+      # Message type
+      enum Type
+        NotRunning
+        IncorrectQuantity
+        RemovedButRunning
+      end
+
+      include JSON::Serializable
+
+      getter type : Type
+      getter process : String?
+      getter current : Int32?
+      getter desired : Int32?
+      getter instance : String?
+      getter status : Instance::Status?
+
+      def initialize(
+           @type : Type,
+           @process : String? = nil,
+           @current : Int32? = nil,
+           @desired : Int32? = nil,
+           @instance : String? = nil,
+           @status : Instance::Status? = nil,
+         )
+      end
+
+      def to_s(io : IO) : Nil
+        case type
+        in .not_running?
+          io.print "#{instance} is not running (#{status})"
+        in .incorrect_quantity?
+          io.print "#{process} has #{current} instances (should have #{desired})"
+        in .removed_but_running?
+          io.print "#{process} has been removed from the Procfile but is still running; \
+run `procodile stop -p #{process}` to stop it"
+        end
       end
     end
   end

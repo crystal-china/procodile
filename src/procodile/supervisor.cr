@@ -172,42 +172,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       }
     end
 
-    def messages : Array(Message)
-      messages = [] of Message
-
-      processes.each do |process, process_instances|
-        next if process.scheduled?
-
-        if process.removed? && process_instances.any?(&.status.running?)
-          messages << Message.new(
-            type: :removed_but_running,
-            process: process.name,
-          )
-        end
-
-        unless process.correct_quantity?(process_instances.size)
-          messages << Message.new(
-            type: :incorrect_quantity,
-            process: process.name,
-            current: process_instances.size,
-            desired: process.quantity,
-          )
-        end
-
-        process_instances.each do |instance|
-          if instance.should_be_running? && !instance.status.running?
-            messages << Message.new(
-              type: :not_running,
-              instance: instance.description,
-              status: instance.status,
-            )
-          end
-        end
-      end
-
-      messages
-    end
-
     def runtime_issues : Array(RuntimeIssue)
       @runtime_issues.values.sort_by { |issue| {issue.process_name, issue.type.to_s} }
     end
@@ -368,47 +332,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       @signal_handler.wakeup
 
       log_listener_reader
-    end
-
-    # Supervisor message
-    struct Message
-      # Message type
-      enum Type
-        NotRunning
-        IncorrectQuantity
-        RemovedButRunning
-      end
-
-      include JSON::Serializable
-
-      getter type : Type
-      getter process : String?
-      getter current : Int32?
-      getter desired : Int32?
-      getter instance : String?
-      getter status : Instance::Status?
-
-      def initialize(
-        @type : Type,
-        @process : String? = nil,
-        @current : Int32? = nil,
-        @desired : Int32? = nil,
-        @instance : String? = nil,
-        @status : Instance::Status? = nil,
-      )
-      end
-
-      def to_s(io : IO) : Nil
-        case type
-        in .not_running?
-          io.print "#{instance} is not running (#{status})"
-        in .incorrect_quantity?
-          io.print "#{process} has #{current} instances (should have #{desired})"
-        in .removed_but_running?
-          io.print "#{process} has been removed from the Procfile but is still running; \
-run `procodile stop -p #{process}` to stop it"
-        end
-      end
     end
 
     enum RuntimeIssueType
