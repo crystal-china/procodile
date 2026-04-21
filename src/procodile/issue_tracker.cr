@@ -3,7 +3,7 @@ module Procodile
     @runtime_issues : Hash(String, RuntimeIssue) = {} of String => RuntimeIssue
 
     def runtime_issues : Array(RuntimeIssue)
-      @runtime_issues.values.sort_by { |issue| {issue.process_name, issue.type.to_s} }
+      @runtime_issues.values.sort_by! { |issue| {issue.process_name, issue.type.to_s} }
     end
 
     def report(type : RuntimeIssueType, process_name : String, message : String) : Nil

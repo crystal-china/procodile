@@ -32,3 +32,9 @@ Naming/BlockParameterName:
 
 Naming/AccessorMethodName:
   Enabled: false
+
+Performance/AnyInsteadOfEmpty:
+  Enabled: false
+
+Excluded:
+  - spec

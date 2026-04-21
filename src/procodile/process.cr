@@ -100,7 +100,7 @@ module Procodile
     end
 
     #
-    # Return the defualt log file name
+    # Return the default log file name
     #
     def default_log_file_name : String
       @options.log_file_name || "#{@name}.log"

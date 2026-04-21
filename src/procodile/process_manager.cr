@@ -232,7 +232,7 @@ module Procodile
       stopped
     end
 
-    private def each_target_long_running_process(process_names : Array(String)? = nil, &block : Procodile::Process, Array(Instance) ->)
+    private def each_target_long_running_process(process_names : Array(String)? = nil, & : Procodile::Process, Array(Instance) ->)
       config.processes.each do |_, process|
         next if process_names && !process_names.includes?(process.name)
         next if process.scheduled?
