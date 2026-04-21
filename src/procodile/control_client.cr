@@ -1,11 +1,5 @@
 module Procodile
   class ControlClient
-    alias SocketResponse = Array(Instance::Config) |
-                           Array(Tuple(Instance::Config?, Instance::Config?)) |
-                           NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)) |
-                           ControlClient::ReplyOfStatusCommand |
-                           Bool
-
     def self.start_processes(
       sock_path : String,
       process_names : Array(String)? = nil,
@@ -20,7 +14,7 @@ module Procodile
 
       send_request(sock_path, "start_processes", request) do |reply|
         Array(Instance::Config).from_json(reply)
-      end.as(Array(Instance::Config))
+      end
     end
 
     def self.stop(
@@ -35,7 +29,7 @@ module Procodile
 
       send_request(sock_path, "stop", request) do |reply|
         Array(Instance::Config).from_json(reply)
-      end.as(Array(Instance::Config))
+      end
     end
 
     def self.restart(
@@ -50,11 +44,11 @@ module Procodile
 
       send_request(sock_path, "restart", request) do |reply|
         Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
-      end.as(Array(Tuple(Instance::Config?, Instance::Config?)))
+      end
     end
 
     def self.reload_config(sock_path : String) : Bool
-      send_request(sock_path, "reload_config", ControlSession::Options.new) { true }.as(Bool)
+      send_request(sock_path, "reload_config", ControlSession::Options.new) { true }
     end
 
     def self.check_concurrency(sock_path : String, reload : Bool? = nil) : NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
@@ -65,37 +59,37 @@ module Procodile
           started: Array(Instance::Config),
           stopped: Array(Instance::Config)
         ).from_json(reply)
-      end.as(NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)))
+      end
     end
 
     def self.status(sock_path : String) : ControlClient::ReplyOfStatusCommand
       send_request(sock_path, "status", ControlSession::Options.new) do |reply|
         ControlClient::ReplyOfStatusCommand.from_json(reply)
-      end.as(ControlClient::ReplyOfStatusCommand)
+      end
     end
 
-    private def self.send_request(sock_path : String, command : String, options : ControlSession::Options, &decoder : String -> SocketResponse) : SocketResponse
+    private def self.send_request(
+                 sock_path : String,
+                 command : String,
+                 options, &decoder : String -> T
+               ) : T forall T
       socket = UNIXSocket.new(sock_path)
       socket.puts("#{command} #{options.to_json}")
 
       if (data = socket.gets)
         code, reply = data.strip.split(/\s+/, 2)
 
-        if code.to_i == 200 && reply && !reply.empty?
+        if code.to_i == 200 && reply
           decoder.call(reply)
-        elsif code.to_i == 200
-          true
+        elsif code.to_i == 500 && reply
+          message = begin
+                      String.from_json(reply)
+                    rescue JSON::ParseException
+                      reply
+                    end
+
+          raise Error.new(message)
         else
-          if code.to_i == 500 && reply
-            message = begin
-              String.from_json(reply)
-            rescue JSON::ParseException
-              reply
-            end
-
-            raise Error.new(message)
-          end
-
           raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
