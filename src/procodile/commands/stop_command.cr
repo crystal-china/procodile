@@ -35,12 +35,11 @@ module Procodile
         scheduled_processes = scheduled_processes_from_names(process_names)
         disabled_scheduling_message = "Future scheduling was disabled \
 for #{scheduled_processes.map(&.name).join(", ")}."
-        instances = ControlClient.run(
+        instances = ControlClient.stop(
           @config.sock_path,
-          "stop",
-          process_names: process_names,
-          stop_supervisor: @options.stop_supervisor?,
-        ).as(Array(Instance::Config))
+          process_names,
+          @options.stop_supervisor?,
+        )
 
         # 没有任何 Instance::Config 被 stop
         if instances.empty?

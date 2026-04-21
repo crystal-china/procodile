@@ -198,7 +198,7 @@ RUBY
       first_lines = File.read_lines(output_file)
       first_lines.size.should be >= 1
 
-      Procodile::ControlClient.run(config.sock_path, "stop", process_names: ["job"])
+      Procodile::ControlClient.stop(config.sock_path, ["job"])
 
       sleep 2.2.seconds
 
@@ -271,7 +271,7 @@ RUBY
 
       first_run_count = File.read_lines(output_file).size
 
-      Procodile::ControlClient.run(config.sock_path, "restart", process_names: ["job"])
+      Procodile::ControlClient.restart(config.sock_path, ["job"])
 
       sleep 0.3.seconds
 
@@ -379,7 +379,7 @@ RUBY
       running_before.size.should eq(1)
       running_instance = running_before.first
 
-      Procodile::ControlClient.run(config.sock_path, "restart", process_names: ["job"])
+      Procodile::ControlClient.restart(config.sock_path, ["job"])
 
       sleep 1.2.seconds
 

@@ -39,12 +39,11 @@ module Procodile
           end
         end
 
-        instance_configs = ControlClient.run(
+        instance_configs = ControlClient.restart(
           @config.sock_path,
-          "restart",
-          process_names: process_names,
-          tag: @options.tag,
-        ).as Array(Tuple(Instance::Config?, Instance::Config?))
+          process_names,
+          @options.tag,
+        )
 
         # 正常 instance_configs 三种情况：
         # - [old, new] 真正 restart 了一个实例

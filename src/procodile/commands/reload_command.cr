@@ -8,7 +8,7 @@ module Procodile
 
       private def reload : Nil
         if supervisor_running?
-          ControlClient.run(@config.sock_path, "reload_config")
+          ControlClient.reload_config(@config.sock_path)
 
           puts "Reloaded Procodile config"
         else

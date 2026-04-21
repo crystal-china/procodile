@@ -141,5 +141,14 @@ module Procodile
     getter port_allocations : Hash(String, Int32)?
     getter reload : Bool?
     getter stop_supervisor : Bool?
+
+    def initialize(
+      @process_names : Array(String)? = nil,
+      @tag : String? = nil,
+      @port_allocations : Hash(String, Int32)? = nil,
+      @reload : Bool? = nil,
+      @stop_supervisor : Bool? = nil,
+    )
+    end
   end
 end
