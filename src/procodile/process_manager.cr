@@ -260,13 +260,13 @@ module Procodile
       getter status : Instance::Status?
 
       def initialize(
-           @type : Type,
-           @process : String? = nil,
-           @current : Int32? = nil,
-           @desired : Int32? = nil,
-           @instance : String? = nil,
-           @status : Instance::Status? = nil,
-         )
+        @type : Type,
+        @process : String? = nil,
+        @current : Int32? = nil,
+        @desired : Int32? = nil,
+        @instance : String? = nil,
+        @status : Instance::Status? = nil,
+      )
       end
 
       def to_s(io : IO) : Nil

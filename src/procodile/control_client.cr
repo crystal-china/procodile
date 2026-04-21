@@ -6,13 +6,13 @@ module Procodile
       tag : String? = nil,
       port_allocations : Hash(String, Int32)? = nil,
     ) : Array(Instance::Config)
-      request = ControlSession::Options.new(
+      options = ControlSession::Options.new(
         process_names: process_names,
         tag: tag,
         port_allocations: port_allocations
       )
 
-      send_request(sock_path, "start_processes", request) do |reply|
+      send_request(sock_path, "start_processes", options) do |reply|
         Array(Instance::Config).from_json(reply)
       end
     end
@@ -22,12 +22,12 @@ module Procodile
       process_names : Array(String)? = nil,
       stop_supervisor : Bool? = nil,
     ) : Array(Instance::Config)
-      request = ControlSession::Options.new(
+      options = ControlSession::Options.new(
         process_names: process_names,
         stop_supervisor: stop_supervisor
       )
 
-      send_request(sock_path, "stop", request) do |reply|
+      send_request(sock_path, "stop", options) do |reply|
         Array(Instance::Config).from_json(reply)
       end
     end
@@ -37,12 +37,12 @@ module Procodile
       process_names : Array(String)? = nil,
       tag : String? = nil,
     ) : Array(Tuple(Instance::Config?, Instance::Config?))
-      request = ControlSession::Options.new(
+      options = ControlSession::Options.new(
         process_names: process_names,
         tag: tag
       )
 
-      send_request(sock_path, "restart", request) do |reply|
+      send_request(sock_path, "restart", options) do |reply|
         Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
       end
     end
@@ -52,13 +52,12 @@ module Procodile
     end
 
     def self.check_concurrency(sock_path : String, reload : Bool? = nil) : NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
-      request = ControlSession::Options.new(reload: reload)
+      options = ControlSession::Options.new(reload: reload)
 
-      send_request(sock_path, "check_concurrency", request) do |reply|
+      send_request(sock_path, "check_concurrency", options) do |reply|
         NamedTuple(
           started: Array(Instance::Config),
-          stopped: Array(Instance::Config)
-        ).from_json(reply)
+          stopped: Array(Instance::Config)).from_json(reply)
       end
     end
 
@@ -69,10 +68,11 @@ module Procodile
     end
 
     private def self.send_request(
-                 sock_path : String,
-                 command : String,
-                 options, &decoder : String -> T
-               ) : T forall T
+      sock_path : String,
+      command : String,
+      options : ControlSession::Options,
+      &decoder : String -> T
+    ) : T forall T
       socket = UNIXSocket.new(sock_path)
       socket.puts("#{command} #{options.to_json}")
 
@@ -83,10 +83,10 @@ module Procodile
           decoder.call(reply)
         elsif code.to_i == 500 && reply
           message = begin
-                      String.from_json(reply)
-                    rescue JSON::ParseException
-                      reply
-                    end
+            String.from_json(reply)
+          rescue JSON::ParseException
+            reply
+          end
 
           raise Error.new(message)
         else

@@ -46,11 +46,11 @@ module Procodile
       getter message : String
 
       def initialize(
-           @key : String,
-           @type : RuntimeIssueType,
-           @process_name : String,
-           @message : String,
-         )
+        @key : String,
+        @type : RuntimeIssueType,
+        @process_name : String,
+        @message : String,
+      )
       end
     end
   end
