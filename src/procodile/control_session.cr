@@ -47,7 +47,7 @@ module Procodile
     private def reload_config(options : ControlSession::Options) : String
       @supervisor.reload_config
 
-      "200 []"
+      %(200 {"ok":true})
     end
 
     private def check_concurrency(options : ControlSession::Options) : String

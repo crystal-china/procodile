@@ -53,7 +53,7 @@ describe Procodile::ControlSession do
     begin
       response = session.receive_data(%(reload_config {}))
 
-      response.should eq("200 []")
+      response.should eq(%(200 {"ok":true}))
     ensure
       cleanup_control_session_app(app_root, supervisor, client)
     end
@@ -134,8 +134,7 @@ describe Procodile::ControlSession do
       reply = response.sub(/\A200\s+/, "")
       parsed = NamedTuple(
         started: Array(Procodile::Instance::Config),
-        stopped: Array(Procodile::Instance::Config)
-      ).from_json(reply)
+        stopped: Array(Procodile::Instance::Config)).from_json(reply)
       parsed[:started].size.should eq(1)
       parsed[:started].first.description.should eq("app1.1")
       parsed[:stopped].should be_empty

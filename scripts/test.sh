@@ -132,7 +132,7 @@ bin/procodile stop -papp5 |grep 'Future scheduling was disabled for app5' && sle
 #     fi
 # done
 waiting "bin/procodile status --simple |grep -Fq 'app5[0]'"
-header '(2.2) Fix failed to start process and restart'
+header '(2.3) Fix failed to start process and restart'
 sed -i 's#baz1\.sh#baz\.sh#' $ROOT/Procfile
 bin/procodile restart -p app6
 ! bin/procodile status 2>&1 |grep -F "Process 'app6' failed to start: Error executing process: 'scripts/../scripts/baz1.sh'"

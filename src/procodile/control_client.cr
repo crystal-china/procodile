@@ -47,8 +47,10 @@ module Procodile
       end
     end
 
-    def self.reload_config(sock_path : String) : Bool
-      send_request(sock_path, "reload_config", ControlSession::Options.new) { true }
+    def self.reload_config(sock_path : String) : NamedTuple(ok: Bool)
+      send_request(sock_path, "reload_config", ControlSession::Options.new) do |reply|
+        NamedTuple(ok: Bool).from_json(reply)
+      end
     end
 
     def self.check_concurrency(sock_path : String, reload : Bool? = nil) : NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
