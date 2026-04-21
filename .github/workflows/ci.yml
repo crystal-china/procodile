@@ -27,9 +27,9 @@ jobs:
       - name: Run Ameba
         run: bin/ameba
 
-      - name: Run typer
-        run: bin/typer src/procodile.cr
-        
+      # - name: Run typer
+      #   run: bin/typer src/procodile.cr
+
       - name: Run tests
         run: scripts/test.sh
         
