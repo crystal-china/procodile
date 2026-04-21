@@ -198,9 +198,7 @@ module Procodile
     end
 
     private def status_reply : ControlClient::ReplyOfStatusCommand
-      ControlClient.run(
-        @config.sock_path, "status"
-      ).as ControlClient::ReplyOfStatusCommand
+      ControlClient.status(@config.sock_path)
     end
 
     private def self.options(name : Symbol, &block : Proc(OptionParser, CLI, Nil)) : Nil

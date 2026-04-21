@@ -14,11 +14,10 @@ module Procodile
 
       private def check_concurrency : Nil
         if supervisor_running?
-          reply = ControlClient.run(
+          reply = ControlClient.check_concurrency(
             @config.sock_path,
-            "check_concurrency",
-            reload: @options.reload?
-          ).as NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
+            @options.reload?
+          )
 
           if reply["started"].empty? && reply["stopped"].empty?
             puts "Processes are running as configured"

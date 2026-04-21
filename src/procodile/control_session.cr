@@ -105,32 +105,30 @@ module Procodile
       "200 #{result.to_json}"
     end
 
-    {% begin %}
-      def receive_data(data : String) : String
-        command, session_data = data.split(/\s+/, 2)
-        options = ControlSession::Options.from_json(session_data)
+    def receive_data(data : String) : String
+      command, session_data = data.split(/\s+/, 2)
+      options = ControlSession::Options.from_json(session_data)
 
-        callable = {} of String => Proc(ControlSession::Options, String)
-
-        {% for e in @type.methods %}
-          # It's interest, @type.methods not include current defined #receive_data method.
-          {% if e.name.stringify != "initialize" %}
-            callable[{{ e.name.stringify }}] = ->{{ e.name }}(ControlSession::Options)
-          {% end %}
-        {% end %}
-
-        if callable[command]?
-          begin
-            callable[command].call(options)
-          rescue e : Error
-            Procodile.log "control", "Error: #{e.message}".colorize.red.to_s
-            "500 #{e.message}"
-          end
-        else
-          "404 Invalid command"
-        end
+      case command
+      when "start_processes"
+        start_processes(options)
+      when "stop"
+        stop(options)
+      when "restart"
+        restart(options)
+      when "reload_config"
+        reload_config(options)
+      when "check_concurrency"
+        check_concurrency(options)
+      when "status"
+        status(options)
+      else
+        "404 Invalid command"
       end
-    {% end %}
+    rescue e : Error
+      Procodile.log "control", "Error: #{e.message}".colorize.red.to_s
+      "500 #{e.message}"
+    end
   end
 
   struct ControlSession::Options
@@ -141,5 +139,14 @@ module Procodile
     getter port_allocations : Hash(String, Int32)?
     getter reload : Bool?
     getter stop_supervisor : Bool?
+
+    def initialize(
+      @process_names : Array(String)? = nil,
+      @tag : String? = nil,
+      @port_allocations : Hash(String, Int32)? = nil,
+      @reload : Bool? = nil,
+      @stop_supervisor : Bool? = nil,
+    )
+    end
   end
 end

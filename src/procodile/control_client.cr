@@ -1,63 +1,102 @@
 module Procodile
   class ControlClient
-    alias SocketResponse = Array(Instance::Config) |
-                           Array(Tuple(Instance::Config?, Instance::Config?)) |
-                           NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config)) |
-                           ControlClient::ReplyOfStatusCommand |
-                           Bool
+    def self.start_processes(
+      sock_path : String,
+      process_names : Array(String)? = nil,
+      tag : String? = nil,
+      port_allocations : Hash(String, Int32)? = nil,
+    ) : Array(Instance::Config)
+      options = ControlSession::Options.new(
+        process_names: process_names,
+        tag: tag,
+        port_allocations: port_allocations
+      )
 
-    def self.run(sock_path : String, command : String, **options) : SocketResponse
-      socket = self.new(sock_path)
-      socket.run(command, **options)
-    ensure
-      socket.try &.disconnect
+      send_request(sock_path, "start_processes", options) do |reply|
+        Array(Instance::Config).from_json(reply)
+      end
     end
 
-    def initialize(sock_path : String)
-      @socket = UNIXSocket.new(sock_path)
+    def self.stop(
+      sock_path : String,
+      process_names : Array(String)? = nil,
+      stop_supervisor : Bool? = nil,
+    ) : Array(Instance::Config)
+      options = ControlSession::Options.new(
+        process_names: process_names,
+        stop_supervisor: stop_supervisor
+      )
+
+      send_request(sock_path, "stop", options) do |reply|
+        Array(Instance::Config).from_json(reply)
+      end
     end
 
-    def run(command : String, **options) : SocketResponse
-      @socket.puts("#{command} #{options.to_json}")
+    def self.restart(
+      sock_path : String,
+      process_names : Array(String)? = nil,
+      tag : String? = nil,
+    ) : Array(Tuple(Instance::Config?, Instance::Config?))
+      options = ControlSession::Options.new(
+        process_names: process_names,
+        tag: tag
+      )
 
-      if (data = @socket.gets)
+      send_request(sock_path, "restart", options) do |reply|
+        Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
+      end
+    end
+
+    def self.reload_config(sock_path : String) : Bool
+      send_request(sock_path, "reload_config", ControlSession::Options.new) { true }
+    end
+
+    def self.check_concurrency(sock_path : String, reload : Bool? = nil) : NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
+      options = ControlSession::Options.new(reload: reload)
+
+      send_request(sock_path, "check_concurrency", options) do |reply|
+        NamedTuple(
+          started: Array(Instance::Config),
+          stopped: Array(Instance::Config)).from_json(reply)
+      end
+    end
+
+    def self.status(sock_path : String) : ControlClient::ReplyOfStatusCommand
+      send_request(sock_path, "status", ControlSession::Options.new) do |reply|
+        ControlClient::ReplyOfStatusCommand.from_json(reply)
+      end
+    end
+
+    private def self.send_request(
+      sock_path : String,
+      command : String,
+      options : ControlSession::Options,
+      &decoder : String -> T
+    ) : T forall T
+      socket = UNIXSocket.new(sock_path)
+      socket.puts("#{command} #{options.to_json}")
+
+      if (data = socket.gets)
         code, reply = data.strip.split(/\s+/, 2)
 
-        if code.to_i == 200 && reply && !reply.empty?
-          case command
-          when "start_processes", "stop"
-            Array(Instance::Config).from_json(reply)
-          when "restart"
-            Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
-          when "check_concurrency"
-            NamedTuple(
-              started: Array(Instance::Config),
-              stopped: Array(Instance::Config)).from_json(reply)
-          when "status"
-            ControlClient::ReplyOfStatusCommand.from_json(reply)
-          else # e.g. stop, reload command
-            true
+        if code.to_i == 200 && reply
+          decoder.call(reply)
+        elsif code.to_i == 500 && reply
+          message = begin
+            String.from_json(reply)
+          rescue JSON::ParseException
+            reply
           end
+
+          raise Error.new(message)
         else
-          if code.to_i == 500 && reply
-            message = begin
-              String.from_json(reply)
-            rescue JSON::ParseException
-              reply
-            end
-
-            raise Error.new(message)
-          end
-
           raise Error.new "Error from control server: #{code}: (#{reply.inspect})"
         end
       else
         raise Error.new "Control server disconnected. Check procodile.log for details."
       end
-    end
-
-    def disconnect : Nil
-      @socket.try &.close
+    ensure
+      socket.try &.close
     end
   end
 
