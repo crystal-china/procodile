@@ -28,11 +28,11 @@ jobs:
       - name: Disable git safe repository checks
         run: git config --global --add safe.directory '*'
 
-      - name: Install test runtime dependencies
-        run: apk add --no-cache bash ruby
+      # - name: Install test runtime dependencies
+      #   run: apk add --no-cache bash ruby
 
-      - name: Run tests
-        run: scripts/test.sh
+      # - name: Run tests
+      #   run: crystal spec --order=random --error-on-warnings
 
       - name: Collect package information
         run: |

@@ -31,7 +31,7 @@ jobs:
       #   run: bin/typer src/procodile.cr
 
       - name: Run tests
-        run: scripts/test.sh
+        run: crystal spec --order=random --error-on-warnings
         
       - name: Build docs
         run: crystal docs

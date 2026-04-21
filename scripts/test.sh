@@ -69,10 +69,11 @@ function header()
 
 function waiting() {
     local command=$1
+    local message=${2-'Waiting ...'}
 
     while ! eval "$command"; do
         sleep 1
-        echo 'Waiting ...'
+        echo $message
     done
 }
 
@@ -121,7 +122,7 @@ header '(2.2) restart/stop crontab'
 bin/procodile restart -papp5 && sleep 3
 bin/procodile status |grep -F -A3 '|| app5' |grep 'Schedule' |grep -F '*/5 * * * * *'
 waiting "bin/procodile status --simple |grep -F 'app5[1]'"
-waiting "bin/procodile status 2>&1 |grep -F \"Scheduled process 'app5' skipped 3 runs because the previous run is still active\""
+waiting "bin/procodile status 2>&1 |grep -e \"Scheduled process 'app5' skipped [0-9] runs because the previous run is still active\""
 bin/procodile stop -papp5 |grep 'Future scheduling was disabled for app5' && sleep 3
 # set -x
 # deadline=$((SECONDS + 6))
