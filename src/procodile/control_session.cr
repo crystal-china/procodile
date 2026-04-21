@@ -74,7 +74,7 @@ module Procodile
         seen_names << process.name
       end
 
-      # 使用目前实际存在的替换空列表（可能配置文件已经移除，但是仍在运行）
+      # 合并正在运行但是配置中已经删除的实例
       @supervisor.processes.each do |process, process_instances|
         instances[process.name] = process_instances.map(&.to_struct)
         processes << process unless seen_names.includes?(process.name)

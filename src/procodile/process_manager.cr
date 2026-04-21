@@ -96,7 +96,6 @@ module Procodile
       instances_restarted.concat checked
 
       # 确保所有的 @reader 设定完毕，再启动 log listener
-      # 这个代码仍旧有机会造成 UNIXSever 立即退出，但是没有任何 backtrace, 原因未知
       wg.wait
 
       instances_restarted
@@ -176,7 +175,7 @@ module Procodile
       names.each_with_object([] of Instance) do |name, array|
         process_name, instance_id = ProcessSelector.parse(name)
 
-        # 如果进程不在 Procfile 中，用原始 name 在 @processes 中查找（已被移除的进程）
+        # 如果进程不在 Procfile 中，用原始 name 在 @supervisor.processes 中查找（已被移除的进程）
         target_name = process_name || name
 
         @supervisor.processes.each do |process, instances|

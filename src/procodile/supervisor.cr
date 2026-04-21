@@ -256,9 +256,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def log_listener_reader : Nil
       # After run restart command, @readers need to be update.
-      # Ruby version @readers is wrapped by a loop, so can workaround this.
       # Crystal version need rerun this method again after restart.
-
       # Restart may add readers, so this method can be called multiple times.
       # Ensure one worker per reader to avoid duplicate consumers/fiber leaks.
       @readers.keys.each do |reader|

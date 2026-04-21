@@ -8,8 +8,7 @@ module Procodile
   class SignalHandler
     Wakeup = 0_u8
 
-    # 信号处理回调最稳的实践是：只做极简、可重入、无复杂状态访问的动作，
-    # 因此，这里引入 signal code
+    # 信号处理回调最稳的实践是：只做极简、可重入、无复杂状态访问的动作, 因此，这里引入 signal code
     enum SignalCode : UInt8
       Term = 1_u8
       Usr1 = 2_u8

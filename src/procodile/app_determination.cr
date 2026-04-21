@@ -9,7 +9,7 @@ module Procodile
     getter root : String?
     getter procfile : String?
 
-    # Start by creating an determination ased on the root and procfile that has been provided
+    # Start by creating a determination based on the root and procfile that were provided
     # to us by the user (from --root and/or --procfile)
     def initialize(
       @pwd : String,

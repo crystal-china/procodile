@@ -41,9 +41,4 @@ describe Procodile::Process do
     process.network_protocol.should be_a String
     process.network_protocol.should eq "tcp"
   end
-
-  # it "should create a new instance" do
-  #   supervisor = Procodile::Supervisor.new(config)
-  #   process.create_instance
-  # end
 end

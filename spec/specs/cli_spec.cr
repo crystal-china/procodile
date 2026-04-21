@@ -60,7 +60,6 @@ describe Procodile::CLI do
       command.description.should eq "Stops processes and/or the supervisor"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "should run status command" do
@@ -70,7 +69,6 @@ describe Procodile::CLI do
       command.description.should eq "Show the current status of processes"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "should run exec command" do
@@ -80,7 +78,6 @@ describe Procodile::CLI do
       command.description.should eq "Execute a command within the environment"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "should run reload command" do
@@ -90,7 +87,6 @@ describe Procodile::CLI do
       command.description.should eq "Reload Procodile configuration"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "should run check_concurrency command" do
@@ -100,7 +96,6 @@ describe Procodile::CLI do
       command.description.should eq "Check process concurrency"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "should run log command" do
@@ -110,7 +105,6 @@ describe Procodile::CLI do
       command.description.should eq "Open/stream a Procodile log file"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "should run restart command" do
@@ -120,7 +114,6 @@ describe Procodile::CLI do
       command.description.should eq "Restart processes"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
-      # command.callable.call
     end
 
     it "parses tag for start" do

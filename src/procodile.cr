@@ -43,7 +43,6 @@ module Procodile
 
   command = probe_argv[0]?
   valid_command = cli.class.commands[command]?
-  # actual_run_command = cli.class.commands[command]? ? command : "help"
   remaining_args = [] of String
 
   OptionParser.parse do |opt|

@@ -74,10 +74,6 @@ describe Procodile::Config do
   context "an application with options" do
     config = Procodile::Config.new(root: File.join(APPS_ROOT, "full"))
 
-    # it "should have options", focus: true do
-    #   # config.options.size.should_not eq 0
-    # end
-
     it "should return the app name" do
       config.app_name.should eq "specapp"
     end
