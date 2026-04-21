@@ -97,6 +97,7 @@ RUBY
       end
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
 
       supervisor.processes.each_value do |instances|
@@ -129,6 +130,15 @@ RUBY
       %Q("job__AT__*/5 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
     )
 
+    File.write(
+      File.join(app_root, "Procfile.options"),
+      <<-YAML
+processes:
+  job:
+    random_delay: 2
+YAML
+    )
+
     config = Procodile::Config.new(root: app_root)
     supervisor = Procodile::Supervisor.new(config)
     process = config.processes["job"]
@@ -144,6 +154,7 @@ RUBY
 
       output.should contain("|| job")
       output.should contain("Schedule            */5 * * * * *")
+      output.should contain("Random Delay        up to 2 seconds")
       output.should contain("No scheduled runs in progress.")
       output.should_not contain("Quantity            ")
       output.should_not contain("Respawning          ")
@@ -151,6 +162,7 @@ RUBY
       output.should_not contain("Address/Port        ")
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(app_root)
@@ -222,6 +234,7 @@ RUBY
       end.should be_true
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
 
       supervisor.processes.each_value do |instances|
@@ -388,6 +401,7 @@ RUBY
       running_after.first.description.should eq(running_instance.description)
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
 
       supervisor.processes.each_value do |instances|
@@ -448,6 +462,7 @@ RUBY
       end.should be_true
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
       FileUtils.rm_rf(app_root)
     end
@@ -503,6 +518,7 @@ RUBY
       end.should be_true
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
 
       supervisor.processes.each_value do |instances|
@@ -562,6 +578,7 @@ RUBY
       current_running_instance.description.should eq(first_description)
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      File.write(File.join(app_root, "Procfile.options"), "")
       supervisor.reload_config
 
       supervisor.processes.each_value do |instances|

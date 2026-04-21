@@ -176,6 +176,7 @@ module Procodile
       ControlClient::ProcessStatus.new(
         name: self.name,
         schedule: self.schedule,
+        random_delay: self.random_delay,
         last_started_at: @last_started_at ? @last_started_at.not_nil!.to_unix : nil,
         last_finished_at: @last_finished_at ? @last_finished_at.not_nil!.to_unix : nil,
         last_exit_status: @last_exit_status,

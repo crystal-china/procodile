@@ -107,6 +107,7 @@ module Procodile
 
     getter name : String
     getter schedule : String?
+    getter random_delay : Int32
     getter last_started_at : Int64?
     getter last_finished_at : Int64?
     getter last_exit_status : Int32?
@@ -125,6 +126,7 @@ module Procodile
     def initialize(
       @name : String,
       @schedule : String?,
+      @random_delay : Int32,
       @last_started_at : Int64?,
       @last_finished_at : Int64?,
       @last_exit_status : Int32?,

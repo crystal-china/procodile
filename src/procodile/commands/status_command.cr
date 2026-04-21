@@ -111,6 +111,7 @@ module Procodile
           if scheduled
             schedule = process.schedule.not_nil!
             puts "#{"||".colorize(process.log_color)} Schedule            #{schedule}"
+            puts "#{"||".colorize(process.log_color)} Random Delay        up to #{process.random_delay} seconds" if process.random_delay > 0
             puts "#{"||".colorize(process.log_color)} Last Started At     #{formatted_timestamp(process.last_started_at)}" if process.last_started_at
             puts "#{"||".colorize(process.log_color)} Last Finished At    #{formatted_timestamp(process.last_finished_at)}" if process.last_finished_at
             puts "#{"||".colorize(process.log_color)} Last Exit Status    #{process.last_exit_status}" unless process.last_exit_status.nil?
