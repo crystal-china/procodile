@@ -474,7 +474,7 @@ SH
       File.join(app_root, "ok.sh"),
       <<-'SH'
 #!/usr/bin/env bash
-sleep 10
+sleep 60
 SH
     )
     File.chmod(File.join(app_root, "fail.sh"), 0o755)
