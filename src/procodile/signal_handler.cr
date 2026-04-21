@@ -6,8 +6,6 @@
 
 module Procodile
   class SignalHandler
-    Wakeup = 0_u8
-
     # 信号处理回调最稳的实践是：只做极简、可重入、无复杂状态访问的动作, 因此，这里引入 signal code
     enum SignalCode : UInt8
       Term = 1_u8
@@ -53,14 +51,6 @@ module Procodile
       @handlers[signal] << block
     end
 
-    # 普通唤醒（非信号）
-    def wakeup : Nil
-      # 向 @pipe[:writer] 写一个字节，唤醒 watch_for_output 那边被 pipe[:reader].read_byte block 的主循环
-      @pipe[:writer].write_byte(Wakeup)
-    rescue IO::Error
-      # Ignore wake-up failures during shutdown.
-    end
-
     # trap 路径中不要分配复杂对象，只写一个字节到 pipe
     private def wakeup(code : SignalCode) : Nil
       @pipe[:writer].write_byte(code.value)
@@ -70,8 +60,6 @@ module Procodile
 
     # 运行拦截的信号对应的处理函数
     def handle(byte : UInt8) : Nil
-      return if byte == Wakeup
-
       signal = SignalCode.from_value(byte).signal
 
       Procodile.log "system", "Supervisor received #{signal} signal"

@@ -28,9 +28,6 @@ module Procodile
       @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new,
     )
       @signal_handler = SignalHandler.new
-      @signal_handler_chan = Channel(Nil).new
-      @log_listener_chan = Channel(Nil).new
-
       @issue_tracker = IssueTracker.new
       @process_manager = ProcessManager.new(self, issue_tracker)
       @schedule_manager = ScheduleManager.new(self, issue_tracker)
@@ -228,18 +225,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def watch_for_output : Nil
       spawn watch_for_signal_events
-
       log_listener_reader
-
-      spawn do
-        loop do
-          select
-          when @signal_handler_chan.receive
-          when @log_listener_chan.receive
-          when timeout 30.seconds
-          end
-        end
-      end
     end
 
     private def watch_for_signal_events : Nil
@@ -249,8 +235,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         break if byte.nil?
 
         @signal_handler.handle(byte)
-
-        @signal_handler_chan.send nil
       end
     end
 
@@ -289,8 +273,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         else
           Procodile.log "unknown", line
         end
-
-        @log_listener_chan.send nil
       end
     rescue ex : IO::Error
       Procodile.log "system", "Log reader closed: #{ex.message}"
@@ -308,8 +290,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
       @readers[io] = instance
-
-      @signal_handler.wakeup
 
       log_listener_reader
     end
