@@ -9,7 +9,7 @@ end
 private class DeterministicJitterSupervisor < Procodile::Supervisor
   def initialize(config : Procodile::Config)
     super(config)
-    @schedule_manager = DeterministicScheduleManager.new(self)
+    @schedule_manager = DeterministicScheduleManager.new(self, issue_tracker)
   end
 end
 
@@ -485,7 +485,7 @@ RUBY
       supervisor.start_processes(nil).should be_empty
 
       wait_until(8.seconds, 100.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.scheduled_run_skipped_repeatedly?)
+        supervisor.runtime_issues_for_spec.any?(&.type.scheduled_run_skipped_repeatedly?)
       end.should be_true
 
       File.write(
@@ -499,7 +499,7 @@ RUBY
 
       wait_until(8.seconds, 100.milliseconds) do
         process.last_finished_at != nil &&
-          supervisor.runtime_issues.none?(&.type.scheduled_run_skipped_repeatedly?)
+          supervisor.runtime_issues_for_spec.none?(&.type.scheduled_run_skipped_repeatedly?)
       end.should be_true
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
