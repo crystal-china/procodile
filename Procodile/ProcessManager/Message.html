@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::Instance::Config - procodile 2.0.0-rc4</title>
+  <title>Procodile::ProcessManager::Message - procodile 2.0.0-rc4</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../../";
   </script>
@@ -217,12 +217,12 @@
       
     </li>
   
-  <li class="parent open current" data-id="procodile/Procodile/Instance" data-name="procodile::instance">
+  <li class="parent " data-id="procodile/Procodile/Instance" data-name="procodile::instance">
       <a href="../../Procodile/Instance.html">Instance</a>
       
         <ul>
   
-  <li class=" current" data-id="procodile/Procodile/Instance/Config" data-name="procodile::instance::config">
+  <li class=" " data-id="procodile/Procodile/Instance/Config" data-name="procodile::instance::config">
       <a href="../../Procodile/Instance/Config.html">Config</a>
       
     </li>
@@ -272,12 +272,12 @@
       
     </li>
   
-  <li class="parent " data-id="procodile/Procodile/ProcessManager" data-name="procodile::processmanager">
+  <li class="parent open current" data-id="procodile/Procodile/ProcessManager" data-name="procodile::processmanager">
       <a href="../../Procodile/ProcessManager.html">ProcessManager</a>
       
         <ul>
   
-  <li class="parent " data-id="procodile/Procodile/ProcessManager/Message" data-name="procodile::processmanager::message">
+  <li class="parent open current" data-id="procodile/Procodile/ProcessManager/Message" data-name="procodile::processmanager::message">
       <a href="../../Procodile/ProcessManager/Message.html">Message</a>
       
         <ul>
@@ -363,12 +363,12 @@
 
   <span class="kind">
     struct
-  </span> Procodile::<wbr>Instance::<wbr>Config
+  </span> Procodile::<wbr>ProcessManager::<wbr>Message
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../Procodile/Instance/Config.html">Procodile::Instance::Config</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass">Object</li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../Procodile/ProcessManager/Message.html">Procodile::ProcessManager::Message</a></li><li class="superclass">Struct</li><li class="superclass">Value</li><li class="superclass">Object</li></ul>
 
 
 
@@ -412,8 +412,8 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L612" target="_blank">
-        procodile/instance.cr
+      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L245" target="_blank">
+        procodile/process_manager.cr
       </a>
     
     <br/>
@@ -435,12 +435,12 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#new%28description%3AString%2Cpid%3AInt64%7CNil%2Crespawns%3AInt32%2Cstatus%3AInstance%3A%3AStatus%2Cstarted_at%3AInt64%7CNil%2Clast_finished_at%3AInt64%7CNil%2Clast_exit_status%3AInt32%7CNil%2Clast_run_duration%3AFloat64%7CNil%2Ctag%3AString%7CNil%2Cport%3AInt32%7CNil%2Cforeground%3ABool%3Dfalse%29-class-method" class="signature"><strong>.new</strong>(description : String, pid : Int64 | Nil, respawns : Int32, status : Instance::Status, started_at : Int64 | Nil, last_finished_at : Int64 | Nil, last_exit_status : Int32 | Nil, last_run_duration : Float64 | Nil, tag : String | Nil, port : Int32 | Nil, foreground : Bool = <span class="n">false</span>)</a>
+        <a href="#new%28pull%3AJSON%3A%3APullParser%29-class-method" class="signature"><strong>.new</strong>(pull : JSON::PullParser)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#new%28pull%3AJSON%3A%3APullParser%29-class-method" class="signature"><strong>.new</strong>(pull : JSON::PullParser)</a>
+        <a href="#new%28type%3AType%2Cprocess%3AString%7CNil%3Dnil%2Ccurrent%3AInt32%7CNil%3Dnil%2Cdesired%3AInt32%7CNil%3Dnil%2Cinstance%3AString%7CNil%3Dnil%2Cstatus%3AInstance%3A%3AStatus%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(type : Type, process : String | Nil = <span class="n">nil</span>, current : Int32 | Nil = <span class="n">nil</span>, desired : Int32 | Nil = <span class="n">nil</span>, instance : String | Nil = <span class="n">nil</span>, status : Instance::Status | Nil = <span class="n">nil</span>)</a>
         
       </li>
     
@@ -468,57 +468,39 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#description%3AString-instance-method" class="signature"><strong>#description</strong> : String</a>
+        <a href="#current%3AInt32%7CNil-instance-method" class="signature"><strong>#current</strong> : Int32 | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#foreground%3F%3ABool-instance-method" class="signature"><strong>#foreground?</strong> : Bool</a>
+        <a href="#desired%3AInt32%7CNil-instance-method" class="signature"><strong>#desired</strong> : Int32 | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#last_exit_status%3AInt32%7CNil-instance-method" class="signature"><strong>#last_exit_status</strong> : Int32 | Nil</a>
+        <a href="#instance%3AString%7CNil-instance-method" class="signature"><strong>#instance</strong> : String | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#last_finished_at%3AInt64%7CNil-instance-method" class="signature"><strong>#last_finished_at</strong> : Int64 | Nil</a>
+        <a href="#process%3AString%7CNil-instance-method" class="signature"><strong>#process</strong> : String | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#last_run_duration%3AFloat64%7CNil-instance-method" class="signature"><strong>#last_run_duration</strong> : Float64 | Nil</a>
+        <a href="#status%3AInstance%3A%3AStatus%7CNil-instance-method" class="signature"><strong>#status</strong> : Instance::Status | Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#pid%3AInt64%7CNil-instance-method" class="signature"><strong>#pid</strong> : Int64 | Nil</a>
+        <a href="#to_s%28io%3AIO%29%3ANil-instance-method" class="signature"><strong>#to_s</strong>(io : IO) : Nil</a>
+        
+          <div class="summary"><p>Same as <code>#inspect(io)</code>.</p></div>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#port%3AInt32%7CNil-instance-method" class="signature"><strong>#port</strong> : Int32 | Nil</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#respawns%3AInt32-instance-method" class="signature"><strong>#respawns</strong> : Int32</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#started_at%3AInt64%7CNil-instance-method" class="signature"><strong>#started_at</strong> : Int64 | Nil</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#status%3AInstance%3A%3AStatus-instance-method" class="signature"><strong>#status</strong> : Instance::Status</a>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#tag%3AString%7CNil-instance-method" class="signature"><strong>#tag</strong> : String | Nil</a>
+        <a href="#type%3AType-instance-method" class="signature"><strong>#type</strong> : Type</a>
         
       </li>
     
@@ -592,22 +574,6 @@
     Constructor Detail
   </h2>
   
-    <div class="entry-detail" id="new(description:String,pid:Int64|Nil,respawns:Int32,status:Instance::Status,started_at:Int64|Nil,last_finished_at:Int64|Nil,last_exit_status:Int32|Nil,last_run_duration:Float64|Nil,tag:String|Nil,port:Int32|Nil,foreground:Bool=false)-class-method">
-      <div class="signature">
-        
-        def self.<strong>new</strong>(description : String, pid : Int64 | Nil, respawns : Int32, status : <a href="../../Procodile/Instance/Status.html">Instance::Status</a>, started_at : Int64 | Nil, last_finished_at : Int64 | Nil, last_exit_status : Int32 | Nil, last_run_duration : Float64 | Nil, tag : String | Nil, port : Int32 | Nil, foreground : Bool = <span class="n">false</span>)
-
-        <a class="method-permalink" href="#new%28description%3AString%2Cpid%3AInt64%7CNil%2Crespawns%3AInt32%2Cstatus%3AInstance%3A%3AStatus%2Cstarted_at%3AInt64%7CNil%2Clast_finished_at%3AInt64%7CNil%2Clast_exit_status%3AInt32%7CNil%2Clast_run_duration%3AFloat64%7CNil%2Ctag%3AString%7CNil%2Cport%3AInt32%7CNil%2Cforeground%3ABool%3Dfalse%29-class-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L627" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
     <div class="entry-detail" id="new(pull:JSON::PullParser)-class-method">
       <div class="signature">
         
@@ -619,7 +585,23 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L613" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L253" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="new(type:Type,process:String|Nil=nil,current:Int32|Nil=nil,desired:Int32|Nil=nil,instance:String|Nil=nil,status:Instance::Status|Nil=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(type : <a href="../../Procodile/ProcessManager/Message/Type.html">Type</a>, process : String | Nil = <span class="n">nil</span>, current : Int32 | Nil = <span class="n">nil</span>, desired : Int32 | Nil = <span class="n">nil</span>, instance : String | Nil = <span class="n">nil</span>, status : <a href="../../Procodile/Instance/Status.html">Instance::Status</a> | Nil = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28type%3AType%2Cprocess%3AString%7CNil%3Dnil%2Ccurrent%3AInt32%7CNil%3Dnil%2Cdesired%3AInt32%7CNil%3Dnil%2Cinstance%3AString%7CNil%3Dnil%2Cstatus%3AInstance%3A%3AStatus%7CNil%3Dnil%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L262" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -635,7 +617,7 @@
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L613" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L253" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -656,178 +638,123 @@
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="description:String-instance-method">
+    <div class="entry-detail" id="current:Int32|Nil-instance-method">
       <div class="signature">
         
-        def <strong>description</strong> : String
+        def <strong>current</strong> : Int32 | Nil
 
-        <a class="method-permalink" href="#description%3AString-instance-method">#</a>
+        <a class="method-permalink" href="#current%3AInt32%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L615" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L257" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="foreground?:Bool-instance-method">
+    <div class="entry-detail" id="desired:Int32|Nil-instance-method">
       <div class="signature">
         
-        def <strong>foreground?</strong> : Bool
+        def <strong>desired</strong> : Int32 | Nil
 
-        <a class="method-permalink" href="#foreground%3F%3ABool-instance-method">#</a>
+        <a class="method-permalink" href="#desired%3AInt32%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L625" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L258" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="last_exit_status:Int32|Nil-instance-method">
+    <div class="entry-detail" id="instance:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>last_exit_status</strong> : Int32 | Nil
+        def <strong>instance</strong> : String | Nil
 
-        <a class="method-permalink" href="#last_exit_status%3AInt32%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#instance%3AString%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L621" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L259" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="last_finished_at:Int64|Nil-instance-method">
+    <div class="entry-detail" id="process:String|Nil-instance-method">
       <div class="signature">
         
-        def <strong>last_finished_at</strong> : Int64 | Nil
+        def <strong>process</strong> : String | Nil
 
-        <a class="method-permalink" href="#last_finished_at%3AInt64%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#process%3AString%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L620" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L256" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="last_run_duration:Float64|Nil-instance-method">
+    <div class="entry-detail" id="status:Instance::Status|Nil-instance-method">
       <div class="signature">
         
-        def <strong>last_run_duration</strong> : Float64 | Nil
+        def <strong>status</strong> : <a href="../../Procodile/Instance/Status.html">Instance::Status</a> | Nil
 
-        <a class="method-permalink" href="#last_run_duration%3AFloat64%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#status%3AInstance%3A%3AStatus%7CNil-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L622" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L260" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="pid:Int64|Nil-instance-method">
+    <div class="entry-detail" id="to_s(io:IO):Nil-instance-method">
       <div class="signature">
         
-        def <strong>pid</strong> : Int64 | Nil
+        def <strong>to_s</strong>(io : IO) : Nil
 
-        <a class="method-permalink" href="#pid%3AInt64%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#to_s%28io%3AIO%29%3ANil-instance-method">#</a>
       </div>
+      
+        <div class="doc">
+          
+            <div class="doc-inherited">
+              Description copied from struct Struct
+            </div>
+          
+          <p>Same as <code>#inspect(io)</code>.</p>
+        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L616" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L272" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="port:Int32|Nil-instance-method">
+    <div class="entry-detail" id="type:Type-instance-method">
       <div class="signature">
         
-        def <strong>port</strong> : Int32 | Nil
+        def <strong>type</strong> : <a href="../../Procodile/ProcessManager/Message/Type.html">Type</a>
 
-        <a class="method-permalink" href="#port%3AInt32%7CNil-instance-method">#</a>
+        <a class="method-permalink" href="#type%3AType-instance-method">#</a>
       </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L624" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="respawns:Int32-instance-method">
-      <div class="signature">
-        
-        def <strong>respawns</strong> : Int32
-
-        <a class="method-permalink" href="#respawns%3AInt32-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L617" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="started_at:Int64|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>started_at</strong> : Int64 | Nil
-
-        <a class="method-permalink" href="#started_at%3AInt64%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L619" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="status:Instance::Status-instance-method">
-      <div class="signature">
-        
-        def <strong>status</strong> : <a href="../../Procodile/Instance/Status.html">Instance::Status</a>
-
-        <a class="method-permalink" href="#status%3AInstance%3A%3AStatus-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L618" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="tag:String|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>tag</strong> : String | Nil
-
-        <a class="method-permalink" href="#tag%3AString%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/instance.cr#L623" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L255" target="_blank">View source</a>]
         
       </div>
     </div>

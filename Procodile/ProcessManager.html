@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::Error - procodile 2.0.0-rc4</title>
+  <title>Procodile::ProcessManager - procodile 2.0.0-rc4</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -212,7 +212,7 @@
       
     </li>
   
-  <li class=" current" data-id="procodile/Procodile/Error" data-name="procodile::error">
+  <li class=" " data-id="procodile/Procodile/Error" data-name="procodile::error">
       <a href="../Procodile/Error.html">Error</a>
       
     </li>
@@ -272,7 +272,7 @@
       
     </li>
   
-  <li class="parent " data-id="procodile/Procodile/ProcessManager" data-name="procodile::processmanager">
+  <li class="parent open current" data-id="procodile/Procodile/ProcessManager" data-name="procodile::processmanager">
       <a href="../Procodile/ProcessManager.html">ProcessManager</a>
       
         <ul>
@@ -363,12 +363,12 @@
 
   <span class="kind">
     class
-  </span> Procodile::<wbr>Error
+  </span> Procodile::<wbr>ProcessManager
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/Error.html">Procodile::Error</a></li><li class="superclass">Exception</li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/ProcessManager.html">Procodile::ProcessManager</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
 
 
 
@@ -398,8 +398,8 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile.cr#L12" target="_blank">
-        procodile.cr
+      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L2" target="_blank">
+        procodile/process_manager.cr
       </a>
     
     <br/>
@@ -410,12 +410,86 @@
 
 
   
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28supervisor%3ASupervisor%2Cissue_tracker%3AIssueTracker%29-class-method" class="signature"><strong>.new</strong>(supervisor : Supervisor, issue_tracker : IssueTracker)</a>
+        
+      </li>
+    
+  </ul>
+
 
   
 
   
 
   
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#config%28%2Aargs%2C%2A%2Aoptions%29-instance-method" class="signature"><strong>#config</strong>(*args, **options)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#config%28%2Aargs%2C%2A%2Aoptions%2C%26%29-instance-method" class="signature"><strong>#config</strong>(*args, **options, &)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#messages%3AArray%28Message%29-instance-method" class="signature"><strong>#messages</strong> : Array(Message)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#reconcile_instance_quantities%28process_names%3AArray%28String%29%7CNil%3Dnil%29%3AHash%28Symbol%2CArray%28Instance%29%29-instance-method" class="signature"><strong>#reconcile_instance_quantities</strong>(process_names : Array(String) | Nil = <span class="n">nil</span>) : Hash(Symbol, Array(Instance))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove_removed_processes%3ANil-instance-method" class="signature"><strong>#remove_removed_processes</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove_stopped_instances%3ANil-instance-method" class="signature"><strong>#remove_stopped_instances</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#restart_processes%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Array%28Instance%7CNil%29%29-instance-method" class="signature"><strong>#restart_processes</strong>(process_names : Array(String) | Nil) : Array(Array(Instance | Nil))</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#start_processes%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Instance%29-instance-method" class="signature"><strong>#start_processes</strong>(process_names : Array(String) | Nil) : Array(Instance)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stop_processes%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Instance%29-instance-method" class="signature"><strong>#stop_processes</strong>(process_names : Array(String) | Nil) : Array(Instance)</a>
+        
+      </li>
+    
+  </ul>
+
 
 
   <div class="methods-inherited">
@@ -446,28 +520,195 @@
 
 
     
-      
-
-
-      
-
-
-      
-
-
-      
-
-
-    
   </div>
 
   
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(supervisor:Supervisor,issue_tracker:IssueTracker)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(supervisor : <a href="../Procodile/Supervisor.html">Supervisor</a>, issue_tracker : <a href="../Procodile/IssueTracker.html">IssueTracker</a>)
+
+        <a class="method-permalink" href="#new%28supervisor%3ASupervisor%2Cissue_tracker%3AIssueTracker%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L5" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
   
 
   
 
   
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="config(*args,**options)-instance-method">
+      <div class="signature">
+        
+        def <strong>config</strong>(*args, **options)
+
+        <a class="method-permalink" href="#config%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L3" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="config(*args,**options,&amp;)-instance-method">
+      <div class="signature">
+        
+        def <strong>config</strong>(*args, **options, &)
+
+        <a class="method-permalink" href="#config%28%2Aargs%2C%2A%2Aoptions%2C%26%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L3" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="messages:Array(Message)-instance-method">
+      <div class="signature">
+        
+        def <strong>messages</strong> : Array(<a href="../Procodile/ProcessManager/Message.html">Message</a>)
+
+        <a class="method-permalink" href="#messages%3AArray%28Message%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L133" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="reconcile_instance_quantities(process_names:Array(String)|Nil=nil):Hash(Symbol,Array(Instance))-instance-method">
+      <div class="signature">
+        
+        def <strong>reconcile_instance_quantities</strong>(process_names : Array(String) | Nil = <span class="n">nil</span>) : Hash(Symbol, Array(<a href="../Procodile/Instance.html">Instance</a>))
+
+        <a class="method-permalink" href="#reconcile_instance_quantities%28process_names%3AArray%28String%29%7CNil%3Dnil%29%3AHash%28Symbol%2CArray%28Instance%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L123" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove_removed_processes:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>remove_removed_processes</strong> : Nil
+
+        <a class="method-permalink" href="#remove_removed_processes%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L48" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove_stopped_instances:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>remove_stopped_instances</strong> : Nil
+
+        <a class="method-permalink" href="#remove_stopped_instances%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L34" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="restart_processes(process_names:Array(String)|Nil):Array(Array(Instance|Nil))-instance-method">
+      <div class="signature">
+        
+        def <strong>restart_processes</strong>(process_names : Array(String) | Nil) : Array(Array(<a href="../Procodile/Instance.html">Instance</a> | Nil))
+
+        <a class="method-permalink" href="#restart_processes%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Array%28Instance%7CNil%29%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L64" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start_processes(process_names:Array(String)|Nil):Array(Instance)-instance-method">
+      <div class="signature">
+        
+        def <strong>start_processes</strong>(process_names : Array(String) | Nil) : Array(<a href="../Procodile/Instance.html">Instance</a>)
+
+        <a class="method-permalink" href="#start_processes%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Instance%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L105" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stop_processes(process_names:Array(String)|Nil):Array(Instance)-instance-method">
+      <div class="signature">
+        
+        def <strong>stop_processes</strong>(process_names : Array(String) | Nil) : Array(<a href="../Procodile/Instance.html">Instance</a>)
+
+        <a class="method-permalink" href="#stop_processes%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Instance%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/process_manager.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
 
 </div>

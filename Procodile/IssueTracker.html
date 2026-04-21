@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::Error - procodile 2.0.0-rc4</title>
+  <title>Procodile::IssueTracker - procodile 2.0.0-rc4</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -212,7 +212,7 @@
       
     </li>
   
-  <li class=" current" data-id="procodile/Procodile/Error" data-name="procodile::error">
+  <li class=" " data-id="procodile/Procodile/Error" data-name="procodile::error">
       <a href="../Procodile/Error.html">Error</a>
       
     </li>
@@ -237,7 +237,7 @@
       
     </li>
   
-  <li class="parent " data-id="procodile/Procodile/IssueTracker" data-name="procodile::issuetracker">
+  <li class="parent open current" data-id="procodile/Procodile/IssueTracker" data-name="procodile::issuetracker">
       <a href="../Procodile/IssueTracker.html">IssueTracker</a>
       
         <ul>
@@ -363,12 +363,12 @@
 
   <span class="kind">
     class
-  </span> Procodile::<wbr>Error
+  </span> Procodile::<wbr>IssueTracker
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/Error.html">Procodile::Error</a></li><li class="superclass">Exception</li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/IssueTracker.html">Procodile::IssueTracker</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
 
 
 
@@ -398,8 +398,8 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile.cr#L12" target="_blank">
-        procodile.cr
+      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/issue_tracker.cr#L2" target="_blank">
+        procodile/issue_tracker.cr
       </a>
     
     <br/>
@@ -416,22 +416,41 @@
   
 
   
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#clear_process%28process_name%3AString%29%3ANil-instance-method" class="signature"><strong>#clear_process</strong>(process_name : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#report%28type%3ARuntimeIssueType%2Cprocess_name%3AString%2Cmessage%3AString%29%3ANil-instance-method" class="signature"><strong>#report</strong>(type : RuntimeIssueType, process_name : String, message : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#resolve%28type%3ARuntimeIssueType%2Cprocess_name%3AString%29%3ANil-instance-method" class="signature"><strong>#resolve</strong>(type : RuntimeIssueType, process_name : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#runtime_issues%3AArray%28RuntimeIssue%29-instance-method" class="signature"><strong>#runtime_issues</strong> : Array(RuntimeIssue)</a>
+        
+      </li>
+    
+  </ul>
+
 
 
   <div class="methods-inherited">
-    
-      
-
-
-      
-
-
-      
-
-
-      
-
-
     
       
 
@@ -468,6 +487,80 @@
   
 
   
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="clear_process(process_name:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>clear_process</strong>(process_name : String) : Nil
+
+        <a class="method-permalink" href="#clear_process%28process_name%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/issue_tracker.cr#L23" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="report(type:RuntimeIssueType,process_name:String,message:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>report</strong>(type : <a href="../Procodile/IssueTracker/RuntimeIssueType.html">RuntimeIssueType</a>, process_name : String, message : String) : Nil
+
+        <a class="method-permalink" href="#report%28type%3ARuntimeIssueType%2Cprocess_name%3AString%2Cmessage%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/issue_tracker.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="resolve(type:RuntimeIssueType,process_name:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>resolve</strong>(type : <a href="../Procodile/IssueTracker/RuntimeIssueType.html">RuntimeIssueType</a>, process_name : String) : Nil
+
+        <a class="method-permalink" href="#resolve%28type%3ARuntimeIssueType%2Cprocess_name%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/issue_tracker.cr#L19" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="runtime_issues:Array(RuntimeIssue)-instance-method">
+      <div class="signature">
+        
+        def <strong>runtime_issues</strong> : Array(<a href="../Procodile/IssueTracker/RuntimeIssue.html">RuntimeIssue</a>)
+
+        <a class="method-permalink" href="#runtime_issues%3AArray%28RuntimeIssue%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/issue_tracker.cr#L5" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
 
 </div>

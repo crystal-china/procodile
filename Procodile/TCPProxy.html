@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::Error - procodile 2.0.0-rc4</title>
+  <title>Procodile::TCPProxy - procodile 2.0.0-rc4</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -212,7 +212,7 @@
       
     </li>
   
-  <li class=" current" data-id="procodile/Procodile/Error" data-name="procodile::error">
+  <li class=" " data-id="procodile/Procodile/Error" data-name="procodile::error">
       <a href="../Procodile/Error.html">Error</a>
       
     </li>
@@ -342,7 +342,7 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/TCPProxy" data-name="procodile::tcpproxy">
+  <li class=" current" data-id="procodile/Procodile/TCPProxy" data-name="procodile::tcpproxy">
       <a href="../Procodile/TCPProxy.html">TCPProxy</a>
       
     </li>
@@ -363,12 +363,12 @@
 
   <span class="kind">
     class
-  </span> Procodile::<wbr>Error
+  </span> Procodile::<wbr>TCPProxy
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/Error.html">Procodile::Error</a></li><li class="superclass">Exception</li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/TCPProxy.html">Procodile::TCPProxy</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
 
 
 
@@ -398,8 +398,8 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile.cr#L12" target="_blank">
-        procodile.cr
+      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L2" target="_blank">
+        procodile/tcp_proxy.cr
       </a>
     
     <br/>
@@ -410,12 +410,71 @@
 
 
   
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28supervisor%3ASupervisor%29-class-method" class="signature"><strong>.new</strong>(supervisor : Supervisor)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#start%28supervisor%3ASupervisor%29%3ATCPProxy-class-method" class="signature"><strong>.start</strong>(supervisor : Supervisor) : TCPProxy</a>
+        
+      </li>
+    
+  </ul>
+
 
   
 
   
 
   
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#add_process%28process%3AProcodile%3A%3AProcess%29%3ANil-instance-method" class="signature"><strong>#add_process</strong>(process : Procodile::Process) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#remove_process%28process%3AProcodile%3A%3AProcess%29%3ANil-instance-method" class="signature"><strong>#remove_process</strong>(process : Procodile::Process) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#start%3Aself-instance-method" class="signature"><strong>#start</strong> : <span class="k">self</span></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#stop%3ANil-instance-method" class="signature"><strong>#stop</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sync_processes%28processes%3AArray%28Procodile%3A%3AProcess%29%29%3ANil-instance-method" class="signature"><strong>#sync_processes</strong>(processes : Array(Procodile::Process)) : Nil</a>
+        
+      </li>
+    
+  </ul>
+
 
 
   <div class="methods-inherited">
@@ -446,28 +505,147 @@
 
 
     
-      
-
-
-      
-
-
-      
-
-
-      
-
-
-    
   </div>
 
   
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(supervisor:Supervisor)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(supervisor : <a href="../Procodile/Supervisor.html">Supervisor</a>)
+
+        <a class="method-permalink" href="#new%28supervisor%3ASupervisor%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start(supervisor:Supervisor):TCPProxy-class-method">
+      <div class="signature">
+        
+        def self.<strong>start</strong>(supervisor : <a href="../Procodile/Supervisor.html">Supervisor</a>) : <a href="../Procodile/TCPProxy.html">TCPProxy</a>
+
+        <a class="method-permalink" href="#start%28supervisor%3ASupervisor%29%3ATCPProxy-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L6" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
   
 
   
 
   
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="add_process(process:Procodile::Process):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>add_process</strong>(process : <a href="../Procodile/Process.html">Procodile::Process</a>) : Nil
+
+        <a class="method-permalink" href="#add_process%28process%3AProcodile%3A%3AProcess%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L48" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="remove_process(process:Procodile::Process):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>remove_process</strong>(process : <a href="../Procodile/Process.html">Procodile::Process</a>) : Nil
+
+        <a class="method-permalink" href="#remove_process%28process%3AProcodile%3A%3AProcess%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L38" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="start:self-instance-method">
+      <div class="signature">
+        
+        def <strong>start</strong> : <span class="k">self</span>
+
+        <a class="method-permalink" href="#start%3Aself-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L13" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="stop:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>stop</strong> : Nil
+
+        <a class="method-permalink" href="#stop%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sync_processes(processes:Array(Procodile::Process)):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>sync_processes</strong>(processes : Array(<a href="../Procodile/Process.html">Procodile::Process</a>)) : Nil
+
+        <a class="method-permalink" href="#sync_processes%28processes%3AArray%28Procodile%3A%3AProcess%29%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/tcp_proxy.cr#L30" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
 
 
 </div>

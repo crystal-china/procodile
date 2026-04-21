@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="procodile">
-  <title>Procodile::AppDetermination - procodile 2.0.0-rc4</title>
+  <title>Procodile::ScheduleManager - procodile 2.0.0-rc4</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -62,7 +62,7 @@
       
         <ul>
   
-  <li class=" current" data-id="procodile/Procodile/AppDetermination" data-name="procodile::appdetermination">
+  <li class=" " data-id="procodile/Procodile/AppDetermination" data-name="procodile::appdetermination">
       <a href="../Procodile/AppDetermination.html">AppDetermination</a>
       
     </li>
@@ -302,7 +302,7 @@
       
     </li>
   
-  <li class=" " data-id="procodile/Procodile/ScheduleManager" data-name="procodile::schedulemanager">
+  <li class=" current" data-id="procodile/Procodile/ScheduleManager" data-name="procodile::schedulemanager">
       <a href="../Procodile/ScheduleManager.html">ScheduleManager</a>
       
     </li>
@@ -363,26 +363,15 @@
 
   <span class="kind">
     class
-  </span> Procodile::<wbr>AppDetermination
+  </span> Procodile::<wbr>ScheduleManager
 
 </h1>
 
 
-  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/AppDetermination.html">Procodile::AppDetermination</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Procodile/ScheduleManager.html">Procodile::ScheduleManager</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
 
 
 
-
-  <h2>
-    <a id="overview" class="anchor" href="#overview">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-    Overview
-  </h2>
-
-  <p>This class is responsible for determining which application should be used</p>
 
 
 
@@ -409,14 +398,33 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L5" target="_blank">
-        procodile/app_determination.cr
+      <a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L2" target="_blank">
+        procodile/schedule_manager.cr
       </a>
     
     <br/>
   
 
 
+
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="SCHEDULED_SKIP_ISSUE_THRESHOLD">
+        <strong>SCHEDULED_SKIP_ISSUE_THRESHOLD</strong> = <code><span class="n">3</span></code>
+      </dt>
+      
+    
+  </dl>
 
 
 
@@ -432,9 +440,7 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#new%28pwd%3AString%2Cgiven_root%3AString%7CNil%2Cgiven_procfile%3AString%7CNil%2Cglobal_options%3AArray%28Config%3A%3AGlobalOption%29%3D%5B%5DofConfig%3A%3AGlobalOption%29-class-method" class="signature"><strong>.new</strong>(pwd : String, given_root : String | Nil, given_procfile : String | Nil, global_options : Array(Config::GlobalOption) = <span class="o">[]</span> <span class="k">of</span> <span class="t">Config</span><span class="t">::</span><span class="t">GlobalOption</span>)</a>
-        
-          <div class="summary"><p>Start by creating an determination ased on the root and procfile that has been provided to us by the user (from --root and/or --procfile)</p></div>
+        <a href="#new%28supervisor%3ASupervisor%2Cissue_tracker%3AIssueTracker%29-class-method" class="signature"><strong>.new</strong>(supervisor : Supervisor, issue_tracker : IssueTracker)</a>
         
       </li>
     
@@ -457,33 +463,82 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#ambiguous%3F%3ABool-instance-method" class="signature"><strong>#ambiguous?</strong> : Bool</a>
-        
-          <div class="summary"><p>No root</p></div>
+        <a href="#config%28%2Aargs%2C%2A%2Aoptions%29-instance-method" class="signature"><strong>#config</strong>(*args, **options)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#app_options%3AHash%28Int32%2CString%29-instance-method" class="signature"><strong>#app_options</strong> : Hash(Int32, String)</a>
-        
-          <div class="summary"><p>Return an hash of possible options to settle the ambiguity</p></div>
+        <a href="#config%28%2Aargs%2C%2A%2Aoptions%2C%26%29-instance-method" class="signature"><strong>#config</strong>(*args, **options, &)</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#procfile%3AString%7CNil-instance-method" class="signature"><strong>#procfile</strong> : String | Nil</a>
+        <a href="#disable_scheduled_processes%28processes%3AArray%28Procodile%3A%3AProcess%29%29%3ANil-instance-method" class="signature"><strong>#disable_scheduled_processes</strong>(processes : Array(Procodile::Process)) : Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#root%3AString%7CNil-instance-method" class="signature"><strong>#root</strong> : String | Nil</a>
+        <a href="#disable_schedules%28process_names%3AArray%28String%29%7CNil%29%3ANil-instance-method" class="signature"><strong>#disable_schedules</strong>(process_names : Array(String) | Nil) : Nil</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#set_app_id_and_find_root_and_procfile%28id%3AInt32%29%3ANil-instance-method" class="signature"><strong>#set_app_id_and_find_root_and_procfile</strong>(id : Int32) : Nil</a>
+        <a href="#disabled_scheduled_jobs%3ASet%28String%29-instance-method" class="signature"><strong>#disabled_scheduled_jobs</strong> : Set(String)</a>
         
-          <div class="summary"><p>Choose which of the ambiguous options we want to choose</p></div>
+          <div class="summary"><p>加入这个 Set 的 process 不再调度</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_scheduled_processes%28processes%3AArray%28Procodile%3A%3AProcess%29%29%3ANil-instance-method" class="signature"><strong>#enable_scheduled_processes</strong>(processes : Array(Procodile::Process)) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#enable_schedules%28process_names%3AArray%28String%29%7CNil%29%3ANil-instance-method" class="signature"><strong>#enable_schedules</strong>(process_names : Array(String) | Nil) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#finish_scheduled_instance%28instance%3AInstance%29%3ANil-instance-method" class="signature"><strong>#finish_scheduled_instance</strong>(instance : Instance) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#reload_schedules%3ANil-instance-method" class="signature"><strong>#reload_schedules</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#scheduled_job_signals%3AHash%28String%2CChannel%28Nil%29%29-instance-method" class="signature"><strong>#scheduled_job_signals</strong> : Hash(String, Channel(Nil))</a>
+        
+          <div class="summary"><p>用于唤醒旧 watcher 立即退出，避免软退出</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#scheduled_jobs%3AHash%28String%2CString%29-instance-method" class="signature"><strong>#scheduled_jobs</strong> : Hash(String, String)</a>
+        
+          <div class="summary"><p>要执行的任务，key 是 name, value 是 crontab</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#scheduled_processes_for%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Procodile%3A%3AProcess%29-instance-method" class="signature"><strong>#scheduled_processes_for</strong>(process_names : Array(String) | Nil) : Array(Procodile::Process)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#scheduled_running%3ASet%28String%29-instance-method" class="signature"><strong>#scheduled_running</strong> : Set(String)</a>
+        
+          <div class="summary"><p>检测是不是当前正在运行</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#scheduled_skip_counts%3AHash%28String%2CInt32%29-instance-method" class="signature"><strong>#scheduled_skip_counts</strong> : Hash(String, Int32)</a>
+        
+          <div class="summary"><p>因为 scheduled task 未执行完成，因此连续跳过的次数</p></div>
         
       </li>
     
@@ -531,24 +586,18 @@
     Constructor Detail
   </h2>
   
-    <div class="entry-detail" id="new(pwd:String,given_root:String|Nil,given_procfile:String|Nil,global_options:Array(Config::GlobalOption)=[]ofConfig::GlobalOption)-class-method">
+    <div class="entry-detail" id="new(supervisor:Supervisor,issue_tracker:IssueTracker)-class-method">
       <div class="signature">
         
-        def self.<strong>new</strong>(pwd : String, given_root : String | Nil, given_procfile : String | Nil, global_options : Array(<a href="../Procodile/Config/GlobalOption.html">Config::GlobalOption</a>) = <span class="o">[]</span> <span class="k">of</span> <span class="t">Config</span><span class="t">::</span><span class="t">GlobalOption</span>)
+        def self.<strong>new</strong>(supervisor : <a href="../Procodile/Supervisor.html">Supervisor</a>, issue_tracker : <a href="../Procodile/IssueTracker.html">IssueTracker</a>)
 
-        <a class="method-permalink" href="#new%28pwd%3AString%2Cgiven_root%3AString%7CNil%2Cgiven_procfile%3AString%7CNil%2Cglobal_options%3AArray%28Config%3A%3AGlobalOption%29%3D%5B%5DofConfig%3A%3AGlobalOption%29-class-method">#</a>
+        <a class="method-permalink" href="#new%28supervisor%3ASupervisor%2Cissue_tracker%3AIssueTracker%29-class-method">#</a>
       </div>
-      
-        <div class="doc">
-          
-          <p>Start by creating an determination ased on the root and procfile that has been provided
-to us by the user (from --root and/or --procfile)</p>
-        </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L14" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L18" target="_blank">View source</a>]
         
       </div>
     </div>
@@ -569,97 +618,251 @@ to us by the user (from --root and/or --procfile)</p>
     Instance Method Detail
   </h2>
   
-    <div class="entry-detail" id="ambiguous?:Bool-instance-method">
+    <div class="entry-detail" id="config(*args,**options)-instance-method">
       <div class="signature">
         
-        def <strong>ambiguous?</strong> : Bool
+        def <strong>config</strong>(*args, **options)
 
-        <a class="method-permalink" href="#ambiguous%3F%3ABool-instance-method">#</a>
+        <a class="method-permalink" href="#config%28%2Aargs%2C%2A%2Aoptions%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="config(*args,**options,&amp;)-instance-method">
+      <div class="signature">
+        
+        def <strong>config</strong>(*args, **options, &)
+
+        <a class="method-permalink" href="#config%28%2Aargs%2C%2A%2Aoptions%2C%26%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L16" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="disable_scheduled_processes(processes:Array(Procodile::Process)):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>disable_scheduled_processes</strong>(processes : Array(<a href="../Procodile/Process.html">Procodile::Process</a>)) : Nil
+
+        <a class="method-permalink" href="#disable_scheduled_processes%28processes%3AArray%28Procodile%3A%3AProcess%29%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L76" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="disable_schedules(process_names:Array(String)|Nil):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>disable_schedules</strong>(process_names : Array(String) | Nil) : Nil
+
+        <a class="method-permalink" href="#disable_schedules%28process_names%3AArray%28String%29%7CNil%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="disabled_scheduled_jobs:Set(String)-instance-method">
+      <div class="signature">
+        
+        def <strong>disabled_scheduled_jobs</strong> : Set(String)
+
+        <a class="method-permalink" href="#disabled_scheduled_jobs%3ASet%28String%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>No root</p>
+          <p>加入这个 Set 的 process 不再调度</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L26" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L12" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="app_options:Hash(Int32,String)-instance-method">
+    <div class="entry-detail" id="enable_scheduled_processes(processes:Array(Procodile::Process)):Nil-instance-method">
       <div class="signature">
         
-        def <strong>app_options</strong> : Hash(Int32, String)
+        def <strong>enable_scheduled_processes</strong>(processes : Array(<a href="../Procodile/Process.html">Procodile::Process</a>)) : Nil
 
-        <a class="method-permalink" href="#app_options%3AHash%28Int32%2CString%29-instance-method">#</a>
+        <a class="method-permalink" href="#enable_scheduled_processes%28processes%3AArray%28Procodile%3A%3AProcess%29%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L70" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="enable_schedules(process_names:Array(String)|Nil):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>enable_schedules</strong>(process_names : Array(String) | Nil) : Nil
+
+        <a class="method-permalink" href="#enable_schedules%28process_names%3AArray%28String%29%7CNil%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L21" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="finish_scheduled_instance(instance:Instance):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>finish_scheduled_instance</strong>(instance : <a href="../Procodile/Instance.html">Instance</a>) : Nil
+
+        <a class="method-permalink" href="#finish_scheduled_instance%28instance%3AInstance%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L82" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="reload_schedules:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>reload_schedules</strong> : Nil
+
+        <a class="method-permalink" href="#reload_schedules%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L31" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="scheduled_job_signals:Hash(String,Channel(Nil))-instance-method">
+      <div class="signature">
+        
+        def <strong>scheduled_job_signals</strong> : Hash(String, Channel(Nil))
+
+        <a class="method-permalink" href="#scheduled_job_signals%3AHash%28String%2CChannel%28Nil%29%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>Return an hash of possible options to settle the ambiguity</p>
+          <p>用于唤醒旧 watcher 立即退出，避免软退出</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L38" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L6" target="_blank">View source</a>]
         
       </div>
     </div>
   
-    <div class="entry-detail" id="procfile:String|Nil-instance-method">
+    <div class="entry-detail" id="scheduled_jobs:Hash(String,String)-instance-method">
       <div class="signature">
         
-        def <strong>procfile</strong> : String | Nil
+        def <strong>scheduled_jobs</strong> : Hash(String, String)
 
-        <a class="method-permalink" href="#procfile%3AString%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L10" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="root:String|Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>root</strong> : String | Nil
-
-        <a class="method-permalink" href="#root%3AString%7CNil-instance-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L9" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="set_app_id_and_find_root_and_procfile(id:Int32):Nil-instance-method">
-      <div class="signature">
-        
-        def <strong>set_app_id_and_find_root_and_procfile</strong>(id : Int32) : Nil
-
-        <a class="method-permalink" href="#set_app_id_and_find_root_and_procfile%28id%3AInt32%29%3ANil-instance-method">#</a>
+        <a class="method-permalink" href="#scheduled_jobs%3AHash%28String%2CString%29-instance-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>Choose which of the ambiguous options we want to choose</p>
+          <p>要执行的任务，key 是 name, value 是 crontab</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/app_determination.cr#L31" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L8" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="scheduled_processes_for(process_names:Array(String)|Nil):Array(Procodile::Process)-instance-method">
+      <div class="signature">
+        
+        def <strong>scheduled_processes_for</strong>(process_names : Array(String) | Nil) : Array(<a href="../Procodile/Process.html">Procodile::Process</a>)
+
+        <a class="method-permalink" href="#scheduled_processes_for%28process_names%3AArray%28String%29%7CNil%29%3AArray%28Procodile%3A%3AProcess%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L105" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="scheduled_running:Set(String)-instance-method">
+      <div class="signature">
+        
+        def <strong>scheduled_running</strong> : Set(String)
+
+        <a class="method-permalink" href="#scheduled_running%3ASet%28String%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>检测是不是当前正在运行</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L10" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="scheduled_skip_counts:Hash(String,Int32)-instance-method">
+      <div class="signature">
+        
+        def <strong>scheduled_skip_counts</strong> : Hash(String, Int32)
+
+        <a class="method-permalink" href="#scheduled_skip_counts%3AHash%28String%2CInt32%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>因为 scheduled task 未执行完成，因此连续跳过的次数</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/crystal-china/procodile/blob/v2.0.0-rc4/src/procodile/schedule_manager.cr#L14" target="_blank">View source</a>]
         
       </div>
     </div>
