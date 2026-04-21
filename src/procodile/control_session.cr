@@ -1,5 +1,7 @@
 module Procodile
   class ControlSession
+    delegate process_manager, config, issue_tracker, to: @supervisor
+
     def initialize(@supervisor : Supervisor, @client : UNIXSocket)
     end
 
@@ -66,7 +68,7 @@ module Procodile
       seen_names = Set(String).new
 
       # 先使用配置文件初始化实例（可能是最新修改过的）
-      @supervisor.config.processes.each do |_, process|
+      config.processes.each do |_, process|
         instances[process.name] = [] of Instance::Config
         processes << process
         seen_names << process.name
@@ -80,25 +82,25 @@ module Procodile
 
       processes = processes.map(&.to_struct)
 
-      loaded_at = @supervisor.config.loaded_at
+      loaded_at = config.loaded_at
 
       result = ControlClient::ReplyOfStatusCommand.new(
         version: VERSION,
-        messages: @supervisor.process_manager.messages,
-        root: @supervisor.config.root,
-        app_name: @supervisor.config.app_name,
+        messages: process_manager.messages,
+        root: config.root,
+        app_name: config.app_name,
         supervisor: @supervisor.to_hash,
         instances: instances,
         processes: processes,
-        runtime_issues: @supervisor.issue_tracker.runtime_issues,
-        environment_variables: @supervisor.config.environment_variables,
-        procfile_path: @supervisor.config.procfile_path,
-        options_path: @supervisor.config.options_path,
-        local_options_path: @supervisor.config.local_options_path,
-        sock_path: @supervisor.config.sock_path,
-        log_root: @supervisor.config.log_root,
-        supervisor_pid_path: @supervisor.config.supervisor_pid_path,
-        pid_root: @supervisor.config.pid_root,
+        runtime_issues: issue_tracker.runtime_issues,
+        environment_variables: config.environment_variables,
+        procfile_path: config.procfile_path,
+        options_path: config.options_path,
+        local_options_path: config.local_options_path,
+        sock_path: config.sock_path,
+        log_root: config.log_root,
+        supervisor_pid_path: config.supervisor_pid_path,
+        pid_root: config.pid_root,
         loaded_at: loaded_at ? loaded_at.to_unix : nil,
       )
 
