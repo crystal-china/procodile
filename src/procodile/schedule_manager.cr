@@ -15,7 +15,7 @@ module Procodile
 
     delegate config, to: @supervisor
 
-    def initialize(@supervisor : Supervisor)
+    def initialize(@supervisor : Supervisor, @issue_tracker : IssueTracker)
     end
 
     def enable_schedules(process_names : Array(String)?) : Nil
@@ -44,8 +44,8 @@ module Procodile
         signal_scheduled_job(name)
         scheduled_jobs.delete(name)
         scheduled_job_signals.delete(name)
-        @supervisor.resolve_issue(:invalid_schedule, name)
-        @supervisor.resolve_issue(:scheduled_run_failed, name)
+        @issue_tracker.resolve(:invalid_schedule, name)
+        @issue_tracker.resolve(:scheduled_run_failed, name)
         clear_scheduled_skip_state(name)
       end
 
@@ -88,12 +88,12 @@ module Procodile
       scheduled_process_finished(instance)
 
       if stopped_by_user || instance.process.last_exit_status == 0
-        @supervisor.resolve_issue(:scheduled_run_failed, process_name)
+        @issue_tracker.resolve(:scheduled_run_failed, process_name)
       else
         last_exit_status = instance.process.last_exit_status || -1
         suggested_command = config.suggested_command("restart -p #{process_name}")
 
-        @supervisor.report_issue(
+        @issue_tracker.report(
           :scheduled_run_failed,
           process_name,
           "Scheduled process '#{process_name}' failed with exit \
@@ -118,7 +118,7 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
     private def watch_scheduled_process(name : String, schedule : String, signal : Channel(Nil)) : Nil
       begin
         parser = CronParser.new(schedule)
-        @supervisor.resolve_issue(:invalid_schedule, name)
+        @issue_tracker.resolve(:invalid_schedule, name)
       rescue ex
         if scheduled_job_signals[name]? == signal
           scheduled_jobs.delete(name)
@@ -128,7 +128,7 @@ status #{last_exit_status}. Fix it, then run `#{suggested_command}`."
         clear_scheduled_skip_state(name)
         suggested_restart_command = config.suggested_command("restart -p #{name}")
 
-        @supervisor.report_issue(
+        @issue_tracker.report(
           :invalid_schedule,
           name,
           "Scheduled process '#{name}' has invalid cron schedule '#{schedule}': #{ex.message}. \
@@ -184,7 +184,7 @@ or `#{suggested_restart_command}`."
         skip_count = scheduled_skip_counts[name] = (scheduled_skip_counts[name]? || 0) + 1
 
         if skip_count >= SCHEDULED_SKIP_ISSUE_THRESHOLD
-          @supervisor.report_issue(
+          @issue_tracker.report(
             :scheduled_run_skipped_repeatedly,
             name,
             "Scheduled process '#{name}' skipped #{skip_count} runs because the previous run is still active. Consider increasing the schedule interval or shortening the task runtime."
@@ -216,7 +216,7 @@ or `#{suggested_restart_command}`."
 
     private def clear_scheduled_skip_state(name : String) : Nil
       @scheduled_skip_counts.delete(name)
-      @supervisor.resolve_issue(:scheduled_run_skipped_repeatedly, name)
+      @issue_tracker.resolve(:scheduled_run_skipped_repeatedly, name)
     end
 
     private def signal_scheduled_job(name : String) : Nil

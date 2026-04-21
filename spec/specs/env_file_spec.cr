@@ -141,7 +141,7 @@ SH
     begin
       supervisor.start_processes(nil).should be_empty
 
-      issue = supervisor.runtime_issues.find(&.type.process_failed_permanently?)
+      issue = supervisor.runtime_issues_for_spec.find(&.type.process_failed_permanently?)
       issue.should_not be_nil
       issue = issue.not_nil!
       issue.process_name.should eq("app1")

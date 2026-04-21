@@ -90,7 +90,7 @@ module Procodile
         supervisor: @supervisor.to_hash,
         instances: instances,
         processes: processes,
-        runtime_issues: @supervisor.runtime_issues,
+        runtime_issues: @supervisor.issue_tracker.runtime_issues,
         environment_variables: @supervisor.config.environment_variables,
         procfile_path: @supervisor.config.procfile_path,
         options_path: @supervisor.config.options_path,

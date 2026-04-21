@@ -64,7 +64,7 @@ RUBY
       supervisor.start_processes(nil).should be_empty
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.invalid_schedule?)
+        supervisor.runtime_issues_for_spec.any?(&.type.invalid_schedule?)
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -80,7 +80,7 @@ RUBY
       supervisor.reload_config
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.none?(&.type.invalid_schedule?)
+        supervisor.runtime_issues_for_spec.none?(&.type.invalid_schedule?)
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -142,7 +142,7 @@ YAML
       instance.check
 
       wait_until(2.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.process_failed_permanently?)
+        supervisor.runtime_issues_for_spec.any?(&.type.process_failed_permanently?)
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -154,7 +154,7 @@ YAML
       supervisor.restart(Procodile::Supervisor::Options.new(process_names: ["app1"]))
 
       wait_until(2.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.none?(&.type.process_failed_permanently?)
+        supervisor.runtime_issues_for_spec.none?(&.type.process_failed_permanently?)
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -217,7 +217,7 @@ SH
       restart_output.should contain("Process 'app1' failed to start: The file #{File.join(app_root, ".env")} could not be found.")
 
       wait_until(2.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.process_failed_permanently?)
+        supervisor.runtime_issues_for_spec.any?(&.type.process_failed_permanently?)
       end.should be_true
     ensure
       supervisor.processes.each_value do |instances|
@@ -276,7 +276,7 @@ YAML
       started.map(&.process.name).should eq(["app2"])
 
       wait_until(2.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.process_failed_permanently?)
+        supervisor.runtime_issues_for_spec.any?(&.type.process_failed_permanently?)
       end.should be_true
 
       wait_until(2.seconds, 50.milliseconds) do
@@ -303,7 +303,7 @@ PROCFILE
       restart_output.should_not contain("Active issues:")
 
       wait_until(2.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.none?(&.type.process_failed_permanently?)
+        supervisor.runtime_issues_for_spec.none?(&.type.process_failed_permanently?)
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -429,7 +429,7 @@ YAML
       supervisor.start_processes(nil).should be_empty
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.scheduled_run_failed?)
+        supervisor.runtime_issues_for_spec.any?(&.type.scheduled_run_failed?)
       end.should be_true
 
       stop_status, stop_output = run_cli_command(app_root, "stop", "-p", "app1")
@@ -438,7 +438,7 @@ YAML
       stop_output.should_not contain("Active issues:")
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.none?(&.type.scheduled_run_failed?)
+        supervisor.runtime_issues_for_spec.none?(&.type.scheduled_run_failed?)
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -510,7 +510,7 @@ YAML
       wait_for_control_socket(config.sock_path).should be_true
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any? { |issue| issue.type.process_failed_permanently? && issue.process_name == "app1" }
+        supervisor.runtime_issues_for_spec.any? { |issue| issue.type.process_failed_permanently? && issue.process_name == "app1" }
       end.should be_true
 
       wait_until(5.seconds, 50.milliseconds) do
@@ -534,7 +534,7 @@ YAML
       stop_output.should contain("app1.")
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.none? { |issue| issue.process_name == "app1" }
+        supervisor.runtime_issues_for_spec.none? { |issue| issue.process_name == "app1" }
       end.should be_true
 
       status, output = run_cli_command(app_root, "status")
@@ -584,7 +584,7 @@ RUBY
       supervisor.start_processes(nil).should be_empty
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.any?(&.type.invalid_schedule?)
+        supervisor.runtime_issues_for_spec.any?(&.type.invalid_schedule?)
       end.should be_true
 
       File.write(
@@ -597,7 +597,7 @@ RUBY
       restart_output.should contain("Reloaded schedule for job.")
 
       wait_until(5.seconds, 50.milliseconds) do
-        supervisor.runtime_issues.none?(&.type.invalid_schedule?)
+        supervisor.runtime_issues_for_spec.none?(&.type.invalid_schedule?)
       end.should be_true
 
       output_file = File.join(app_root, "schedule.out")
