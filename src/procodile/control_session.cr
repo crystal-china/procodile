@@ -5,7 +5,7 @@ module Procodile
     def initialize(@supervisor : Supervisor, @client : UNIXSocket)
     end
 
-    private def start_processes(options : ControlSession::Options) : String
+    private def start_processes(options : ControlSession::Options) : Array(Instance::Config)
       if (ports = options.port_allocations)
         if (run_options_ports = @supervisor.run_options.port_allocations)
           run_options_ports.merge!(ports)
@@ -19,10 +19,10 @@ module Procodile
         Supervisor::Options.new(tag: options.tag)
       )
 
-      "200 #{instances.map(&.to_struct).to_json}"
+      instances.map(&.to_struct)
     end
 
-    private def stop(options : ControlSession::Options) : String
+    private def stop(options : ControlSession::Options) : Array(Instance::Config)
       instances = @supervisor.stop(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -30,10 +30,10 @@ module Procodile
         )
       )
 
-      "200 #{instances.map(&.to_struct).to_json}"
+      instances.map(&.to_struct)
     end
 
-    private def restart(options : ControlSession::Options) : String
+    private def restart(options : ControlSession::Options) : Array(Array(Instance::Config | Nil))
       instances = @supervisor.restart(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -41,28 +41,26 @@ module Procodile
         )
       )
 
-      "200 " + instances.map { |a| a.map { |i| i ? i.to_struct : nil } }.to_json
+      instances.map { |pair| pair.map { |instance| instance ? instance.to_struct : nil } }
     end
 
-    private def reload_config(options : ControlSession::Options) : String
+    private def reload_config(options : ControlSession::Options) : NamedTuple(ok: Bool)
       @supervisor.reload_config
 
-      %(200 {"ok":true})
+      {ok: true}
     end
 
-    private def check_concurrency(options : ControlSession::Options) : String
+    private def check_concurrency(options : ControlSession::Options) : Hash(Symbol, Array(Instance::Config))
       result = @supervisor.check_concurrency(
         Supervisor::Options.new(
           reload: options.reload
         )
       )
 
-      result = result.transform_values { |instances, _type| instances.map(&.to_struct) }
-
-      "200 #{result.to_json}"
+      result.transform_values { |instances, _type| instances.map(&.to_struct) }
     end
 
-    private def status(options : ControlSession::Options) : String
+    private def status(options : ControlSession::Options) : ControlClient::ReplyOfStatusCommand
       instances = {} of String => Array(Instance::Config)
       processes = [] of Procodile::Process
       seen_names = Set(String).new
@@ -104,32 +102,34 @@ module Procodile
         loaded_at: loaded_at ? loaded_at.to_unix : nil,
       )
 
-      "200 #{result.to_json}"
+      result
     end
 
     def receive_data(data : String) : String
       command, session_data = data.split(/\s+/, 2)
       options = ControlSession::Options.from_json(session_data)
 
-      case command
-      when "start_processes"
-        start_processes(options)
-      when "stop"
-        stop(options)
-      when "restart"
-        restart(options)
-      when "reload_config"
-        reload_config(options)
-      when "check_concurrency"
-        check_concurrency(options)
-      when "status"
-        status(options)
-      else
-        "404 Invalid command"
-      end
+      payload = case command
+                when "start_processes"
+                  start_processes(options)
+                when "stop"
+                  stop(options)
+                when "restart"
+                  restart(options)
+                when "reload_config"
+                  reload_config(options)
+                when "check_concurrency"
+                  check_concurrency(options)
+                when "status"
+                  status(options)
+                else
+                  return "404 Invalid command"
+                end
+
+      "200 #{payload.to_json}"
     rescue e : Error
       Procodile.log "control", "Error: #{e.message}".colorize.red.to_s
-      "500 #{e.message}"
+      "500 #{e.message || e.to_s}"
     end
   end
 
