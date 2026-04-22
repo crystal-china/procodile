@@ -1,9 +1,7 @@
 module Procodile
   class CLI
     module ReloadCommand
-      macro included
-        options :reload do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def reload : Nil

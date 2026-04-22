@@ -27,20 +27,21 @@ module Procodile
 
     {% begin %}
       {% for e in COMMANDS %}
-        {% name = e[0] %}
-        include {{ (name.camelcase + "Command").id }}
+        {% class_name = e[0].camelcase %}
+        include {{ (class_name + "Command").id }}
       {% end %}
 
         def initialize
           @config = uninitialized Config
           {% for e in COMMANDS %}
             {% name = e[0] %}
+            {% class_name = e[0].camelcase %}
             {% description = e[1] %}
 
             self.class.commands[{{ name.id.stringify }}] = Command.new(
               name: {{ name.id.stringify }},
               description: {{ description.id.stringify }},
-              options: @@options[{{ name }}],
+              options: {{ (class_name + "Command").id }}::OPTIONS,
               callable: ->{{ name.id }}
             )
           {% end %}
@@ -199,10 +200,6 @@ module Procodile
 
     private def status_reply : ControlClient::ReplyOfStatusCommand
       ControlClient.status(@config.sock_path)
-    end
-
-    private def self.options(name : Symbol, &block : Proc(OptionParser, CLI, Nil)) : Nil
-      @@options[name] = block
     end
 
     struct Command

@@ -1,9 +1,7 @@
 module Procodile
   class CLI
     module ConsoleCommand
-      macro included
-        options :console do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def console : Nil

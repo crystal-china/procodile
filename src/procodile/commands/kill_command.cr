@@ -1,9 +1,7 @@
 module Procodile
   class CLI
     module KillCommand
-      macro included
-        options :kill do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def kill : Nil

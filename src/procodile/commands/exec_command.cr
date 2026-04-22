@@ -1,9 +1,7 @@
 module Procodile
   class CLI
     module ExecCommand
-      macro included
-        options :exec do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def exec(command : String? = nil) : Nil

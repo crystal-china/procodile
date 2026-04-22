@@ -1,9 +1,7 @@
 module Procodile
   class CLI
     module HelpCommand
-      macro included
-        options :help do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def help : Nil

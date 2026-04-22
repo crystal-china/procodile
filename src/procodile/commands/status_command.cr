@@ -1,28 +1,26 @@
 module Procodile
   class CLI
     module StatusCommand
-      macro included
-        options :status do |opts, cli|
-          opts.on(
-            "--json",
-            "Return the status as a JSON hash"
-          ) do
-            cli.options.json = true
-          end
+      OPTIONS = ->(opts : OptionParser, cli : CLI) do
+        opts.on(
+          "--json",
+          "Return the status as a JSON hash"
+        ) do
+          cli.options.json = true
+        end
 
-          opts.on(
-            "--json-pretty",
-            "Return the status as a JSON hash printed nicely"
-          ) do
-            cli.options.json_pretty = true
-          end
+        opts.on(
+          "--json-pretty",
+          "Return the status as a JSON hash printed nicely"
+        ) do
+          cli.options.json_pretty = true
+        end
 
-          opts.on(
-            "--simple",
-            "Return overall status"
-          ) do
-            cli.options.simple = true
-          end
+        opts.on(
+          "--simple",
+          "Return overall status"
+        ) do
+          cli.options.simple = true
         end
       end
 
