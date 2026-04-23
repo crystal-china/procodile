@@ -49,9 +49,9 @@ module Procodile
       end
     end
 
-    def self.reload_config(sock_path : String) : NamedTuple(ok: Bool)
+    def self.reload_config(sock_path : String) : OkResponse
       send_request(sock_path, "reload_config", ControlHandler::Options.new) do |reply|
-        NamedTuple(ok: Bool).from_json(reply)
+        OkResponse.from_json(reply)
       end
     end
 

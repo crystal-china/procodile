@@ -1,4 +1,14 @@
 module Procodile
+  # Represents a generic successful control command response.
+  struct OkResponse
+    include JSON::Serializable
+
+    getter ok : Bool
+
+    def initialize(@ok : Bool)
+    end
+  end
+
   # Represents one configured process in `procodile status`.
   struct ProcessStatus
     include JSON::Serializable

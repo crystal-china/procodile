@@ -46,10 +46,10 @@ module Procodile
       instances.map { |pair| pair.map { |instance| instance ? instance.to_struct : nil } }
     end
 
-    private def reload_config : NamedTuple(ok: Bool)
+    private def reload_config : OkResponse
       @supervisor.reload_config
 
-      {ok: true}
+      OkResponse.new(true)
     end
 
     private def check_concurrency(options : ControlHandler::Options) : Hash(Symbol, Array(Instance::Config))
