@@ -1,7 +1,5 @@
 require "./start_supervisor"
 require "./supervisor"
-require "./tcp_proxy"
-require "lucky_env"
 
 module Procodile
   class Instance
