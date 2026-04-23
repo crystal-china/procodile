@@ -1,3 +1,5 @@
+require "./status_types"
+
 module Procodile
   class ControlSession
     delegate process_manager, config, issue_tracker, to: @supervisor
@@ -60,7 +62,7 @@ module Procodile
       result.transform_values { |instances, _type| instances.map(&.to_struct) }
     end
 
-    private def status(options : ControlSession::Options) : ControlClient::ReplyOfStatusCommand
+    private def status(options : ControlSession::Options) : StatusReply
       instances = {} of String => Array(Instance::Config)
       processes = [] of Procodile::Process
       seen_names = Set(String).new
@@ -82,12 +84,12 @@ module Procodile
 
       loaded_at = config.loaded_at
 
-      result = ControlClient::ReplyOfStatusCommand.new(
+      result = StatusReply.new(
         version: VERSION,
         messages: process_manager.messages,
         root: config.root,
         app_name: config.app_name,
-        supervisor: @supervisor.to_hash,
+        supervisor: @supervisor.to_status,
         instances: instances,
         processes: processes,
         runtime_issues: issue_tracker.runtime_issues,

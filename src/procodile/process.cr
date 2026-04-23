@@ -1,5 +1,5 @@
-require "./control_client"
 require "./instance"
+require "./status_types"
 
 module Procodile
   class Process
@@ -172,8 +172,8 @@ module Procodile
     #
     # Return a struct
     #
-    def to_struct : ControlClient::ProcessStatus
-      ControlClient::ProcessStatus.new(
+    def to_struct : ProcessStatus
+      ProcessStatus.new(
         name: self.name,
         schedule: self.schedule,
         random_delay: self.random_delay,

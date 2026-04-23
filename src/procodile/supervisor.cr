@@ -5,6 +5,7 @@ require "./process_selector"
 require "./issue_tracker"
 require "./process_manager"
 require "./schedule_manager"
+require "./status_types"
 require "./tcp_proxy"
 
 module Procodile
@@ -158,14 +159,14 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    def to_hash : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
+    def to_status : SupervisorStatus
       started_at = @started_at
 
-      {
+      SupervisorStatus.new(
         started_at:    started_at ? started_at.to_unix : nil,
         pid:           ::Process.pid,
         proxy_enabled: !!@run_options.proxy?,
-      }
+      )
     end
 
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil

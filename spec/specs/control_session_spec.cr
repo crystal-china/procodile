@@ -39,7 +39,7 @@ describe Procodile::ControlSession do
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
-      parsed = Procodile::ControlClient::ReplyOfStatusCommand.from_json(reply)
+      parsed = Procodile::StatusReply.from_json(reply)
       parsed.root.should eq(app_root)
       parsed.processes.map(&.name).should contain("app1")
     ensure

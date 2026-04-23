@@ -1,5 +1,6 @@
 require "./app_determination"
 require "./config"
+require "./control_client"
 require "./commands/*"
 
 module Procodile
@@ -87,7 +88,7 @@ module Procodile
       # Do not block the actual command if issue reporting fails.
     end
 
-    private def runtime_issue_status_reply(timeout : Time::Span, interval : Time::Span = 100.milliseconds) : ControlClient::ReplyOfStatusCommand
+    private def runtime_issue_status_reply(timeout : Time::Span, interval : Time::Span = 100.milliseconds) : StatusReply
       deadline = Time.instant + timeout
       last_error = nil
 
@@ -196,7 +197,7 @@ module Procodile
       end
     end
 
-    private def status_reply : ControlClient::ReplyOfStatusCommand
+    private def status_reply : StatusReply
       ControlClient.status(@config.sock_path)
     end
 
