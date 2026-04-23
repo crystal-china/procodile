@@ -83,7 +83,6 @@ module Procodile
           # directory as the root.
           @root = pwd
           @procfile = "Procfile"
-          @in_app_directory = true
         end
       end
     end
