@@ -8,9 +8,9 @@ private def build_control_session_app(procfile : String)
   config = Procodile::Config.new(root: app_root)
   supervisor = Procodile::Supervisor.new(config)
   client = UNIXSocket.pair[0]
-  session = Procodile::ControlSession.new(supervisor, client)
+  handler = Procodile::ControlHandler.new(supervisor)
 
-  {app_root, supervisor, client, session}
+  {app_root, supervisor, client, handler}
 end
 
 private def cleanup_control_session_app(
@@ -30,12 +30,12 @@ private def cleanup_control_session_app(
   FileUtils.rm_rf(app_root)
 end
 
-describe Procodile::ControlSession do
+describe Procodile::ControlHandler do
   it "dispatches status through receive_data" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 1\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 1\n")
 
     begin
-      response = session.receive_data(%(status {}))
+      response = handler.receive_data(%(status {}))
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
@@ -48,10 +48,10 @@ describe Procodile::ControlSession do
   end
 
   it "dispatches reload_config through receive_data" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 1\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 1\n")
 
     begin
-      response = session.receive_data(%(reload_config {}))
+      response = handler.receive_data(%(reload_config {}))
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
@@ -63,10 +63,10 @@ describe Procodile::ControlSession do
   end
 
   it "dispatches start_processes through receive_data" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 60\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 60\n")
 
     begin
-      response = session.receive_data(%(start_processes {}))
+      response = handler.receive_data(%(start_processes {}))
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
@@ -83,7 +83,7 @@ describe Procodile::ControlSession do
   end
 
   it "dispatches stop through receive_data" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 60\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 60\n")
 
     begin
       supervisor.start_processes(nil)
@@ -92,7 +92,7 @@ describe Procodile::ControlSession do
         supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app1" && instance.running? }
       end.should be_true
 
-      response = session.receive_data(%(stop {"process_names":["app1"]}))
+      response = handler.receive_data(%(stop {"process_names":["app1"]}))
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
@@ -105,7 +105,7 @@ describe Procodile::ControlSession do
   end
 
   it "dispatches restart through receive_data" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 60\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 60\n")
 
     begin
       supervisor.start_processes(nil)
@@ -114,7 +114,7 @@ describe Procodile::ControlSession do
         supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app1" && instance.running? }
       end.should be_true
 
-      response = session.receive_data(%(restart {"process_names":["app1"]}))
+      response = handler.receive_data(%(restart {"process_names":["app1"]}))
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
@@ -128,10 +128,10 @@ describe Procodile::ControlSession do
   end
 
   it "dispatches check_concurrency through receive_data" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 60\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 60\n")
 
     begin
-      response = session.receive_data(%(check_concurrency {"reload":false}))
+      response = handler.receive_data(%(check_concurrency {"reload":false}))
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
@@ -147,10 +147,10 @@ describe Procodile::ControlSession do
   end
 
   it "returns 404 for an unknown command" do
-    app_root, supervisor, client, session = build_control_session_app("app1: sleep 1\n")
+    app_root, supervisor, client, handler = build_control_session_app("app1: sleep 1\n")
 
     begin
-      session.receive_data(%(not-a-command {})).should eq("404 Invalid command")
+      handler.receive_data(%(not-a-command {})).should eq("404 Invalid command")
     ensure
       cleanup_control_session_app(app_root, supervisor, client)
     end

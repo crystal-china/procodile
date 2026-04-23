@@ -1,13 +1,13 @@
 require "./status_types"
 
 module Procodile
-  class ControlSession
+  class ControlHandler
     delegate process_manager, config, issue_tracker, to: @supervisor
 
     def initialize(@supervisor : Supervisor)
     end
 
-    private def start_processes(options : ControlSession::Options) : Array(Instance::Config)
+    private def start_processes(options : ControlHandler::Options) : Array(Instance::Config)
       if (ports = options.port_allocations)
         if (run_options_ports = @supervisor.run_options.port_allocations)
           run_options_ports.merge!(ports)
@@ -24,7 +24,7 @@ module Procodile
       instances.map(&.to_struct)
     end
 
-    private def stop(options : ControlSession::Options) : Array(Instance::Config)
+    private def stop(options : ControlHandler::Options) : Array(Instance::Config)
       instances = @supervisor.stop(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -35,7 +35,7 @@ module Procodile
       instances.map(&.to_struct)
     end
 
-    private def restart(options : ControlSession::Options) : Array(Array(Instance::Config | Nil))
+    private def restart(options : ControlHandler::Options) : Array(Array(Instance::Config | Nil))
       instances = @supervisor.restart(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -46,13 +46,13 @@ module Procodile
       instances.map { |pair| pair.map { |instance| instance ? instance.to_struct : nil } }
     end
 
-    private def reload_config(options : ControlSession::Options) : NamedTuple(ok: Bool)
+    private def reload_config(options : ControlHandler::Options) : NamedTuple(ok: Bool)
       @supervisor.reload_config
 
       {ok: true}
     end
 
-    private def check_concurrency(options : ControlSession::Options) : Hash(Symbol, Array(Instance::Config))
+    private def check_concurrency(options : ControlHandler::Options) : Hash(Symbol, Array(Instance::Config))
       result = @supervisor.check_concurrency(
         Supervisor::Options.new(
           reload: options.reload
@@ -62,7 +62,7 @@ module Procodile
       result.transform_values { |instances, _type| instances.map(&.to_struct) }
     end
 
-    private def status(options : ControlSession::Options) : StatusReply
+    private def status(options : ControlHandler::Options) : StatusReply
       instances = {} of String => Array(Instance::Config)
       processes = [] of Procodile::Process
       seen_names = Set(String).new
@@ -109,7 +109,7 @@ module Procodile
 
     def receive_data(data : String) : String
       command, session_data = data.split(/\s+/, 2)
-      options = ControlSession::Options.from_json(session_data)
+      options = ControlHandler::Options.from_json(session_data)
 
       payload = case command
                 when "start_processes"
@@ -135,7 +135,7 @@ module Procodile
     end
   end
 
-  struct ControlSession::Options
+  struct ControlHandler::Options
     include JSON::Serializable
 
     getter process_names : Array(String)?
