@@ -21,7 +21,7 @@ module Procodile
       Procodile.log "control", "Listening at #{sock_path}"
 
       while (client = server.accept)
-        session = ControlSession.new(@supervisor, client)
+        session = ControlSession.new(@supervisor)
 
         spawn handle_client(session, client)
       end

@@ -4,7 +4,7 @@ module Procodile
   class ControlSession
     delegate process_manager, config, issue_tracker, to: @supervisor
 
-    def initialize(@supervisor : Supervisor, @client : UNIXSocket)
+    def initialize(@supervisor : Supervisor)
     end
 
     private def start_processes(options : ControlSession::Options) : Array(Instance::Config)
