@@ -23,8 +23,6 @@ module Procodile
 
     class_getter commands : Hash(String, Command) { {} of String => Command }
 
-    @@options = {} of Symbol => Proc(OptionParser, CLI, Nil)
-
     {% begin %}
       {% for e in COMMANDS %}
         {% class_name = e[0].camelcase %}
