@@ -1,5 +1,5 @@
 module Procodile
-  # Snapshot of one configured process as shown by `procodile status`.
+  # Represents one configured process in `procodile status`.
   struct ProcessStatus
     include JSON::Serializable
 
@@ -43,7 +43,7 @@ module Procodile
     end
   end
 
-  # Snapshot of the supervisor itself for status output.
+  # Represents the supervisor itself in `procodile status`.
   struct SupervisorStatus
     include JSON::Serializable
 
@@ -59,7 +59,7 @@ module Procodile
     end
   end
 
-  # Full payload returned by the `status` control command.
+  # Represents the full payload returned by the `status` control command.
   struct StatusReply
     include JSON::Serializable
 
