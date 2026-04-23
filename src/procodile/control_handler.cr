@@ -46,7 +46,7 @@ module Procodile
       instances.map { |pair| pair.map { |instance| instance ? instance.to_struct : nil } }
     end
 
-    private def reload_config(options : ControlHandler::Options) : NamedTuple(ok: Bool)
+    private def reload_config : NamedTuple(ok: Bool)
       @supervisor.reload_config
 
       {ok: true}
@@ -62,7 +62,7 @@ module Procodile
       result.transform_values { |instances, _type| instances.map(&.to_struct) }
     end
 
-    private def status(options : ControlHandler::Options) : StatusReply
+    private def status : StatusReply
       instances = {} of String => Array(Instance::Config)
       processes = [] of Procodile::Process
       seen_names = Set(String).new
@@ -119,11 +119,11 @@ module Procodile
                 when "restart"
                   restart(options)
                 when "reload_config"
-                  reload_config(options)
+                  reload_config
                 when "check_concurrency"
                   check_concurrency(options)
                 when "status"
-                  status(options)
+                  status
                 else
                   return "404 Invalid command"
                 end
