@@ -21,9 +21,9 @@ module Procodile
       Procodile.log "control", "Listening at #{sock_path}"
 
       while (client = server.accept)
-        session = ControlHandler.new(@supervisor)
+        handler = ControlHandler.new(@supervisor)
 
-        spawn handle_client(session, client)
+        spawn handle_client(handler, client)
       end
     ensure
       FileUtils.rm_rf(sock_path) if sock_path

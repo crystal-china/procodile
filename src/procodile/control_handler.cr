@@ -107,9 +107,9 @@ module Procodile
       result
     end
 
-    def receive_data(data : String) : String
-      command, session_data = data.split(/\s+/, 2)
-      options = ControlHandler::Options.from_json(session_data)
+    def receive_data(request_data : String) : String
+      command, request_body = request_data.split(/\s+/, 2)
+      options = ControlHandler::Options.from_json(request_body)
 
       payload = case command
                 when "start_processes"
