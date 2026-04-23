@@ -1,5 +1,5 @@
 require "./instance"
-require "./status_types"
+require "./control_types"
 
 module Procodile
   class Process

@@ -5,7 +5,7 @@ require "./process_selector"
 require "./issue_tracker"
 require "./process_manager"
 require "./schedule_manager"
-require "./status_types"
+require "./control_types"
 require "./tcp_proxy"
 
 module Procodile

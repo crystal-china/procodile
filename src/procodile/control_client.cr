@@ -1,4 +1,4 @@
-require "./status_types"
+require "./control_types"
 
 module Procodile
   class ControlClient
