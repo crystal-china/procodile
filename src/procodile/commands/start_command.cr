@@ -132,17 +132,17 @@ because --no-supervisor is set" if @options.start_supervisor? == false
           raise Error.new "Cannot enable the proxy when the supervisor is running"
         end
 
-        instance_configs = ControlClient.start_processes(
+        response = ControlClient.start_processes(
           @config.sock_path,
           process_names,
           @options.tag,
           @options.port_allocations,
         )
 
-        if instance_configs.empty?
+        if response.started_instances.empty?
           puts "No processes to start."
         else
-          instance_configs.each do |instance_config|
+          response.started_instances.each do |instance_config|
             puts "#{"Started".colorize.green} #{instance_config.description} (PID: #{instance_config.pid})"
           end
         end

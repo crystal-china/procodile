@@ -37,7 +37,7 @@ module Procodile
           end
         end
 
-        instance_configs = ControlClient.restart(
+        response = ControlClient.restart(
           @config.sock_path,
           process_names,
           @options.tag,
@@ -48,7 +48,7 @@ module Procodile
         # - [old, nil] 只 stop 了一个实例
         # - [nil, new] 来没跑，现在补启动了一个实例
         # 如果没有任何 normal processes 重启结果发生，空数组 []
-        if instance_configs.empty?
+        if response.changes.empty?
           if process_names
             scheduled_processes = scheduled_processes_from_names(process_names)
 
@@ -66,7 +66,10 @@ module Procodile
           # tends to be prone to failure, use it with caution."
           #           end
 
-          instance_configs.each do |old_instance, new_instance|
+          response.changes.each do |change|
+            old_instance = change.previous_instance
+            new_instance = change.current_instance
+
             if old_instance && new_instance
               if old_instance.description == new_instance.description
                 puts "#{"Restarted".colorize.magenta} #{old_instance.description}"

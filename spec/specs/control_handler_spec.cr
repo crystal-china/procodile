@@ -70,9 +70,9 @@ describe Procodile::ControlHandler do
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
-      parsed = Array(Procodile::Instance::Config).from_json(reply)
-      parsed.size.should eq(1)
-      parsed.first.description.should eq("app1.1")
+      parsed = Procodile::StartProcessesResponse.from_json(reply)
+      parsed.started_instances.size.should eq(1)
+      parsed.started_instances.first.description.should eq("app1.1")
 
       wait_until(2.seconds, 50.milliseconds) do
         supervisor.processes.values.flatten.any? { |instance| instance.process.name == "app1" && instance.running? }
@@ -96,9 +96,9 @@ describe Procodile::ControlHandler do
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
-      parsed = Array(Procodile::Instance::Config).from_json(reply)
-      parsed.size.should eq(1)
-      parsed.first.description.should eq("app1.1")
+      parsed = Procodile::StopProcessesResponse.from_json(reply)
+      parsed.stopped_instances.size.should eq(1)
+      parsed.stopped_instances.first.description.should eq("app1.1")
     ensure
       cleanup_control_session_app(app_root, supervisor, client)
     end
@@ -118,10 +118,10 @@ describe Procodile::ControlHandler do
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
-      parsed = Array(Tuple(Procodile::Instance::Config?, Procodile::Instance::Config?)).from_json(reply)
-      parsed.size.should eq(1)
-      parsed.first[0].should_not be_nil
-      parsed.first[1].should_not be_nil
+      parsed = Procodile::RestartProcessesResponse.from_json(reply)
+      parsed.changes.size.should eq(1)
+      parsed.changes.first.previous_instance.should_not be_nil
+      parsed.changes.first.current_instance.should_not be_nil
     ensure
       cleanup_control_session_app(app_root, supervisor, client)
     end
@@ -135,12 +135,10 @@ describe Procodile::ControlHandler do
 
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
-      parsed = NamedTuple(
-        started: Array(Procodile::Instance::Config),
-        stopped: Array(Procodile::Instance::Config)).from_json(reply)
-      parsed[:started].size.should eq(1)
-      parsed[:started].first.description.should eq("app1.1")
-      parsed[:stopped].should be_empty
+      parsed = Procodile::CheckConcurrencyResponse.from_json(reply)
+      parsed.started_instances.size.should eq(1)
+      parsed.started_instances.first.description.should eq("app1.1")
+      parsed.stopped_instances.should be_empty
     ensure
       cleanup_control_session_app(app_root, supervisor, client)
     end

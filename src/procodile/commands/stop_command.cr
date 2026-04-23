@@ -33,14 +33,14 @@ module Procodile
         scheduled_processes = scheduled_processes_from_names(process_names)
         disabled_scheduling_message = "Future scheduling was disabled \
 for #{scheduled_processes.map(&.name).join(", ")}."
-        instances = ControlClient.stop(
+        response = ControlClient.stop(
           @config.sock_path,
           process_names,
           @options.stop_supervisor?,
         )
 
         # 没有任何 Instance::Config 被 stop
-        if instances.empty?
+        if response.stopped_instances.empty?
           if process_names
             if scheduled_processes.any?
               puts disabled_scheduling_message
@@ -55,7 +55,7 @@ for #{scheduled_processes.map(&.name).join(", ")}."
             puts "No processes were stopped."
           end
         else
-          instances.each do |instance|
+          response.stopped_instances.each do |instance|
             puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
           end
 

@@ -9,6 +9,64 @@ module Procodile
     end
   end
 
+  # Represents the response from `start_processes`.
+  struct StartProcessesResponse
+    include JSON::Serializable
+
+    getter started_instances : Array(Instance::Config)
+
+    def initialize(@started_instances : Array(Instance::Config))
+    end
+  end
+
+  # Represents the response from `stop`.
+  struct StopProcessesResponse
+    include JSON::Serializable
+
+    getter stopped_instances : Array(Instance::Config)
+
+    def initialize(@stopped_instances : Array(Instance::Config))
+    end
+  end
+
+  # Represents one instance-level change returned by `restart`.
+  struct RestartChange
+    include JSON::Serializable
+
+    getter previous_instance : Instance::Config?
+    getter current_instance : Instance::Config?
+
+    def initialize(
+      @previous_instance : Instance::Config?,
+      @current_instance : Instance::Config?,
+    )
+    end
+  end
+
+  # Represents the response from `restart`.
+  struct RestartProcessesResponse
+    include JSON::Serializable
+
+    getter changes : Array(RestartChange)
+
+    def initialize(@changes : Array(RestartChange))
+    end
+  end
+
+  # Represents the response from `check_concurrency`.
+  struct CheckConcurrencyResponse
+    include JSON::Serializable
+
+    getter started_instances : Array(Instance::Config)
+    getter stopped_instances : Array(Instance::Config)
+
+    def initialize(
+      @started_instances : Array(Instance::Config),
+      @stopped_instances : Array(Instance::Config),
+    )
+    end
+  end
+
   # Represents one configured process in `procodile status`.
   struct ProcessStatus
     include JSON::Serializable

@@ -163,8 +163,8 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       started_at = @started_at
 
       SupervisorStatus.new(
-        started_at:    started_at ? started_at.to_unix : nil,
-        pid:           ::Process.pid,
+        started_at: started_at ? started_at.to_unix : nil,
+        pid: ::Process.pid,
         proxy_enabled: !!@run_options.proxy?,
       )
     end

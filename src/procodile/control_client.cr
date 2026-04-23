@@ -2,12 +2,7 @@ require "./status_types"
 
 module Procodile
   class ControlClient
-    def self.start_processes(
-      sock_path : String,
-      process_names : Array(String)? = nil,
-      tag : String? = nil,
-      port_allocations : Hash(String, Int32)? = nil,
-    ) : Array(Instance::Config)
+    def self.start_processes(sock_path : String, process_names : Array(String)? = nil, tag : String? = nil, port_allocations : Hash(String, Int32)? = nil) : StartProcessesResponse
       options = ControlHandler::Options.new(
         process_names: process_names,
         tag: tag,
@@ -15,37 +10,29 @@ module Procodile
       )
 
       send_request(sock_path, "start_processes", options) do |reply|
-        Array(Instance::Config).from_json(reply)
+        StartProcessesResponse.from_json(reply)
       end
     end
 
-    def self.stop(
-      sock_path : String,
-      process_names : Array(String)? = nil,
-      stop_supervisor : Bool? = nil,
-    ) : Array(Instance::Config)
+    def self.stop(sock_path : String, process_names : Array(String)? = nil, stop_supervisor : Bool? = nil) : StopProcessesResponse
       options = ControlHandler::Options.new(
         process_names: process_names,
         stop_supervisor: stop_supervisor
       )
 
       send_request(sock_path, "stop", options) do |reply|
-        Array(Instance::Config).from_json(reply)
+        StopProcessesResponse.from_json(reply)
       end
     end
 
-    def self.restart(
-      sock_path : String,
-      process_names : Array(String)? = nil,
-      tag : String? = nil,
-    ) : Array(Tuple(Instance::Config?, Instance::Config?))
+    def self.restart(sock_path : String, process_names : Array(String)? = nil, tag : String? = nil) : RestartProcessesResponse
       options = ControlHandler::Options.new(
         process_names: process_names,
         tag: tag
       )
 
       send_request(sock_path, "restart", options) do |reply|
-        Array(Tuple(Instance::Config?, Instance::Config?)).from_json(reply)
+        RestartProcessesResponse.from_json(reply)
       end
     end
 
@@ -55,13 +42,11 @@ module Procodile
       end
     end
 
-    def self.check_concurrency(sock_path : String, reload : Bool? = nil) : NamedTuple(started: Array(Instance::Config), stopped: Array(Instance::Config))
+    def self.check_concurrency(sock_path : String, reload : Bool? = nil) : CheckConcurrencyResponse
       options = ControlHandler::Options.new(reload: reload)
 
       send_request(sock_path, "check_concurrency", options) do |reply|
-        NamedTuple(
-          started: Array(Instance::Config),
-          stopped: Array(Instance::Config)).from_json(reply)
+        CheckConcurrencyResponse.from_json(reply)
       end
     end
 

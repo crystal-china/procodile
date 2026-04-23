@@ -17,14 +17,14 @@ module Procodile
             @options.reload?
           )
 
-          if reply["started"].empty? && reply["stopped"].empty?
+          if reply.started_instances.empty? && reply.stopped_instances.empty?
             puts "Processes are running as configured"
           else
-            reply["started"].each do |instance|
+            reply.started_instances.each do |instance|
               puts "#{"Started".colorize.green} #{instance.description} (PID: #{instance.pid})"
             end
 
-            reply["stopped"].each do |instance|
+            reply.stopped_instances.each do |instance|
               puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
             end
           end

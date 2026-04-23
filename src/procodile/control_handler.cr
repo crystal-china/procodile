@@ -7,7 +7,7 @@ module Procodile
     def initialize(@supervisor : Supervisor)
     end
 
-    private def start_processes(options : ControlHandler::Options) : Array(Instance::Config)
+    private def start_processes(options : ControlHandler::Options) : StartProcessesResponse
       if (ports = options.port_allocations)
         if (run_options_ports = @supervisor.run_options.port_allocations)
           run_options_ports.merge!(ports)
@@ -21,10 +21,10 @@ module Procodile
         Supervisor::Options.new(tag: options.tag)
       )
 
-      instances.map(&.to_struct)
+      StartProcessesResponse.new(instances.map(&.to_struct))
     end
 
-    private def stop(options : ControlHandler::Options) : Array(Instance::Config)
+    private def stop(options : ControlHandler::Options) : StopProcessesResponse
       instances = @supervisor.stop(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -32,10 +32,10 @@ module Procodile
         )
       )
 
-      instances.map(&.to_struct)
+      StopProcessesResponse.new(instances.map(&.to_struct))
     end
 
-    private def restart(options : ControlHandler::Options) : Array(Array(Instance::Config | Nil))
+    private def restart(options : ControlHandler::Options) : RestartProcessesResponse
       instances = @supervisor.restart(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -43,7 +43,17 @@ module Procodile
         )
       )
 
-      instances.map { |pair| pair.map { |instance| instance ? instance.to_struct : nil } }
+      RestartProcessesResponse.new(
+        instances.map do |pair|
+          previous_instance = pair[0]?
+          current_instance = pair[1]?
+
+          RestartChange.new(
+            previous_instance: previous_instance ? previous_instance.to_struct : nil,
+            current_instance: current_instance ? current_instance.to_struct : nil,
+          )
+        end
+      )
     end
 
     private def reload_config : OkResponse
@@ -52,14 +62,17 @@ module Procodile
       OkResponse.new(true)
     end
 
-    private def check_concurrency(options : ControlHandler::Options) : Hash(Symbol, Array(Instance::Config))
+    private def check_concurrency(options : ControlHandler::Options) : CheckConcurrencyResponse
       result = @supervisor.check_concurrency(
         Supervisor::Options.new(
           reload: options.reload
         )
       )
 
-      result.transform_values { |instances, _type| instances.map(&.to_struct) }
+      CheckConcurrencyResponse.new(
+        started_instances: result[:started].map(&.to_struct),
+        stopped_instances: result[:stopped].map(&.to_struct),
+      )
     end
 
     private def status : StatusReply
