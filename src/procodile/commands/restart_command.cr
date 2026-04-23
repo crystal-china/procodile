@@ -23,7 +23,7 @@ module Procodile
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
         process_names = configured_process_names_from_cli_option
-        removed_running_instances = [] of Instance::Config
+        removed_running_instances = [] of InstanceStatus
 
         if !process_names # 如果是全量 restart
           status = status_reply

@@ -13,9 +13,9 @@ module Procodile
   struct StartProcessesResponse
     include JSON::Serializable
 
-    getter started_instances : Array(Instance::Config)
+    getter started_instances : Array(InstanceStatus)
 
-    def initialize(@started_instances : Array(Instance::Config))
+    def initialize(@started_instances : Array(InstanceStatus))
     end
   end
 
@@ -23,9 +23,9 @@ module Procodile
   struct StopProcessesResponse
     include JSON::Serializable
 
-    getter stopped_instances : Array(Instance::Config)
+    getter stopped_instances : Array(InstanceStatus)
 
-    def initialize(@stopped_instances : Array(Instance::Config))
+    def initialize(@stopped_instances : Array(InstanceStatus))
     end
   end
 
@@ -33,12 +33,12 @@ module Procodile
   struct RestartChange
     include JSON::Serializable
 
-    getter previous_instance : Instance::Config?
-    getter current_instance : Instance::Config?
+    getter previous_instance : InstanceStatus?
+    getter current_instance : InstanceStatus?
 
     def initialize(
-      @previous_instance : Instance::Config?,
-      @current_instance : Instance::Config?,
+      @previous_instance : InstanceStatus?,
+      @current_instance : InstanceStatus?,
     )
     end
   end
@@ -57,12 +57,46 @@ module Procodile
   struct CheckConcurrencyResponse
     include JSON::Serializable
 
-    getter started_instances : Array(Instance::Config)
-    getter stopped_instances : Array(Instance::Config)
+    getter started_instances : Array(InstanceStatus)
+    getter stopped_instances : Array(InstanceStatus)
 
     def initialize(
-      @started_instances : Array(Instance::Config),
-      @stopped_instances : Array(Instance::Config),
+      @started_instances : Array(InstanceStatus),
+      @stopped_instances : Array(InstanceStatus),
+    )
+    end
+  end
+
+  # Represents one managed instance in control and status payloads.
+  struct InstanceStatus
+    include JSON::Serializable
+
+    getter description : String
+    getter pid : Int64?
+    getter respawns : Int32
+    getter status : Instance::Status
+    getter started_at : Int64?
+    getter last_finished_at : Int64?
+    getter last_exit_status : Int32?
+    getter last_run_duration : Float64?
+    getter tag : String?
+    getter port : Int32?
+    getter? foreground : Bool
+
+    def initialize(
+      @description : String,
+      @pid : Int64?,
+      @respawns : Int32,
+      @status : Instance::Status,
+      @started_at : Int64?,
+      @last_finished_at : Int64?,
+      @last_exit_status : Int32?,
+      @last_run_duration : Float64?,
+      @tag : String?,
+      @port : Int32?,
+
+      # foreground is used for supervisor, but add here for simplicity communication
+      @foreground : Bool = false,
     )
     end
   end
@@ -136,7 +170,7 @@ module Procodile
     getter root : String
     getter app_name : String
     getter supervisor : SupervisorStatus
-    getter instances : Hash(String, Array(Instance::Config))
+    getter instances : Hash(String, Array(InstanceStatus))
     getter processes : Array(ProcessStatus)
     getter runtime_issues : Array(IssueTracker::RuntimeIssue)
     getter environment_variables : Hash(String, String)
@@ -155,7 +189,7 @@ module Procodile
       @root : String,
       @app_name : String,
       @supervisor : SupervisorStatus,
-      @instances : Hash(String, Array(Instance::Config)),
+      @instances : Hash(String, Array(InstanceStatus)),
       @processes : Array(ProcessStatus),
       @runtime_issues : Array(IssueTracker::RuntimeIssue),
       @environment_variables : Hash(String, String),

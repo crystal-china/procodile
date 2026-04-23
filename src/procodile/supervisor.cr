@@ -159,7 +159,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    def to_status : SupervisorStatus
+    def to_supervisor_status : SupervisorStatus
       started_at = @started_at
 
       SupervisorStatus.new(

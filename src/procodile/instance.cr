@@ -364,11 +364,11 @@ Fix it, then run `#{suggested_command}`.
     #
     # Return this instance as a hash
     #
-    def to_struct : Instance::Config
+    def to_instance_status : InstanceStatus
       started_at = @started_at
       last_finished_at = @finished_at
 
-      Instance::Config.new(
+      InstanceStatus.new(
         description: description,
         pid: pid,
         respawns: respawns,
@@ -607,36 +607,4 @@ Fix it, then run `#{suggested_command}`.
     Failed
   end
 
-  struct Instance::Config
-    include JSON::Serializable
-
-    getter description : String
-    getter pid : Int64?
-    getter respawns : Int32
-    getter status : Instance::Status
-    getter started_at : Int64?
-    getter last_finished_at : Int64?
-    getter last_exit_status : Int32?
-    getter last_run_duration : Float64?
-    getter tag : String?
-    getter port : Int32?
-    getter? foreground : Bool
-
-    def initialize(
-      @description : String,
-      @pid : Int64?,
-      @respawns : Int32,
-      @status : Instance::Status,
-      @started_at : Int64?,
-      @last_finished_at : Int64?,
-      @last_exit_status : Int32?,
-      @last_run_duration : Float64?,
-      @tag : String?,
-      @port : Int32?,
-
-      # foreground is used for supervisor, but add here for simplicity communication
-      @foreground : Bool = false,
-    )
-    end
-  end
 end

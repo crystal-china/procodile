@@ -21,7 +21,7 @@ module Procodile
         Supervisor::Options.new(tag: options.tag)
       )
 
-      StartProcessesResponse.new(instances.map(&.to_struct))
+      StartProcessesResponse.new(instances.map(&.to_instance_status))
     end
 
     private def stop(options : ControlHandler::Options) : StopProcessesResponse
@@ -32,7 +32,7 @@ module Procodile
         )
       )
 
-      StopProcessesResponse.new(instances.map(&.to_struct))
+      StopProcessesResponse.new(instances.map(&.to_instance_status))
     end
 
     private def restart(options : ControlHandler::Options) : RestartProcessesResponse
@@ -49,8 +49,8 @@ module Procodile
           current_instance = pair[1]?
 
           RestartChange.new(
-            previous_instance: previous_instance ? previous_instance.to_struct : nil,
-            current_instance: current_instance ? current_instance.to_struct : nil,
+            previous_instance: previous_instance ? previous_instance.to_instance_status : nil,
+            current_instance: current_instance ? current_instance.to_instance_status : nil,
           )
         end
       )
@@ -70,30 +70,30 @@ module Procodile
       )
 
       CheckConcurrencyResponse.new(
-        started_instances: result[:started].map(&.to_struct),
-        stopped_instances: result[:stopped].map(&.to_struct),
+        started_instances: result[:started].map(&.to_instance_status),
+        stopped_instances: result[:stopped].map(&.to_instance_status),
       )
     end
 
     private def status : StatusReply
-      instances = {} of String => Array(Instance::Config)
+      instances = {} of String => Array(InstanceStatus)
       processes = [] of Procodile::Process
       seen_names = Set(String).new
 
       # 先使用配置文件初始化实例（可能是最新修改过的）
       config.processes.each do |_, process|
-        instances[process.name] = [] of Instance::Config
+        instances[process.name] = [] of InstanceStatus
         processes << process
         seen_names << process.name
       end
 
       # 合并正在运行但是配置中已经删除的实例
       @supervisor.processes.each do |process, process_instances|
-        instances[process.name] = process_instances.map(&.to_struct)
+        instances[process.name] = process_instances.map(&.to_instance_status)
         processes << process unless seen_names.includes?(process.name)
       end
 
-      processes = processes.map(&.to_struct)
+      processes = processes.map(&.to_process_status)
 
       loaded_at = config.loaded_at
 
@@ -102,7 +102,7 @@ module Procodile
         messages: process_manager.messages,
         root: config.root,
         app_name: config.app_name,
-        supervisor: @supervisor.to_status,
+        supervisor: @supervisor.to_supervisor_status,
         instances: instances,
         processes: processes,
         runtime_issues: issue_tracker.runtime_issues,

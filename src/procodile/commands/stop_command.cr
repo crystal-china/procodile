@@ -39,7 +39,6 @@ for #{scheduled_processes.map(&.name).join(", ")}."
           @options.stop_supervisor?,
         )
 
-        # 没有任何 Instance::Config 被 stop
         if response.stopped_instances.empty?
           if process_names
             if scheduled_processes.any?

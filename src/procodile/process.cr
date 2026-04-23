@@ -172,7 +172,7 @@ module Procodile
     #
     # Return a struct
     #
-    def to_struct : ProcessStatus
+    def to_process_status : ProcessStatus
       ProcessStatus.new(
         name: name,
         schedule: schedule,
