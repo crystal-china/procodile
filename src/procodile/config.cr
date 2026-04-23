@@ -186,16 +186,26 @@ Procfile. It will be removed when it is stopped."
     end
 
     private def suggested_command_prefix : String
+      parts = ["procodile"] of String
       current_root = Dir.current
-      return "procodile" if @root == current_root
 
-      suggested_root = if @root.starts_with?(current_root + "/")
-                         @root[current_root.size + 1..]
-                       else
-                         @root
-                       end
+      unless @root == current_root
+        parts << "-r #{suggest_path(@root, current_root)}"
+      end
 
-      "procodile -r #{suggested_root}"
+      if procfile_path != File.join(@root, "Procfile")
+        parts << "--procfile #{suggest_path(procfile_path, current_root)}"
+      end
+
+      parts.join(' ')
+    end
+
+    private def suggest_path(path : String, current_root : String) : String
+      if path.starts_with?(current_root + "/")
+        path[(current_root.size + 1)..]
+      else
+        path
+      end
     end
 
     private def create_process(
