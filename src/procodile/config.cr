@@ -143,7 +143,7 @@ Procfile. It will be removed when it is stopped."
       po.merge(local_po)
     end
 
-    def pid_root : String?
+    def pid_root : String
       File.expand_path(local_options.pid_root || options.pid_root || "pids", self.root)
     end
 
