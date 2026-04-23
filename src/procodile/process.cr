@@ -3,7 +3,7 @@ require "./instance"
 
 module Procodile
   class Process
-    @@mutex = Mutex.new
+    @instance_mutex = Mutex.new
     @instance_index : Int32 = 0
 
     getter config : Config
@@ -209,7 +209,7 @@ module Procodile
     # Increase the instance index and return
     #
     private def instance_id : Int32
-      @@mutex.synchronize do
+      @instance_mutex.synchronize do
         @instance_index = 0 if @instance_index == 10000
         @instance_index += 1
       end
