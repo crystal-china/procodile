@@ -174,21 +174,21 @@ module Procodile
     #
     def to_struct : ProcessStatus
       ProcessStatus.new(
-        name: self.name,
-        schedule: self.schedule,
-        random_delay: self.random_delay,
+        name: name,
+        schedule: schedule,
+        random_delay: random_delay,
         last_started_at: @last_started_at ? @last_started_at.not_nil!.to_unix : nil,
         last_finished_at: @last_finished_at ? @last_finished_at.not_nil!.to_unix : nil,
         last_exit_status: @last_exit_status,
         last_run_duration: @last_run_duration,
-        log_color: self.log_color,
-        quantity: self.quantity,
-        max_respawns: self.max_respawns,
-        respawn_window: self.respawn_window,
-        command: self.command,
-        restart_mode: self.restart_mode,
-        log_path: self.log_path,
-        removed: self.removed? ? true : false,
+        log_color: log_color,
+        quantity: quantity,
+        max_respawns: max_respawns,
+        respawn_window: respawn_window,
+        command: command,
+        restart_mode: restart_mode,
+        log_path: log_path,
+        removed: removed? ? true : false,
         proxy_port: proxy_port,
         proxy_address: proxy_address,
       )
@@ -197,11 +197,11 @@ module Procodile
     #
     # Is the given quantity suitable for this process?
     #
-    def correct_quantity?(quantity : Int32) : Bool
-      if self.restart_mode == "start-term"
-        quantity >= self.quantity
+    def correct_quantity?(actual_quantity : Int32) : Bool
+      if restart_mode == "start-term"
+        actual_quantity >= quantity
       else
-        self.quantity == quantity
+        quantity == actual_quantity
       end
     end
 

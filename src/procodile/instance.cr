@@ -64,8 +64,8 @@ module Procodile
         allocate_port
       elsif (proposed_port = @process.allocate_port_from) && @process.restart_mode != "start-term"
         # Allocate ports to this process sequentially from the starting port
-        process = @supervisor.processes[@process]?
-        allocated_ports = process ? process.select(&.running?).map(&.port) : [] of Int32
+        process_instances = @supervisor.processes[@process]?
+        allocated_ports = process_instances ? process_instances.select(&.running?).map(&.port) : [] of Int32
 
         while !@port
           @port = proposed_port unless allocated_ports.includes?(proposed_port)
@@ -73,9 +73,9 @@ module Procodile
         end
       end
 
-      if self.process.log_path && @supervisor.run_options.force_single_log? != true
-        FileUtils.mkdir_p(File.dirname(self.process.log_path))
-        log_destination = File.open(self.process.log_path, "a")
+      if @process.log_path && @supervisor.run_options.force_single_log? != true
+        FileUtils.mkdir_p(File.dirname(@process.log_path))
+        log_destination = File.open(@process.log_path, "a")
         io = nil
       else
         reader, writer = IO.pipe
@@ -131,10 +131,10 @@ module Procodile
 
       issue_tracker.resolve(:process_failed_permanently, @process.name) unless @process.scheduled?
 
-      if self.process.log_path && io.nil?
+      if @process.log_path && io.nil?
         Procodile.log(
           description,
-          "Logging to #{self.process.log_path}",
+          "Logging to #{@process.log_path}",
           @process.log_color
         )
       end
@@ -236,7 +236,7 @@ If this command is meant to run once, it may not be suitable as a normal Procfil
           )
           on_stop
           new_instance = @process.create_instance(@supervisor)
-          new_instance.port = self.port
+          new_instance.port = port
           new_instance.start
         end
 
@@ -264,7 +264,7 @@ If this command is meant to run once, it may not be suitable as a normal Procfil
         stop
 
         new_instance = @process.create_instance(@supervisor)
-        new_instance.port = self.port
+        new_instance.port = port
 
         wg.spawn do
           while running?
@@ -369,15 +369,15 @@ Fix it, then run `#{suggested_command}`.
       last_finished_at = @finished_at
 
       Instance::Config.new(
-        description: self.description,
-        pid: self.pid,
-        respawns: self.respawns,
-        status: self.status,
+        description: description,
+        pid: pid,
+        respawns: respawns,
+        status: status,
         started_at: started_at ? started_at.to_unix : nil,
         last_finished_at: last_finished_at ? last_finished_at.to_unix : nil,
         last_exit_status: @last_exit_status,
         last_run_duration: @last_run_duration,
-        tag: self.tag,
+        tag: tag,
         port: @port,
         foreground: @supervisor.run_use_foreground?
       )
@@ -468,7 +468,7 @@ Fix it, then run `#{suggested_command}`.
         attempts += 1
         possible_port = rand(20000..29999)
 
-        if self.port_available?(possible_port)
+        if port_available?(possible_port)
           Procodile.log(
             description,
             "Allocated port as #{possible_port}",
@@ -506,7 +506,7 @@ Fix it, then run `#{suggested_command}`.
     # Tidy up when this process isn't needed any more
     #
     private def tidy : Nil
-      FileUtils.rm_rf(self.pid_file_path)
+      FileUtils.rm_rf(pid_file_path)
       Procodile.log(description, "Removed PID file", @process.log_color)
     end
 
@@ -550,8 +550,8 @@ Fix it, then run `#{suggested_command}`.
       vars = @process.environment_variables(@supervisor)
 
       vars = vars.merge({
-        "PROC_NAME" => self.description,
-        "PID_FILE"  => self.pid_file_path,
+        "PROC_NAME" => description,
+        "PID_FILE"  => pid_file_path,
         "APP_ROOT"  => @process.config.root,
       })
 
@@ -564,11 +564,11 @@ Fix it, then run `#{suggested_command}`.
     # Update the locally cached PID from that stored on the file system.
     #
     private def update_pid : Bool
-      pid_from_file = self.pid_from_file
+      file_pid = pid_from_file
 
-      if pid_from_file && pid_from_file != @pid
-        @pid = pid_from_file
-        @started_at = File.info(self.pid_file_path).modification_time
+      if file_pid && file_pid != @pid
+        @pid = file_pid
+        @started_at = File.info(pid_file_path).modification_time
 
         Procodile.log(
           description,
