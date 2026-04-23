@@ -124,9 +124,9 @@ describe Procodile::Config do
         File.write(procfile_path, %(app1: sleep 60
 ))
 
-        config = Procodile::Config.new(app_root, procfile_path)
+        custom_config = Procodile::Config.new(app_root, procfile_path)
 
-        config.suggested_command("reload").should eq %(procodile -r #{app_root} --procfile #{procfile_path} reload)
+        custom_config.suggested_command("reload").should eq %(procodile -r #{app_root} --procfile #{procfile_path} reload)
       ensure
         FileUtils.rm_rf(app_root)
       end
