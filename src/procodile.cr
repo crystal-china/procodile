@@ -9,83 +9,6 @@ module Procodile
               ")"
              }}
 
-  private def self.probe_command(original_argv : Array(String), cli : CLI) : Tuple(String?, CLI::Command?, Array(String))
-    probe_argv = original_argv.dup
-
-    OptionParser.parse(probe_argv) do |opt|
-      opt.on("-r", "--root PATH", "The path to the root of your application") { }
-      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }
-      opt.on("-h", "--help", "Show this help message and exit") { }
-      opt.on("-v", "--version", "Show version") { }
-
-      # 默认行为是，存在 invalid option （- 开头的）会炸，例如，当我传递一个子命令选项
-      # 但是我这里并没有编写 opt 处理它
-      opt.invalid_option { }
-
-      opt.unknown_args do |args|
-        probe_argv = args
-      end
-    end
-
-    command = probe_argv[0]?
-    valid_command = cli.class.commands[command]?
-
-    {command, valid_command, probe_argv}
-  end
-
-  private def self.parse_options(valid_command : CLI::Command?, cli : CLI) : Tuple(Hash(Symbol, String), Array(String))
-    options = {} of Symbol => String
-    remaining_args = [] of String
-
-    OptionParser.parse do |opt|
-      # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
-      if valid_command && (option_proc = valid_command.options)
-        option_proc.call(opt, cli)
-      end
-
-      if valid_command
-        opt.banner = "Usage: procodile #{valid_command.name} [options]\n"
-      else
-        opt.banner = "Usage: procodile command [options]"
-      end
-
-      opt.separator
-      opt.separator("Global options: (Can be used before or after the sub commands)\n")
-
-      opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
-        options[:root] = root
-      end
-
-      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
-        options[:procfile] = path
-      end
-
-      opt.on("-h", "--help", "Show this help message and exit") do
-        STDERR.puts opt
-
-        exit 0 if valid_command
-      end
-
-      opt.on("-v", "--version", "Show version\n") do
-        abort VERSION, status: 0
-      end
-
-      opt.invalid_option do |flag|
-        abort "Invalid option: #{flag}\n\n#{opt}"
-      end
-
-      opt.missing_option do |flag|
-        abort "Missing option for #{flag}\n\n#{opt}"
-      end
-
-      opt.unknown_args do |args|
-        remaining_args = args
-      end
-    end
-
-    {options, remaining_args}
-  end
-
   # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
   # ORIGINAL_ARGV 这份快照也不变
   ORIGINAL_ARGV = ARGV.dup
@@ -193,5 +116,82 @@ module Procodile
     cli.dispatch(command || "help")
   rescue ex : Error
     abort "Error: #{ex.message}".colorize.red
+  end
+
+  private def self.probe_command(original_argv : Array(String), cli : CLI) : Tuple(String?, CLI::Command?, Array(String))
+    probe_argv = original_argv.dup
+
+    OptionParser.parse(probe_argv) do |opt|
+      opt.on("-r", "--root PATH", "The path to the root of your application") { }
+      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }
+      opt.on("-h", "--help", "Show this help message and exit") { }
+      opt.on("-v", "--version", "Show version") { }
+
+      # 默认行为是，存在 invalid option （- 开头的）会炸，例如，当我传递一个子命令选项
+      # 但是我这里并没有编写 opt 处理它
+      opt.invalid_option { }
+
+      opt.unknown_args do |args|
+        probe_argv = args
+      end
+    end
+
+    command = probe_argv[0]?
+    valid_command = cli.class.commands[command]?
+
+    {command, valid_command, probe_argv}
+  end
+
+  private def self.parse_options(valid_command : CLI::Command?, cli : CLI) : Tuple(Hash(Symbol, String), Array(String))
+    options = {} of Symbol => String
+    remaining_args = [] of String
+
+    OptionParser.parse do |opt|
+      # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
+      if valid_command && (option_proc = valid_command.options)
+        option_proc.call(opt, cli)
+      end
+
+      if valid_command
+        opt.banner = "Usage: procodile #{valid_command.name} [options]\n"
+      else
+        opt.banner = "Usage: procodile command [options]"
+      end
+
+      opt.separator
+      opt.separator("Global options: (Can be used before or after the sub commands)\n")
+
+      opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
+        options[:root] = root
+      end
+
+      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
+        options[:procfile] = path
+      end
+
+      opt.on("-h", "--help", "Show this help message and exit") do
+        STDERR.puts opt
+
+        exit 0 if valid_command
+      end
+
+      opt.on("-v", "--version", "Show version\n") do
+        abort VERSION, status: 0
+      end
+
+      opt.invalid_option do |flag|
+        abort "Invalid option: #{flag}\n\n#{opt}"
+      end
+
+      opt.missing_option do |flag|
+        abort "Missing option for #{flag}\n\n#{opt}"
+      end
+
+      opt.unknown_args do |args|
+        remaining_args = args
+      end
+    end
+
+    {options, remaining_args}
   end
 end
