@@ -27,7 +27,7 @@ describe Procodile::CLI do
       command = cli.class.commands["help"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "help"
-      command.description.should eq "Shows this help output"
+      command.description.should eq "Show this help output"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
       command.callable.call
@@ -37,7 +37,7 @@ describe Procodile::CLI do
       command = cli.class.commands["kill"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "kill"
-      command.description.should eq "Forcefully kill all known processes"
+      command.description.should eq "Forcefully kill all managed processes"
       command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
       command.callable.should be_a Proc(Nil)
       command.callable.call
