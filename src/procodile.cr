@@ -9,15 +9,7 @@ module Procodile
               ")"
              }}
 
-  # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
-  # ORIGINAL_ARGV 这份快照也不变
-  ORIGINAL_ARGV = ARGV.dup
-  cli = CLI.new
-
-  private def self.probe_command(
-               original_argv : Array(String),
-               cli : CLI,
-             ) : Tuple(String?, CLI::Command?, Array(String))
+  private def self.probe_command(original_argv : Array(String), cli : CLI) : Tuple(String?, CLI::Command?, Array(String))
     probe_argv = original_argv.dup
 
     OptionParser.parse(probe_argv) do |opt|
@@ -41,7 +33,65 @@ module Procodile
     {command, valid_command, probe_argv}
   end
 
+  private def self.parse_options(valid_command : CLI::Command?, cli : CLI) : Tuple(Hash(Symbol, String), Array(String))
+    options = {} of Symbol => String
+    remaining_args = [] of String
+
+    OptionParser.parse do |opt|
+      # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
+      if valid_command && (option_proc = valid_command.options)
+        option_proc.call(opt, cli)
+      end
+
+      if valid_command
+        opt.banner = "Usage: procodile #{valid_command.name} [options]\n"
+      else
+        opt.banner = "Usage: procodile command [options]"
+      end
+
+      opt.separator
+      opt.separator("Global options: (Can be used before or after the sub commands)\n")
+
+      opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
+        options[:root] = root
+      end
+
+      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
+        options[:procfile] = path
+      end
+
+      opt.on("-h", "--help", "Show this help message and exit") do
+        STDERR.puts opt
+
+        exit 0 if valid_command
+      end
+
+      opt.on("-v", "--version", "Show version\n") do
+        abort VERSION, status: 0
+      end
+
+      opt.invalid_option do |flag|
+        abort "Invalid option: #{flag}\n\n#{opt}"
+      end
+
+      opt.missing_option do |flag|
+        abort "Missing option for #{flag}\n\n#{opt}"
+      end
+
+      opt.unknown_args do |args|
+        remaining_args = args
+      end
+    end
+
+    {options, remaining_args}
+  end
+
+  # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
+  # ORIGINAL_ARGV 这份快照也不变
+  ORIGINAL_ARGV = ARGV.dup
+  cli = CLI.new
   command, valid_command, probe_argv = probe_command(ORIGINAL_ARGV, cli)
+  options, remaining_args = parse_options(valid_command, cli)
 
   class Error < Exception
   end
@@ -52,55 +102,6 @@ module Procodile
 
   private def self.bin_path : String
     File.join(root, "bin", "procodile")
-  end
-
-  options = {} of Symbol => String
-  remaining_args = [] of String
-
-  OptionParser.parse do |opt|
-    # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
-    if valid_command && (option_proc = valid_command.options)
-      option_proc.call(opt, cli)
-    end
-
-    if valid_command
-      opt.banner = "Usage: procodile #{command} [options]\n"
-    else
-      opt.banner = "Usage: procodile command [options]"
-    end
-
-    opt.separator
-    opt.separator("Global options: (Can be used before or after the sub commands)\n")
-
-    opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
-      options[:root] = root
-    end
-
-    opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
-      options[:procfile] = path
-    end
-
-    opt.on("-h", "--help", "Show this help message and exit") do
-      STDERR.puts opt
-
-      exit 0 if valid_command
-    end
-
-    opt.on("-v", "--version", "Show version\n") do
-      abort VERSION, status: 0
-    end
-
-    opt.invalid_option do |flag|
-      abort "Invalid option: #{flag}\n\n#{opt}"
-    end
-
-    opt.missing_option do |flag|
-      abort "Missing option for #{flag}\n\n#{opt}"
-    end
-
-    opt.unknown_args do |args|
-      remaining_args = args
-    end
   end
 
   command_args = if valid_command && remaining_args.size > 1
