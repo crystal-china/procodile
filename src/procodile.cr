@@ -204,12 +204,4 @@ module Procodile
       )
     end
   end
-
-  private def self.root : String
-    File.expand_path("..", __DIR__)
-  end
-
-  private def self.bin_path : String
-    File.join(root, "bin", "procodile")
-  end
 end
