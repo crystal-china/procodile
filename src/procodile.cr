@@ -9,23 +9,15 @@ module Procodile
               ")"
              }}
 
+  class Error < Exception
+  end
+
   # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
   # ORIGINAL_ARGV 这份快照也不变
   ORIGINAL_ARGV = ARGV.dup
   cli = CLI.new
-  command, valid_command, probe_argv = probe_command(ORIGINAL_ARGV, cli)
+  command, valid_command, _probe_argv = probe_command(ORIGINAL_ARGV, cli)
   options, remaining_args = parse_options(valid_command, cli)
-
-  class Error < Exception
-  end
-
-  private def self.root : String
-    File.expand_path("..", __DIR__)
-  end
-
-  private def self.bin_path : String
-    File.join(root, "bin", "procodile")
-  end
 
   command_args = if valid_command && remaining_args.size > 1
                    remaining_args[1..]
@@ -35,61 +27,8 @@ module Procodile
 
   cli.options.command_args = command_args
 
-  # Get the global configuration file data
-  global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
-
-  global_config = if File.file?(global_config_path)
-                    global_config_yaml = File.read(global_config_path)
-                    global_config_node = YAML.parse(global_config_yaml)
-
-                    if global_config_node.raw.is_a?(Array)
-                      Array(Config::GlobalOption).from_yaml(global_config_yaml)
-                    elsif global_config_node.raw.is_a?(Hash)
-                      [Config::GlobalOption.from_yaml(global_config_yaml)]
-                    else
-                      raise Error.new("Invalid global configuration format in #{global_config_path}")
-                    end
-                  else
-                    [] of Config::GlobalOption
-                  end
-
-  # Create a determination to work out where we want to load our app from
-  ap = AppDetermination.new(
-    FileUtils.pwd,
-    options[:root]?,
-    options[:procfile]?,
-    global_config
-  )
-
-  if ap.ambiguous?
-    if (app_id = ENV["PROCODILE_APP_ID"]?)
-      ap.set_app_id_and_find_root_and_procfile(app_id.to_i)
-    elsif ap.app_options.empty?
-      abort "Error: Could not find Procfile in #{FileUtils.pwd}/Procfile".colorize.red
-    else
-      puts "There are multiple applications configured in #{global_config_path}"
-      puts "Choose an application:".colorize.light_gray.on_magenta
-
-      ap.app_options.each do |i, app|
-        col = i % 3
-        print "#{(i + 1)}) #{app}"[0, 28].ljust(col != 2 ? 30 : 0, ' ')
-        if col == 2 || i == ap.app_options.size - 1
-          puts
-        end
-      end
-
-      input = STDIN.gets
-      if !input.nil?
-        app_id = input.strip.to_i - 1
-
-        if ap.app_options[app_id]?
-          ap.set_app_id_and_find_root_and_procfile(app_id)
-        else
-          abort "Invalid app number: #{app_id + 1}"
-        end
-      end
-    end
-  end
+  global_config = load_global_config
+  ap = determine_app(FileUtils.pwd, options, global_config)
 
   begin
     if valid_command && command.in?({"start", "restart", "stop"}) && command_args.any?
@@ -193,5 +132,75 @@ module Procodile
     end
 
     {options, remaining_args}
+  end
+
+  private def self.load_global_config : Array(Config::GlobalOption)
+    global_config_path = ENV["PROCODILE_CONFIG"]? || "/etc/procodile"
+
+    if File.file?(global_config_path)
+      global_config_yaml = File.read(global_config_path)
+      global_config_node = YAML.parse(global_config_yaml)
+
+      if global_config_node.raw.is_a?(Array)
+        Array(Config::GlobalOption).from_yaml(global_config_yaml)
+      elsif global_config_node.raw.is_a?(Hash)
+        [Config::GlobalOption.from_yaml(global_config_yaml)]
+      else
+        raise Error.new("Invalid global configuration format in #{global_config_path}")
+      end
+    else
+      [] of Config::GlobalOption
+    end
+  end
+
+  private def self.determine_app(pwd : String, options : Hash(Symbol, String), global_config : Array(Config::GlobalOption)) : AppDetermination
+    # Create a determination to work out where we want to load our app from
+    ap = AppDetermination.new(
+      pwd,
+      options[:root]?,
+      options[:procfile]?,
+      global_config
+    )
+
+    if ap.ambiguous?
+      if (app_id = ENV["PROCODILE_APP_ID"]?)
+        ap.set_app_id_and_find_root_and_procfile(app_id.to_i)
+      elsif ap.app_options.empty?
+        abort "Error: Could not find Procfile in #{pwd}/Procfile".colorize.red
+      else
+        puts "There are multiple applications configured in #{ENV["PROCODILE_CONFIG"]? || "/etc/
+             procodile"}"
+        puts "Choose an application:".colorize.light_gray.on_magenta
+
+        ap.app_options.each do |i, app|
+          col = i % 3
+          print "#{(i + 1)}) #{app}"[0, 28].ljust(col != 2 ? 30 : 0, ' ')
+          if col == 2 || i == ap.app_options.size - 1
+            puts
+          end
+        end
+
+        input = STDIN.gets
+        if !input.nil?
+          app_id = input.strip.to_i - 1
+
+          if ap.app_options[app_id]?
+            ap.set_app_id_and_find_root_and_procfile(app_id)
+          else
+            abort "Invalid app number: #{app_id + 1}"
+          end
+        end
+      end
+    end
+
+    ap
+  end
+
+  private def self.root : String
+    File.expand_path("..", __DIR__)
+  end
+
+  private def self.bin_path : String
+    File.join(root, "bin", "procodile")
   end
 end

@@ -606,5 +606,4 @@ Fix it, then run `#{suggested_command}`.
     Running
     Failed
   end
-
 end
