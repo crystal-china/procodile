@@ -12,32 +12,37 @@ module Procodile
   class Error < Exception
   end
 
-  # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
-  # ORIGINAL_ARGV 这份快照也不变
   ORIGINAL_ARGV = ARGV.dup
-  cli = CLI.new
-  command, valid_command, _probe_argv = probe_command(ORIGINAL_ARGV, cli)
-  options, remaining_args = parse_options(valid_command, cli)
 
-  command_args = if valid_command && remaining_args.size > 1
-                   remaining_args[1..]
-                 else
-                   [] of String
-                 end
+  def self.run
+    # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
+    # ORIGINAL_ARGV 这份快照也不变
+    cli = CLI.new
+    command, valid_command, _probe_argv = probe_command(ORIGINAL_ARGV, cli)
+    options, remaining_args = parse_options(valid_command, cli)
 
-  cli.options.command_args = command_args
+    command_args = if valid_command && remaining_args.size > 1
+                     remaining_args[1..]
+                   else
+                     [] of String
+                   end
 
-  global_config = load_global_config
-  ap = if command_requires_app?(valid_command)
-         determine_app(FileUtils.pwd, options, global_config)
-       end
+    cli.options.command_args = command_args
 
-  begin
-    configure_cli_for_command(cli, ap, valid_command, command_args)
-    cli.dispatch(command || "help")
-  rescue ex : Error
-    abort "Error: #{ex.message}".colorize.red
+    global_config = load_global_config
+    ap = if command_requires_app?(valid_command)
+           determine_app(FileUtils.pwd, options, global_config)
+         end
+
+    begin
+      configure_cli_for_command(cli, ap, valid_command, command_args)
+      cli.dispatch(command || "help")
+    rescue ex : Error
+      abort "Error: #{ex.message}".colorize.red
+    end
   end
+
+  run
 
   private def self.probe_command(original_argv : Array(String), cli : CLI) : Tuple(String?, CLI::Command?, Array(String))
     probe_argv = original_argv.dup
