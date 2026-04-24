@@ -38,7 +38,7 @@ module Procodile
         end
 
         response = ControlClient.restart(
-          @config.sock_path,
+          config.sock_path,
           process_names,
           @options.tag,
         )

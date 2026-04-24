@@ -13,7 +13,7 @@ module Procodile
       private def check_concurrency : Nil
         if supervisor_running?
           reply = ControlClient.check_concurrency(
-            @config.sock_path,
+            config.sock_path,
             @options.reload?
           )
 

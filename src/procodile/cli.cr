@@ -19,7 +19,8 @@ module Procodile
       {:status, "Show the current status of processes"},
       {:console, "Open a console within the environment"},
     ]
-    property config : Config
+
+    @config : Config?
     property options : Options = Options.new
 
     class_getter commands : Hash(String, Command) { {} of String => Command }
@@ -31,7 +32,6 @@ module Procodile
       {% end %}
 
         def initialize
-          @config = uninitialized Config
           {% for e in COMMANDS %}
             {% name = e[0] %}
             {% class_name = e[0].camelcase %}
@@ -62,6 +62,14 @@ module Procodile
       else
         raise Error.new("Invalid command `#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
       end
+    end
+
+    def config=(new_config : Config) : Config
+      @config = new_config
+    end
+
+    def config : Config
+      @config.not_nil!
     end
 
     private def print_runtime_issues(command : String) : Nil
@@ -109,7 +117,7 @@ module Procodile
 
     # 新增：检查 control socket 是否可连接（带短暂等待，避免启动竞态）
     private def control_socket_ready?(*, timeout : Time::Span = 300.milliseconds, interval : Time::Span = 25.milliseconds) : Bool
-      sock_path = @config.sock_path
+      sock_path = config.sock_path
       deadline = Time.instant + timeout
 
       while Time.instant < deadline
@@ -132,7 +140,7 @@ module Procodile
     end
 
     private def supervisor_running? : Bool
-      pid_path = @config.supervisor_pid_path
+      pid_path = config.supervisor_pid_path
 
       return false unless File.exists?(pid_path)
 
@@ -159,12 +167,12 @@ module Procodile
 
     private def configured_process_names_from_cli_option : Array(String)?
       if (processes = process_names_from_cli_option)
-        @config.reload
+        config.reload
 
         processes.each do |process|
           process_name = process.split('.', 2).first
 
-          if !@config.processes.has_key?(process_name.to_s)
+          if !config.processes.has_key?(process_name.to_s)
             raise_unknown_or_removed_process_error(process_name.to_s)
           end
         end
@@ -192,13 +200,13 @@ module Procodile
 
       process_names.compact_map do |name|
         process_name = name.split('.', 2).first
-        process = @config.processes[process_name]?
+        process = config.processes[process_name]?
         process if process && process.scheduled?
       end
     end
 
     private def status_reply : StatusReply
-      ControlClient.status(@config.sock_path)
+      ControlClient.status(config.sock_path)
     end
 
     struct Command

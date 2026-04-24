@@ -106,7 +106,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
 
           # The supervisor isn't actually running. We need to start it before
           # processes can be begin being processed
-          Supervisor.start(@config, @options) do |supervisor|
+          Supervisor.start(config, @options) do |supervisor|
             supervisor.start_processes(
               process_names,
               Supervisor::Options.new(tag: @options.tag)
@@ -133,7 +133,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
         end
 
         response = ControlClient.start_processes(
-          @config.sock_path,
+          config.sock_path,
           process_names,
           @options.tag,
           @options.port_allocations,

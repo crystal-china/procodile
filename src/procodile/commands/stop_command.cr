@@ -34,7 +34,7 @@ module Procodile
         disabled_scheduling_message = "Future scheduling was disabled \
 for #{scheduled_processes.map(&.name).join(", ")}."
         response = ControlClient.stop(
-          @config.sock_path,
+          config.sock_path,
           process_names,
           @options.stop_supervisor?,
         )

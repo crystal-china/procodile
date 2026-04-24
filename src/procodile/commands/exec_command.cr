@@ -7,7 +7,7 @@ module Procodile
       private def exec(command : String? = nil) : Nil
         desired_command = command || @options.command_args.try(&.join(" ")) || ""
 
-        if (prefix = @config.exec_prefix)
+        if (prefix = config.exec_prefix)
           desired_command = ([prefix, desired_command].join(" "))
         end
 
@@ -15,7 +15,7 @@ module Procodile
           raise Error.new "You need to specify a command to run \
 (e.g. procodile run -- rake db:migrate)"
         else
-          environment = @config.environment_variables
+          environment = config.environment_variables
 
           unless ENV["PROCODILE_EXEC_QUIET"]?.try(&.to_i) == 1
             puts "Running with #{desired_command.colorize.yellow}"
@@ -31,7 +31,7 @@ module Procodile
               argv[0],
               argv[1..],
               env: environment,
-              chdir: @config.root
+              chdir: config.root
             )
           rescue e : RuntimeError
             raise Error.new e.message

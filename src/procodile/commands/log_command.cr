@@ -27,13 +27,13 @@ module Procodile
 
       private def log : Nil
         if (process_opts = options.process)
-          if (process = @config.processes[process_opts])
+          if (process = config.processes[process_opts])
             log_path = process.log_path
           else
             raise Error.new "Invalid process name '#{process_opts}'"
           end
         else
-          log_path = @config.log_path
+          log_path = config.log_path
         end
 
         if File.exists?(log_path)
