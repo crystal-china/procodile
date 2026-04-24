@@ -5,7 +5,7 @@ module Procodile
         opts.on(
           "-p",
           "--processes a,b,c",
-          "Only restart the listed processes or process types"
+          "Restart only the listed processes or process types"
         ) do |processes|
           cli.options.processes = processes
         end
@@ -13,7 +13,7 @@ module Procodile
         opts.on(
           "-t",
           "--tag TAGNAME",
-          "Tag all started processes with the given tag"
+          "Tag all newly started processes with the given tag"
         ) do |tag|
           cli.options.tag = tag
         end

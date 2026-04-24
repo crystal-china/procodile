@@ -6,7 +6,7 @@ module Procodile
 
       private def help : Nil
         puts "Welcome to Procodile v#{VERSION}".colorize.light_gray.on_magenta
-        puts "For documentation see https://adam.ac/procodile."
+        puts "For documentation see https://github.com/crystal-china/procodile/wiki."
         puts
 
         puts "The following commands are supported:"
@@ -20,7 +20,7 @@ module Procodile
 
         puts
         puts "For details for the options available for each command, use the --help option."
-        puts "For example 'procodile start --help'."
+        puts "For example `procodile start --help`."
       end
     end
   end

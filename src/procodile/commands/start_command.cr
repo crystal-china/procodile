@@ -21,14 +21,14 @@ module Procodile
           cli.options.foreground = true
         end
 
-        opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
+        opts.on("-x", "--proxy", "Enable the Procodile proxy service") do
           cli.options.proxy = true
         end
 
         opts.on(
           "-p",
           "--processes a,b,c",
-          "Only start the listed processes or process types"
+          "Start only the listed processes or process types"
         ) do |processes|
           cli.options.processes = processes
         end
@@ -50,14 +50,14 @@ module Procodile
 
         opts.on(
           "--env-file [ENV_FILE]",
-          "Read from env file, default: (.env)"
+          "Read environment variables from a file (default: .env)"
         ) do |env_file|
           cli.options.env_file = env_file.presence || ".env"
         end
 
         opts.on(
           "--no-supervisor",
-          "Do not start a supervisor if its not running"
+          "Do not start the supervisor if it is not running"
         ) do
           cli.options.start_supervisor = false
         end
@@ -78,7 +78,7 @@ module Procodile
 
         opts.on(
           "--ports PROCESSES",
-          "Choose ports to allocate to processes"
+          "Specify port allocations for processes"
         ) do |processes|
           cli.options.port_allocations = processes.split(",")
             .each_with_object({} of String => Int32) do |line, hash|

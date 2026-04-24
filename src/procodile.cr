@@ -80,13 +80,13 @@ module Procodile
       end
 
       opt.separator
-      opt.separator("Global options: (Can be used before or after the sub commands)\n")
+      opt.separator("Global options (can be used before or after the subcommand):\n")
 
       opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
         options[:root] = root
       end
 
-      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") do |path|
+      opt.on("--procfile PATH", "The path to the Procfile (default: Procfile)") do |path|
         options[:procfile] = path
       end
 
@@ -96,7 +96,7 @@ module Procodile
         exit 0 if valid_command
       end
 
-      opt.on("-v", "--version", "Show version\n") do
+      opt.on("-v", "--version", "Show the version and exit\n") do
         abort VERSION, status: 0
       end
 

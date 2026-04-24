@@ -4,14 +4,14 @@ module Procodile
       OPTIONS = ->(opts : OptionParser, cli : CLI) do
         opts.on(
           "-f",
-          "Wait for additional data and display it straight away"
+          "Follow the log output"
         ) do
           cli.options.follow = true
         end
 
         opts.on(
           "-n LINES",
-          "The number of previous lines to return"
+          "Show the last N lines"
         ) do |lines|
           cli.options.lines = lines.to_i
         end
@@ -19,7 +19,7 @@ module Procodile
         opts.on(
           "-p PROCESS",
           "--process PROCESS",
-          "Show the log for a given process (rather than procodile)"
+          "Show the log for the given process instead of Procodile itself"
         ) do |process|
           cli.options.process = process
         end

@@ -6,8 +6,8 @@ require "./commands/*"
 module Procodile
   class CLI
     COMMANDS = [
-      {:help, "Shows this help output"},
-      {:kill, "Forcefully kill all known processes"},
+      {:help, "Show this help output"},
+      {:kill, "Forcefully kill all managed processes"},
       {:start, "Starts processes and/or the supervisor"},
       {:stop, "Stops processes and/or the supervisor"},
       {:exec, "Execute a command within the environment"},

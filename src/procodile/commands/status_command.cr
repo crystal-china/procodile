@@ -4,21 +4,21 @@ module Procodile
       OPTIONS = ->(opts : OptionParser, cli : CLI) do
         opts.on(
           "--json",
-          "Return the status as a JSON hash"
+          "Return the status as JSON"
         ) do
           cli.options.json = true
         end
 
         opts.on(
           "--json-pretty",
-          "Return the status as a JSON hash printed nicely"
+          "Return the status as pretty-printed JSON"
         ) do
           cli.options.json_pretty = true
         end
 
         opts.on(
           "--simple",
-          "Return overall status"
+          "Show a simplified overall status"
         ) do
           cli.options.simple = true
         end
