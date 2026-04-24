@@ -3,10 +3,10 @@ require "./procodile/cli"
 
 module Procodile
   VERSION = {{
-              `shards version "#{__DIR__}"`.chomp.stringify +
-              " (rev " +
-              `git rev-parse --short HEAD`.chomp.stringify +
-              ")"
+               `shards version "#{__DIR__}"`.chomp.stringify +
+                 " (rev " +
+                 `git rev-parse --short HEAD`.chomp.stringify +
+                 ")"
              }}
 
   class Error < Exception
@@ -31,27 +31,7 @@ module Procodile
   ap = determine_app(FileUtils.pwd, options, global_config)
 
   begin
-    if valid_command && command.in?({"start", "restart", "stop"}) && command_args.any?
-      raise Error.new "Invalid argument(s) for `#{command}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
-    end
-
-    if valid_command && valid_command != "help"
-      cli.config = Config.new(ap.root || "", ap.procfile)
-
-      user = cli.config.user
-
-      if user && user != ENV["USER"]
-        STDERR.puts "Procodile must be run as #{user}. Re-executing as #{cli.config.user}...".colorize.red
-
-        exe = ::Process.executable_path || $0
-
-        ::Process.exec(
-          "sudo",
-          ["-H", "-u", user, "--", exe] + ORIGINAL_ARGV
-        )
-      end
-    end
-
+    configure_cli_for_command(cli, ap, valid_command, command_args)
     cli.dispatch(command || "help")
   rescue ex : Error
     abort "Error: #{ex.message}".colorize.red
@@ -158,8 +138,8 @@ module Procodile
     ap = AppDetermination.new(
       pwd,
       options[:root]?,
-      options[:procfile]?,
-      global_config
+             options[:procfile]?,
+             global_config
     )
 
     if ap.ambiguous?
@@ -194,6 +174,28 @@ module Procodile
     end
 
     ap
+  end
+
+  private def self.configure_cli_for_command(cli : CLI, ap : AppDetermination, valid_command : CLI::Command?, command_args : Array(String)) : Nil
+    if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && command_args.any?
+      raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
+    end
+
+    return unless valid_command && valid_command.name != "help"
+
+    cli.config = Config.new(ap.root || "", ap.procfile)
+    user = cli.config.user
+
+    if user && user != ENV["USER"]
+      STDERR.puts "Procodile must be run as #{user}. Re-executing as #{user}...".colorize.red
+
+      exe = ::Process.executable_path || $0
+
+      ::Process.exec(
+        "sudo",
+        ["-H", "-u", user, "--", exe] + ORIGINAL_ARGV
+      )
+    end
   end
 
   private def self.root : String
