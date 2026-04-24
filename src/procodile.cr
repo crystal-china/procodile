@@ -7,7 +7,41 @@ module Procodile
               " (rev " +
               `git rev-parse --short HEAD`.chomp.stringify +
               ")"
-            }}
+             }}
+
+  # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
+  # ORIGINAL_ARGV 这份快照也不变
+  ORIGINAL_ARGV = ARGV.dup
+  cli = CLI.new
+
+  private def self.probe_command(
+               original_argv : Array(String),
+               cli : CLI,
+             ) : Tuple(String?, CLI::Command?, Array(String))
+    probe_argv = original_argv.dup
+
+    OptionParser.parse(probe_argv) do |opt|
+      opt.on("-r", "--root PATH", "The path to the root of your application") { }
+      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }
+      opt.on("-h", "--help", "Show this help message and exit") { }
+      opt.on("-v", "--version", "Show version") { }
+
+      # 默认行为是，存在 invalid option （- 开头的）会炸，例如，当我传递一个子命令选项
+      # 但是我这里并没有编写 opt 处理它
+      opt.invalid_option { }
+
+      opt.unknown_args do |args|
+        probe_argv = args
+      end
+    end
+
+    command = probe_argv[0]?
+    valid_command = cli.class.commands[command]?
+
+    {command, valid_command, probe_argv}
+  end
+
+  command, valid_command, probe_argv = probe_command(ORIGINAL_ARGV, cli)
 
   class Error < Exception
   end
@@ -20,29 +54,7 @@ module Procodile
     File.join(root, "bin", "procodile")
   end
 
-  # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
-  # ORIGINAL_ARGV 这份快照也不变
-  ORIGINAL_ARGV = ARGV.dup
   options = {} of Symbol => String
-  cli = CLI.new
-  probe_argv = ORIGINAL_ARGV.dup
-
-  OptionParser.parse(probe_argv) do |opt|
-    opt.on("-r", "--root PATH", "The path to the root of your application") { }
-    opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }
-    opt.on("-h", "--help", "Show this help message and exit") { }
-    opt.on("-v", "--version", "Show version") { }
-    # 默认行为是，存在 invalid option （- 开头的）会炸，例如，当我传递一个子命令选项
-    # 但是我这里并没有编写 opt 处理它
-    opt.invalid_option { }
-
-    opt.unknown_args do |args|
-      probe_argv = args
-    end
-  end
-
-  command = probe_argv[0]?
-  valid_command = cli.class.commands[command]?
   remaining_args = [] of String
 
   OptionParser.parse do |opt|
