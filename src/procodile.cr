@@ -35,7 +35,7 @@ module Procodile
          end
 
     begin
-      configure_cli_for_command(cli, ap, valid_command, command_args)
+      prepare_command_execution(cli, ap, valid_command, command_args)
       cli.dispatch(command || "help")
     rescue ex : Error
       abort "Error: #{ex.message}".colorize.red
@@ -98,7 +98,7 @@ module Procodile
       opt.on("-h", "--help", "Show this help message and exit") do
         STDERR.puts opt
 
-        exit 0 if valid_command
+        exit 0
       end
 
       opt.on("-v", "--version", "Show the version and exit\n") do
@@ -187,7 +187,7 @@ module Procodile
     !!(valid_command && valid_command.name != "help")
   end
 
-  private def self.configure_cli_for_command(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?, command_args : Array(String)) : Nil
+  private def self.prepare_command_execution(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?, command_args : Array(String)) : Nil
     if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && command_args.any?
       raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
     end
