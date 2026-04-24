@@ -28,7 +28,9 @@ module Procodile
   cli.options.command_args = command_args
 
   global_config = load_global_config
-  ap = determine_app(FileUtils.pwd, options, global_config)
+  ap = if command_requires_app?(valid_command)
+         determine_app(FileUtils.pwd, options, global_config)
+       end
 
   begin
     configure_cli_for_command(cli, ap, valid_command, command_args)
@@ -176,14 +178,19 @@ module Procodile
     ap
   end
 
-  private def self.configure_cli_for_command(cli : CLI, ap : AppDetermination, valid_command : CLI::Command?, command_args : Array(String)) : Nil
+  private def self.command_requires_app?(valid_command : CLI::Command?) : Bool
+    !!(valid_command && valid_command.name != "help")
+  end
+
+  private def self.configure_cli_for_command(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?, command_args : Array(String)) : Nil
     if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && command_args.any?
       raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
     end
 
-    return unless valid_command && valid_command.name != "help"
+    return unless command_requires_app?(valid_command)
 
-    cli.config = Config.new(ap.root || "", ap.procfile)
+    resolved_app = ap.not_nil!
+    cli.config = Config.new(resolved_app.root || "", resolved_app.procfile)
     user = cli.config.user
 
     if user && user != ENV["USER"]
