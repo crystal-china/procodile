@@ -1,4 +1,4 @@
-require "./control_session"
+require "./control_handler"
 
 module Procodile
   class ControlServer
@@ -21,17 +21,17 @@ module Procodile
       Procodile.log "control", "Listening at #{sock_path}"
 
       while (client = server.accept)
-        session = ControlSession.new(@supervisor, client)
+        handler = ControlHandler.new(@supervisor)
 
-        spawn handle_client(session, client)
+        spawn handle_client(handler, client)
       end
     ensure
       FileUtils.rm_rf(sock_path) if sock_path
     end
 
-    private def handle_client(session : ControlSession, client : UNIXSocket) : Nil
+    private def handle_client(handler : ControlHandler, client : UNIXSocket) : Nil
       while (line = client.gets)
-        if (response = session.receive_data(line.strip))
+        if (response = handler.receive_data(line.strip))
           client.puts response
         end
       end

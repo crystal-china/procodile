@@ -1,28 +1,26 @@
 module Procodile
   class CLI
     module StatusCommand
-      macro included
-        options :status do |opts, cli|
-          opts.on(
-            "--json",
-            "Return the status as a JSON hash"
-          ) do
-            cli.options.json = true
-          end
+      OPTIONS = ->(opts : OptionParser, cli : CLI) do
+        opts.on(
+          "--json",
+          "Return the status as a JSON hash"
+        ) do
+          cli.options.json = true
+        end
 
-          opts.on(
-            "--json-pretty",
-            "Return the status as a JSON hash printed nicely"
-          ) do
-            cli.options.json_pretty = true
-          end
+        opts.on(
+          "--json-pretty",
+          "Return the status as a JSON hash printed nicely"
+        ) do
+          cli.options.json_pretty = true
+        end
 
-          opts.on(
-            "--simple",
-            "Return overall status"
-          ) do
-            cli.options.simple = true
-          end
+        opts.on(
+          "--simple",
+          "Return overall status"
+        ) do
+          cli.options.simple = true
         end
       end
 
@@ -58,13 +56,13 @@ module Procodile
         end
       end
 
-      private def print_header(status : ControlClient::ReplyOfStatusCommand) : Nil
+      private def print_header(status : StatusReply) : Nil
         puts "Procodile Version   #{status.version.colorize.blue}"
         puts "Application Root    #{status.root.colorize.blue}"
-        puts "Supervisor PID      #{(status.supervisor["pid"]).to_s.colorize.blue}"
-        puts "Proxy Enabled       #{(status.supervisor["proxy_enabled"] ? "yes" : "no").colorize.blue}"
+        puts "Supervisor PID      #{status.supervisor.pid.to_s.colorize.blue}"
+        puts "Proxy Enabled       #{(status.supervisor.proxy_enabled ? "yes" : "no").colorize.blue}"
 
-        if (time = status.supervisor["started_at"])
+        if (time = status.supervisor.started_at)
           time = Time.unix(time)
           puts "Started             #{time.to_s.colorize.blue}"
         end
@@ -89,7 +87,7 @@ module Procodile
         end
       end
 
-      private def print_processes(status : ControlClient::ReplyOfStatusCommand) : Nil
+      private def print_processes(status : StatusReply) : Nil
         puts
 
         failed_processes = status.runtime_issues.each_with_object(Set(String).new) do |issue, set|

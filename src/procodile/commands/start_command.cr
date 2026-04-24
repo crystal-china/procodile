@@ -1,101 +1,99 @@
 module Procodile
   class CLI
     module StartCommand
-      macro included
-        options :start do |opts, cli|
-          opts.on(
-            "-d",
-            "--dev",
-            "Run in development mode"
-          ) do
-            cli.options.respawn = false
-            cli.options.foreground = true
-            cli.options.stop_when_none = true
-            cli.options.proxy = true
-          end
+      OPTIONS = ->(opts : OptionParser, cli : CLI) do
+        opts.on(
+          "-d",
+          "--dev",
+          "Run in development mode"
+        ) do
+          cli.options.respawn = false
+          cli.options.foreground = true
+          cli.options.stop_when_none = true
+          cli.options.proxy = true
+        end
 
-          opts.on(
-            "-f",
-            "--foreground",
-            "Run the supervisor in the foreground"
-          ) do
-            cli.options.foreground = true
-          end
+        opts.on(
+          "-f",
+          "--foreground",
+          "Run the supervisor in the foreground"
+        ) do
+          cli.options.foreground = true
+        end
 
-          opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
-            cli.options.proxy = true
-          end
+        opts.on("-x", "--proxy", "Enables the Procodile proxy service") do
+          cli.options.proxy = true
+        end
 
-          opts.on(
-            "-p",
-            "--processes a,b,c",
-            "Only start the listed processes or process types"
-          ) do |processes|
-            cli.options.processes = processes
-          end
+        opts.on(
+          "-p",
+          "--processes a,b,c",
+          "Only start the listed processes or process types"
+        ) do |processes|
+          cli.options.processes = processes
+        end
 
-          opts.on(
-            "-t",
-            "--tag TAGNAME",
-            "Tag all started processes with the given tag"
-          ) do |tag|
-            cli.options.tag = tag
-          end
+        opts.on(
+          "-t",
+          "--tag TAGNAME",
+          "Tag all started processes with the given tag"
+        ) do |tag|
+          cli.options.tag = tag
+        end
 
-          opts.on(
-            "--clean",
-            "Remove all previous pid and sock files before starting"
-          ) do
-            cli.options.clean = true
-          end
+        opts.on(
+          "--clean",
+          "Remove all previous pid and sock files before starting"
+        ) do
+          cli.options.clean = true
+        end
 
-          opts.on(
-            "--env-file [ENV_FILE]",
-            "Read from env file, default: (.env)"
-          ) do |env_file|
-            cli.options.env_file = env_file.presence || ".env"
-          end
+        opts.on(
+          "--env-file [ENV_FILE]",
+          "Read from env file, default: (.env)"
+        ) do |env_file|
+          cli.options.env_file = env_file.presence || ".env"
+        end
 
-          opts.on(
-            "--no-supervisor",
-            "Do not start a supervisor if its not running"
-          ) do
-            cli.options.start_supervisor = false
-          end
+        opts.on(
+          "--no-supervisor",
+          "Do not start a supervisor if its not running"
+        ) do
+          cli.options.start_supervisor = false
+        end
 
-          opts.on(
-            "--no-processes",
-            "Do not start any processes (only applicable when supervisor is stopped)"
-          ) do
-            cli.options.start_processes = false
-          end
+        opts.on(
+          "--no-processes",
+          "Do not start any processes (only applicable when supervisor is stopped)"
+        ) do
+          cli.options.start_processes = false
+        end
 
-          opts.on(
-            "--no-respawn",
-            "Disable respawning for all processes"
-          ) do
-            cli.options.respawn = false
-          end
+        opts.on(
+          "--no-respawn",
+          "Disable respawning for all processes"
+        ) do
+          cli.options.respawn = false
+        end
 
-          opts.on(
-            "--ports PROCESSES",
-            "Choose ports to allocate to processes"
-          ) do |processes|
-            cli.options.port_allocations = processes.split(",")
-              .each_with_object({} of String => Int32) do |line, hash|
-                abort "No port specified, e.g. app1:3001,app2:3002" unless line.includes?(":")
+        opts.on(
+          "--ports PROCESSES",
+          "Choose ports to allocate to processes"
+        ) do |processes|
+          cli.options.port_allocations = processes.split(",")
+            .each_with_object({} of String => Int32) do |line, hash|
+              abort "No port specified, e.g. app1:3001,app2:3002" unless line.includes?(":")
 
-                process, port = line.split(":")
-                hash[process] = port.to_i
-              end
-          end
+              process, port = line.split(":")
+              hash[process] = port.to_i
+            end
+        end
 
-          opts.on(
-            "--stop-when-none",
-            "Stop the supervisor when all processes are stopped"
-          ) do
-            cli.options.stop_when_none = true
-          end
+        opts.on(
+          "--stop-when-none",
+          "Stop the supervisor when all processes are stopped"
+        ) do
+          cli.options.stop_when_none = true
         end
       end
 
@@ -108,7 +106,7 @@ because --no-supervisor is set" if @options.start_supervisor? == false
 
           # The supervisor isn't actually running. We need to start it before
           # processes can be begin being processed
-          Supervisor.start(@config, @options) do |supervisor|
+          Supervisor.start(config, @options) do |supervisor|
             supervisor.start_processes(
               process_names,
               Supervisor::Options.new(tag: @options.tag)
@@ -134,17 +132,17 @@ because --no-supervisor is set" if @options.start_supervisor? == false
           raise Error.new "Cannot enable the proxy when the supervisor is running"
         end
 
-        instance_configs = ControlClient.start_processes(
-          @config.sock_path,
+        response = ControlClient.start_processes(
+          config.sock_path,
           process_names,
           @options.tag,
           @options.port_allocations,
         )
 
-        if instance_configs.empty?
+        if response.started_instances.empty?
           puts "No processes to start."
         else
-          instance_configs.each do |instance_config|
+          response.started_instances.each do |instance_config|
             puts "#{"Started".colorize.green} #{instance_config.description} (PID: #{instance_config.pid})"
           end
         end

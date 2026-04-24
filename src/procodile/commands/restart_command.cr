@@ -1,23 +1,21 @@
 module Procodile
   class CLI
     module RestartCommand
-      macro included
-        options :restart do |opts, cli|
-          opts.on(
-            "-p",
-            "--processes a,b,c",
-            "Only restart the listed processes or process types"
-          ) do |processes|
-            cli.options.processes = processes
-          end
+      OPTIONS = ->(opts : OptionParser, cli : CLI) do
+        opts.on(
+          "-p",
+          "--processes a,b,c",
+          "Only restart the listed processes or process types"
+        ) do |processes|
+          cli.options.processes = processes
+        end
 
-          opts.on(
-            "-t",
-            "--tag TAGNAME",
-            "Tag all started processes with the given tag"
-          ) do |tag|
-            cli.options.tag = tag
-          end
+        opts.on(
+          "-t",
+          "--tag TAGNAME",
+          "Tag all started processes with the given tag"
+        ) do |tag|
+          cli.options.tag = tag
         end
       end
 
@@ -25,7 +23,7 @@ module Procodile
         raise Error.new "Procodile supervisor isn't running" unless supervisor_running?
 
         process_names = configured_process_names_from_cli_option
-        removed_running_instances = [] of Instance::Config
+        removed_running_instances = [] of InstanceStatus
 
         if !process_names # 如果是全量 restart
           status = status_reply
@@ -39,8 +37,8 @@ module Procodile
           end
         end
 
-        instance_configs = ControlClient.restart(
-          @config.sock_path,
+        response = ControlClient.restart(
+          config.sock_path,
           process_names,
           @options.tag,
         )
@@ -50,7 +48,7 @@ module Procodile
         # - [old, nil] 只 stop 了一个实例
         # - [nil, new] 来没跑，现在补启动了一个实例
         # 如果没有任何 normal processes 重启结果发生，空数组 []
-        if instance_configs.empty?
+        if response.changes.empty?
           if process_names
             scheduled_processes = scheduled_processes_from_names(process_names)
 
@@ -68,7 +66,10 @@ module Procodile
           # tends to be prone to failure, use it with caution."
           #           end
 
-          instance_configs.each do |old_instance, new_instance|
+          response.changes.each do |change|
+            old_instance = change.previous_instance
+            new_instance = change.current_instance
+
             if old_instance && new_instance
               if old_instance.description == new_instance.description
                 puts "#{"Restarted".colorize.magenta} #{old_instance.description}"

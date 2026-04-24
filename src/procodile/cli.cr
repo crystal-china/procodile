@@ -1,5 +1,6 @@
 require "./app_determination"
 require "./config"
+require "./control_client"
 require "./commands/*"
 
 module Procodile
@@ -18,29 +19,28 @@ module Procodile
       {:status, "Show the current status of processes"},
       {:console, "Open a console within the environment"},
     ]
-    property config : Config
+
+    @config : Config?
     property options : Options = Options.new
 
     class_getter commands : Hash(String, Command) { {} of String => Command }
 
-    @@options = {} of Symbol => Proc(OptionParser, CLI, Nil)
-
     {% begin %}
       {% for e in COMMANDS %}
-        {% name = e[0] %}
-        include {{ (name.camelcase + "Command").id }}
+        {% class_name = e[0].camelcase %}
+        include {{ (class_name + "Command").id }}
       {% end %}
 
         def initialize
-          @config = uninitialized Config
           {% for e in COMMANDS %}
             {% name = e[0] %}
+            {% class_name = e[0].camelcase %}
             {% description = e[1] %}
 
             self.class.commands[{{ name.id.stringify }}] = Command.new(
               name: {{ name.id.stringify }},
               description: {{ description.id.stringify }},
-              options: @@options[{{ name }}],
+              options: {{ (class_name + "Command").id }}::OPTIONS,
               callable: ->{{ name.id }}
             )
           {% end %}
@@ -62,6 +62,14 @@ module Procodile
       else
         raise Error.new("Invalid command `#{command}', run `procodile help' for supported commands.".colorize.red.to_s)
       end
+    end
+
+    def config=(new_config : Config) : Config
+      @config = new_config
+    end
+
+    def config : Config
+      @config.not_nil!
     end
 
     private def print_runtime_issues(command : String) : Nil
@@ -88,7 +96,7 @@ module Procodile
       # Do not block the actual command if issue reporting fails.
     end
 
-    private def runtime_issue_status_reply(timeout : Time::Span, interval : Time::Span = 100.milliseconds) : ControlClient::ReplyOfStatusCommand
+    private def runtime_issue_status_reply(timeout : Time::Span, interval : Time::Span = 100.milliseconds) : StatusReply
       deadline = Time.instant + timeout
       last_error = nil
 
@@ -109,7 +117,7 @@ module Procodile
 
     # 新增：检查 control socket 是否可连接（带短暂等待，避免启动竞态）
     private def control_socket_ready?(*, timeout : Time::Span = 300.milliseconds, interval : Time::Span = 25.milliseconds) : Bool
-      sock_path = @config.sock_path
+      sock_path = config.sock_path
       deadline = Time.instant + timeout
 
       while Time.instant < deadline
@@ -132,7 +140,7 @@ module Procodile
     end
 
     private def supervisor_running? : Bool
-      pid_path = @config.supervisor_pid_path
+      pid_path = config.supervisor_pid_path
 
       return false unless File.exists?(pid_path)
 
@@ -159,12 +167,12 @@ module Procodile
 
     private def configured_process_names_from_cli_option : Array(String)?
       if (processes = process_names_from_cli_option)
-        @config.reload
+        config.reload
 
         processes.each do |process|
           process_name = process.split('.', 2).first
 
-          if !@config.processes.has_key?(process_name.to_s)
+          if !config.processes.has_key?(process_name.to_s)
             raise_unknown_or_removed_process_error(process_name.to_s)
           end
         end
@@ -192,17 +200,13 @@ module Procodile
 
       process_names.compact_map do |name|
         process_name = name.split('.', 2).first
-        process = @config.processes[process_name]?
+        process = config.processes[process_name]?
         process if process && process.scheduled?
       end
     end
 
-    private def status_reply : ControlClient::ReplyOfStatusCommand
-      ControlClient.status(@config.sock_path)
-    end
-
-    private def self.options(name : Symbol, &block : Proc(OptionParser, CLI, Nil)) : Nil
-      @@options[name] = block
+    private def status_reply : StatusReply
+      ControlClient.status(config.sock_path)
     end
 
     struct Command

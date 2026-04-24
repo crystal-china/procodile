@@ -115,6 +115,8 @@ RUBY
   it "prints scheduled processes without daemon-only status fields" do
     app_root = File.join(Dir.current, "spec/tmp/procodile-scheduled-status-#{Random.rand(1_000_000)}")
     FileUtils.mkdir_p(File.join(app_root, "pids"))
+    schedule_second = (Time.local.second + 20) % 60
+    schedule = "#{schedule_second} * * * * *"
 
     File.write(
       File.join(app_root, "scheduled_task.rb"),
@@ -127,7 +129,7 @@ RUBY
 
     File.write(
       File.join(app_root, "Procfile"),
-      %Q("job__AT__*/5 * * * * *": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
+      %Q("job__AT__#{schedule}": env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n)
     )
 
     File.write(
@@ -153,7 +155,7 @@ YAML
       output = run_status_command(app_root)
 
       output.should contain("|| job")
-      output.should contain("Schedule            */5 * * * * *")
+      output.should contain("Schedule            #{schedule}")
       output.should contain("Random Delay        up to 2 seconds")
       output.should contain("No scheduled runs in progress.")
       output.should_not contain("Quantity            ")

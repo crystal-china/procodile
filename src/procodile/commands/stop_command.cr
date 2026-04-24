@@ -1,30 +1,28 @@
 module Procodile
   class CLI
     module StopCommand
-      macro included
-        options :stop do |opts, cli|
-          opts.on(
-            "-p",
-            "--processes a,b,c",
-            "Only stop the listed processes or process types"
-          ) do |processes|
-            cli.options.processes = processes
-          end
+      OPTIONS = ->(opts : OptionParser, cli : CLI) do
+        opts.on(
+          "-p",
+          "--processes a,b,c",
+          "Only stop the listed processes or process types"
+        ) do |processes|
+          cli.options.processes = processes
+        end
 
-          opts.on(
-            "-s",
-            "--stop-supervisor",
-            "Stop the supervisor process when all processes are stopped"
-          ) do
-            cli.options.stop_supervisor = true
-          end
+        opts.on(
+          "-s",
+          "--stop-supervisor",
+          "Stop the supervisor process when all processes are stopped"
+        ) do
+          cli.options.stop_supervisor = true
+        end
 
-          opts.on(
-            "--wait",
-            "Wait until supervisor has stopped before exiting"
-          ) do
-            cli.options.wait_until_supervisor_stopped = true
-          end
+        opts.on(
+          "--wait",
+          "Wait until supervisor has stopped before exiting"
+        ) do
+          cli.options.wait_until_supervisor_stopped = true
         end
       end
 
@@ -35,14 +33,13 @@ module Procodile
         scheduled_processes = scheduled_processes_from_names(process_names)
         disabled_scheduling_message = "Future scheduling was disabled \
 for #{scheduled_processes.map(&.name).join(", ")}."
-        instances = ControlClient.stop(
-          @config.sock_path,
+        response = ControlClient.stop(
+          config.sock_path,
           process_names,
           @options.stop_supervisor?,
         )
 
-        # 没有任何 Instance::Config 被 stop
-        if instances.empty?
+        if response.stopped_instances.empty?
           if process_names
             if scheduled_processes.any?
               puts disabled_scheduling_message
@@ -57,7 +54,7 @@ for #{scheduled_processes.map(&.name).join(", ")}."
             puts "No processes were stopped."
           end
         else
-          instances.each do |instance|
+          response.stopped_instances.each do |instance|
             puts "#{"Stopped".colorize.red} #{instance.description} (PID: #{instance.pid})"
           end
 

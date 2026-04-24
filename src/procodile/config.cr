@@ -143,8 +143,8 @@ Procfile. It will be removed when it is stopped."
       po.merge(local_po)
     end
 
-    def pid_root : String?
-      File.expand_path(local_options.pid_root || options.pid_root || "pids", self.root)
+    def pid_root : String
+      File.expand_path(local_options.pid_root || options.pid_root || "pids", root)
     end
 
     def supervisor_pid_path : String
@@ -155,18 +155,18 @@ Procfile. It will be removed when it is stopped."
       log_path = local_options.log_path || options.log_path
 
       if log_path
-        File.expand_path(log_path, self.root)
-      elsif log_path.nil? && (log_root = self.log_root)
-        File.join(log_root, "procodile.log")
+        File.expand_path(log_path, root)
+      elsif log_path.nil? && (resolved_log_root = log_root)
+        File.join(resolved_log_root, "procodile.log")
       else
-        File.expand_path("procodile.log", self.root)
+        File.expand_path("procodile.log", root)
       end
     end
 
     def log_root : String?
       log_root = local_options.log_root || options.log_root
 
-      File.expand_path(log_root, self.root) if log_root
+      File.expand_path(log_root, root) if log_root
     end
 
     def sock_path : String
@@ -174,7 +174,7 @@ Procfile. It will be removed when it is stopped."
     end
 
     def procfile_path : String
-      @procfile || File.join(self.root, "Procfile")
+      @procfile || File.join(root, "Procfile")
     end
 
     def options_path : String
@@ -186,16 +186,26 @@ Procfile. It will be removed when it is stopped."
     end
 
     private def suggested_command_prefix : String
+      parts = ["procodile"] of String
       current_root = Dir.current
-      return "procodile" if @root == current_root
 
-      suggested_root = if @root.starts_with?(current_root + "/")
-                         @root[current_root.size + 1..]
-                       else
-                         @root
-                       end
+      unless @root == current_root
+        parts << "-r #{suggest_path(@root, current_root)}"
+      end
 
-      "procodile -r #{suggested_root}"
+      if procfile_path != File.join(@root, "Procfile")
+        parts << "--procfile #{suggest_path(procfile_path, current_root)}"
+      end
+
+      parts.join(' ')
+    end
+
+    private def suggest_path(path : String, current_root : String) : String
+      if path.starts_with?(current_root + "/")
+        path[(current_root.size + 1)..]
+      else
+        path
+      end
     end
 
     private def create_process(

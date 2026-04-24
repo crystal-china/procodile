@@ -5,6 +5,8 @@ require "./process_selector"
 require "./issue_tracker"
 require "./process_manager"
 require "./schedule_manager"
+require "./control_types"
+require "./tcp_proxy"
 
 module Procodile
   class Supervisor
@@ -28,9 +30,6 @@ module Procodile
       @run_options : Supervisor::RunOptions = Supervisor::RunOptions.new,
     )
       @signal_handler = SignalHandler.new
-      @signal_handler_chan = Channel(Nil).new
-      @log_listener_chan = Channel(Nil).new
-
       @issue_tracker = IssueTracker.new
       @process_manager = ProcessManager.new(self, issue_tracker)
       @schedule_manager = ScheduleManager.new(self, issue_tracker)
@@ -160,14 +159,14 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
       result
     end
 
-    def to_hash : NamedTuple(started_at: Int64?, pid: Int64, proxy_enabled: Bool)
+    def to_supervisor_status : SupervisorStatus
       started_at = @started_at
 
-      {
-        started_at:    started_at ? started_at.to_unix : nil,
-        pid:           ::Process.pid,
+      SupervisorStatus.new(
+        started_at: started_at ? started_at.to_unix : nil,
+        pid: ::Process.pid,
         proxy_enabled: !!@run_options.proxy?,
-      }
+      )
     end
 
     def add_instance(instance : Instance, io : IO::FileDescriptor? = nil) : Nil
@@ -228,18 +227,7 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def watch_for_output : Nil
       spawn watch_for_signal_events
-
       log_listener_reader
-
-      spawn do
-        loop do
-          select
-          when @signal_handler_chan.receive
-          when @log_listener_chan.receive
-          when timeout 30.seconds
-          end
-        end
-      end
     end
 
     private def watch_for_signal_events : Nil
@@ -249,8 +237,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         break if byte.nil?
 
         @signal_handler.handle(byte)
-
-        @signal_handler_chan.send nil
       end
     end
 
@@ -289,8 +275,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
         else
           Procodile.log "unknown", line
         end
-
-        @log_listener_chan.send nil
       end
     rescue ex : IO::Error
       Procodile.log "system", "Log reader closed: #{ex.message}"
@@ -308,8 +292,6 @@ stopped #{result[:stopped].map(&.description).join(", ")}"
 
     private def add_reader(instance : Instance, io : IO::FileDescriptor) : Nil
       @readers[io] = instance
-
-      @signal_handler.wakeup
 
       log_listener_reader
     end

@@ -1,11 +1,13 @@
+require "./control_types"
+
 module Procodile
-  class ControlSession
+  class ControlHandler
     delegate process_manager, config, issue_tracker, to: @supervisor
 
-    def initialize(@supervisor : Supervisor, @client : UNIXSocket)
+    def initialize(@supervisor : Supervisor)
     end
 
-    private def start_processes(options : ControlSession::Options) : String
+    private def start_processes(options : ControlHandler::Options) : StartProcessesResponse
       if (ports = options.port_allocations)
         if (run_options_ports = @supervisor.run_options.port_allocations)
           run_options_ports.merge!(ports)
@@ -19,10 +21,10 @@ module Procodile
         Supervisor::Options.new(tag: options.tag)
       )
 
-      "200 #{instances.map(&.to_struct).to_json}"
+      StartProcessesResponse.new(instances.map(&.to_instance_status))
     end
 
-    private def stop(options : ControlSession::Options) : String
+    private def stop(options : ControlHandler::Options) : StopProcessesResponse
       instances = @supervisor.stop(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -30,10 +32,10 @@ module Procodile
         )
       )
 
-      "200 #{instances.map(&.to_struct).to_json}"
+      StopProcessesResponse.new(instances.map(&.to_instance_status))
     end
 
-    private def restart(options : ControlSession::Options) : String
+    private def restart(options : ControlHandler::Options) : RestartProcessesResponse
       instances = @supervisor.restart(
         Supervisor::Options.new(
           process_names: options.process_names,
@@ -41,55 +43,66 @@ module Procodile
         )
       )
 
-      "200 " + instances.map { |a| a.map { |i| i ? i.to_struct : nil } }.to_json
+      RestartProcessesResponse.new(
+        instances.map do |pair|
+          previous_instance = pair[0]?
+          current_instance = pair[1]?
+
+          RestartChange.new(
+            previous_instance: previous_instance ? previous_instance.to_instance_status : nil,
+            current_instance: current_instance ? current_instance.to_instance_status : nil,
+          )
+        end
+      )
     end
 
-    private def reload_config(options : ControlSession::Options) : String
+    private def reload_config : OkResponse
       @supervisor.reload_config
 
-      %(200 {"ok":true})
+      OkResponse.new(true)
     end
 
-    private def check_concurrency(options : ControlSession::Options) : String
+    private def check_concurrency(options : ControlHandler::Options) : CheckConcurrencyResponse
       result = @supervisor.check_concurrency(
         Supervisor::Options.new(
           reload: options.reload
         )
       )
 
-      result = result.transform_values { |instances, _type| instances.map(&.to_struct) }
-
-      "200 #{result.to_json}"
+      CheckConcurrencyResponse.new(
+        started_instances: result[:started].map(&.to_instance_status),
+        stopped_instances: result[:stopped].map(&.to_instance_status),
+      )
     end
 
-    private def status(options : ControlSession::Options) : String
-      instances = {} of String => Array(Instance::Config)
+    private def status : StatusReply
+      instances = {} of String => Array(InstanceStatus)
       processes = [] of Procodile::Process
       seen_names = Set(String).new
 
       # 先使用配置文件初始化实例（可能是最新修改过的）
       config.processes.each do |_, process|
-        instances[process.name] = [] of Instance::Config
+        instances[process.name] = [] of InstanceStatus
         processes << process
         seen_names << process.name
       end
 
       # 合并正在运行但是配置中已经删除的实例
       @supervisor.processes.each do |process, process_instances|
-        instances[process.name] = process_instances.map(&.to_struct)
+        instances[process.name] = process_instances.map(&.to_instance_status)
         processes << process unless seen_names.includes?(process.name)
       end
 
-      processes = processes.map(&.to_struct)
+      processes = processes.map(&.to_process_status)
 
       loaded_at = config.loaded_at
 
-      result = ControlClient::ReplyOfStatusCommand.new(
+      result = StatusReply.new(
         version: VERSION,
         messages: process_manager.messages,
         root: config.root,
         app_name: config.app_name,
-        supervisor: @supervisor.to_hash,
+        supervisor: @supervisor.to_supervisor_status,
         instances: instances,
         processes: processes,
         runtime_issues: issue_tracker.runtime_issues,
@@ -104,36 +117,38 @@ module Procodile
         loaded_at: loaded_at ? loaded_at.to_unix : nil,
       )
 
-      "200 #{result.to_json}"
+      result
     end
 
-    def receive_data(data : String) : String
-      command, session_data = data.split(/\s+/, 2)
-      options = ControlSession::Options.from_json(session_data)
+    def receive_data(request_data : String) : String
+      command, request_body = request_data.split(/\s+/, 2)
+      options = ControlHandler::Options.from_json(request_body)
 
-      case command
-      when "start_processes"
-        start_processes(options)
-      when "stop"
-        stop(options)
-      when "restart"
-        restart(options)
-      when "reload_config"
-        reload_config(options)
-      when "check_concurrency"
-        check_concurrency(options)
-      when "status"
-        status(options)
-      else
-        "404 Invalid command"
-      end
+      payload = case command
+                when "start_processes"
+                  start_processes(options)
+                when "stop"
+                  stop(options)
+                when "restart"
+                  restart(options)
+                when "reload_config"
+                  reload_config
+                when "check_concurrency"
+                  check_concurrency(options)
+                when "status"
+                  status
+                else
+                  return "404 Invalid command"
+                end
+
+      "200 #{payload.to_json}"
     rescue e : Error
       Procodile.log "control", "Error: #{e.message}".colorize.red.to_s
-      "500 #{e.message}"
+      "500 #{e.message || e.to_s}"
     end
   end
 
-  struct ControlSession::Options
+  struct ControlHandler::Options
     include JSON::Serializable
 
     getter process_names : Array(String)?

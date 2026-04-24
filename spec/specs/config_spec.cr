@@ -115,6 +115,23 @@ describe Procodile::Config do
       config.exec_prefix.should eq "bundle exec"
     end
 
+    it "includes a custom procfile in suggested commands" do
+      app_root = File.join("/tmp", "procodile-custom-procfile-#{Random.rand(1_000_000)}")
+      FileUtils.mkdir_p(app_root)
+
+      begin
+        procfile_path = File.join(app_root, "PFile")
+        File.write(procfile_path, %(app1: sleep 60
+))
+
+        custom_config = Procodile::Config.new(app_root, procfile_path)
+
+        custom_config.suggested_command("reload").should eq %(procodile -r #{app_root} --procfile #{procfile_path} reload)
+      ensure
+        FileUtils.rm_rf(app_root)
+      end
+    end
+
     it "should be able to return options for a process" do
       config.options_for_process("proc1").should be_a Procodile::Process::Option
       config.options_for_process("proc1").quantity.should eq 2

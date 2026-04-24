@@ -1,13 +1,11 @@
 module Procodile
   class CLI
     module KillCommand
-      macro included
-        options :kill do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def kill : Nil
-        Dir[File.join(@config.pid_root, "*.pid")].each do |pid_path|
+        Dir[File.join(config.pid_root, "*.pid")].each do |pid_path|
           name = pid_path.split('/').last.rstrip(".pid")
           pid = File.read(pid_path).to_i
 

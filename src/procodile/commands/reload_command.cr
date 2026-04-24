@@ -1,14 +1,12 @@
 module Procodile
   class CLI
     module ReloadCommand
-      macro included
-        options :reload do |opts, cli|
-        end
+      OPTIONS = ->(_opts : OptionParser, _cli : CLI) do
       end
 
       private def reload : Nil
         if supervisor_running?
-          ControlClient.reload_config(@config.sock_path)
+          ControlClient.reload_config(config.sock_path)
 
           puts "Reloaded Procodile config"
         else
