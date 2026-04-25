@@ -48,7 +48,7 @@ module Procodile
     # 第一次，probe 出来真实的子命令是什么。
     command, valid_command, _probe_argv = probe_command(original_argv, cli)
     # 第二次，针对存在的子命令，执行对应的 Proc 对象，来初始化子命令的选项。
-    options, remaining_args = parse_options(valid_command, cli)
+    options, remaining_args = parse_options(original_argv, valid_command, cli)
 
     command_args = if valid_command && remaining_args.size > 1
                      remaining_args[1..]
@@ -89,11 +89,12 @@ module Procodile
     {command, valid_command, probe_argv}
   end
 
-  private def self.parse_options(valid_command : CLI::Command?, cli : CLI) : Tuple(Hash(Symbol, String), Array(String))
+  private def self.parse_options(original_argv : Array(String), valid_command : CLI::Command?, cli : CLI) : Tuple(Hash(Symbol, String), Array(String))
     options = {} of Symbol => String
     remaining_args = [] of String
+    argv = original_argv.dup
 
-    OptionParser.parse do |opt|
+    OptionParser.parse(argv) do |opt|
       # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
       if valid_command && (option_proc = valid_command.options)
         option_proc.call(opt, cli)
