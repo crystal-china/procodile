@@ -28,7 +28,6 @@ module Procodile
     invocation = parse_invocation(ORIGINAL_ARGV, cli)
 
     cli.options.command_args = invocation.command_args
-
     global_config = load_global_config
     ap = if command_requires_app?(invocation.valid_command)
            determine_app(FileUtils.pwd, invocation.options, global_config)
@@ -46,7 +45,9 @@ module Procodile
   run
 
   private def self.parse_invocation(original_argv : Array(String), cli : CLI) : ParsedInvocation
+    # 第一次，probe 出来真实的子命令是什么。
     command, valid_command, _probe_argv = probe_command(original_argv, cli)
+    # 第二次，针对存在的子命令，执行对应的 Proc 对象，来初始化子命令的选项。
     options, remaining_args = parse_options(valid_command, cli)
 
     command_args = if valid_command && remaining_args.size > 1
