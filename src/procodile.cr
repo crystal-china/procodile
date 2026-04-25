@@ -35,7 +35,8 @@ module Procodile
          end
 
     begin
-      prepare_command_execution(cli, ap, invocation.valid_command, invocation.command_args)
+      validate_command_arguments(invocation.valid_command, invocation.command_args)
+      configure_command_environment(cli, ap, invocation.valid_command)
       cli.dispatch(invocation.command || "help")
     rescue ex : Error
       abort "Error: #{ex.message}".colorize.red
@@ -206,11 +207,13 @@ module Procodile
     !!(valid_command && valid_command.name != "help")
   end
 
-  private def self.prepare_command_execution(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?, command_args : Array(String)) : Nil
+  private def self.validate_command_arguments(valid_command : CLI::Command?, command_args : Array(String)) : Nil
     if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && command_args.any?
       raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
     end
+  end
 
+  private def self.configure_command_environment(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?) : Nil
     return unless command_requires_app?(valid_command)
 
     resolved_app = ap.not_nil!
