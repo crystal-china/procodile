@@ -16,7 +16,6 @@ module Procodile
     command : String?,
     valid_command : CLI::Command?,
     options : Hash(Symbol, String),
-    remaining_args : Array(String),
     command_args : Array(String)
 
   ORIGINAL_ARGV = ARGV.dup
@@ -45,7 +44,7 @@ module Procodile
 
   private def self.parse_invocation(original_argv : Array(String), cli : CLI) : ParsedInvocation
     options = {} of Symbol => String
-    raw_remaining_args = [] of String
+    remaining_args = [] of String
     selected_command : CLI::Command? = nil
     argv = original_argv.dup
 
@@ -90,20 +89,15 @@ Global options (can be used before or after the subcommand):"
       end
 
       opt.unknown_args do |args|
-        raw_remaining_args = args
+        remaining_args = args
       end
     end
 
     parser.parse(argv)
 
-    command = selected_command.try(&.name) || raw_remaining_args[0]?
-    remaining_args = if (resolved_command = selected_command) && raw_remaining_args.any?
-                       [resolved_command.name] + raw_remaining_args
-                     else
-                       raw_remaining_args
-                     end
-    command_args = if selected_command && remaining_args.any?
-                     remaining_args[1..]
+    command = selected_command.try(&.name) || remaining_args[0]?
+    command_args = if selected_command
+                     remaining_args
                    else
                      [] of String
                    end
@@ -112,7 +106,6 @@ Global options (can be used before or after the subcommand):"
       command: command,
       valid_command: selected_command,
       options: options,
-      remaining_args: remaining_args,
       command_args: command_args
     )
   end
