@@ -16,7 +16,7 @@ module Procodile
     command : String?,
     valid_command : CLI::Command?,
     options : Hash(Symbol, String),
-    command_args : Array(String)
+    extra_args : Array(String)
 
   ORIGINAL_ARGV = ARGV.dup
 
@@ -25,14 +25,14 @@ module Procodile
     # ORIGINAL_ARGV 这份快照也不变
     cli = CLI.new
     invocation = parse_invocation(ORIGINAL_ARGV, cli)
-    cli.options.command_args = invocation.command_args
+    cli.options.extra_args = invocation.extra_args
     global_config = load_global_config
     ap = if command_requires_app?(invocation.valid_command)
            determine_app(FileUtils.pwd, invocation.options, global_config)
          end
 
     begin
-      validate_command_arguments(invocation.valid_command, invocation.command_args)
+      validate_command_arguments(invocation.valid_command, invocation.extra_args)
       configure_command_environment(cli, ap, invocation.valid_command)
       cli.dispatch(invocation.command || "help")
     rescue ex : Error
@@ -96,7 +96,7 @@ Global options (can be used before or after the subcommand):"
     parser.parse(argv)
 
     command = selected_command.try(&.name) || remaining_args[0]?
-    command_args = if selected_command
+    extra_args = if selected_command
                      remaining_args
                    elsif remaining_args.size > 1
                      remaining_args[1..]
@@ -108,7 +108,7 @@ Global options (can be used before or after the subcommand):"
       command: command,
       valid_command: selected_command,
       options: options,
-      command_args: command_args
+      extra_args: extra_args
     )
   end
 
@@ -178,9 +178,9 @@ Global options (can be used before or after the subcommand):"
     !!(valid_command && valid_command.name != "help")
   end
 
-  private def self.validate_command_arguments(valid_command : CLI::Command?, command_args : Array(String)) : Nil
-    if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && command_args.any?
-      raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{command_args.join(" ")}. Use `-p/--processes` to target processes."
+  private def self.validate_command_arguments(valid_command : CLI::Command?, extra_args : Array(String)) : Nil
+    if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && extra_args.any?
+      raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{extra_args.join(" ")}. Use `-p/--processes` to target processes."
     end
   end
 

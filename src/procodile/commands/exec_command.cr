@@ -5,7 +5,7 @@ module Procodile
       end
 
       private def exec(command : String? = nil) : Nil
-        desired_command = command || @options.command_args.try(&.join(" ")) || ""
+        desired_command = command || @options.extra_args.try(&.join(" ")) || ""
 
         if (prefix = config.exec_prefix)
           desired_command = ([prefix, desired_command].join(" "))
