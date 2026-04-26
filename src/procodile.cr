@@ -44,27 +44,6 @@ module Procodile
 
   run
 
-  private def self.parse_invocation(original_argv : Array(String), cli : CLI) : ParsedInvocation
-    # 第一次，probe 出来真实的子命令是什么。
-    command, valid_command, _probe_argv = probe_command(original_argv, cli)
-    # 第二次，针对存在的子命令，执行对应的 Proc 对象，来初始化子命令的选项。
-    options, remaining_args = parse_options(original_argv, valid_command, cli)
-
-    command_args = if valid_command && remaining_args.size > 1
-                     remaining_args[1..]
-                   else
-                     [] of String
-                   end
-
-    ParsedInvocation.new(
-      command: command,
-      valid_command: valid_command,
-      options: options,
-      remaining_args: remaining_args,
-      command_args: command_args
-    )
-  end
-
   private def self.parse_invocation_with_subcommands(original_argv : Array(String), cli : CLI) : ParsedInvocation
     options = {} of Symbol => String
     raw_remaining_args = [] of String
@@ -137,84 +116,6 @@ Global options (can be used before or after the subcommand):"
       remaining_args: remaining_args,
       command_args: command_args
     )
-  end
-
-  private def self.probe_command(original_argv : Array(String), cli : CLI) : Tuple(String?, CLI::Command?, Array(String))
-    probe_argv = original_argv.dup
-
-    OptionParser.parse(probe_argv) do |opt|
-      opt.on("-r", "--root PATH", "The path to the root of your application") { }
-      opt.on("--procfile PATH", "The path to the Procfile (defaults to: Procfile)") { }
-      opt.on("-h", "--help", "Show this help message and exit") { }
-      opt.on("-v", "--version", "Show version") { }
-
-      # 默认行为是，存在 invalid option （- 开头的）会炸，例如，当我传递一个子命令选项
-      # 但是我这里并没有编写 opt 处理它
-      opt.invalid_option { }
-
-      opt.unknown_args do |args|
-        probe_argv = args
-      end
-    end
-
-    command = probe_argv[0]?
-    valid_command = cli.class.commands[command]?
-
-    {command, valid_command, probe_argv}
-  end
-
-  private def self.parse_options(original_argv : Array(String), valid_command : CLI::Command?, cli : CLI) : Tuple(Hash(Symbol, String), Array(String))
-    options = {} of Symbol => String
-    remaining_args = [] of String
-    argv = original_argv.dup
-
-    OptionParser.parse(argv) do |opt|
-      # 执行 parse 后，在这里会更新 opt 输出以及 cli.options
-      if valid_command && (option_proc = valid_command.options)
-        option_proc.call(opt, cli)
-      end
-
-      if valid_command
-        opt.banner = "Usage: procodile #{valid_command.name} [options]\n\nGlobal options such as `-r` and `--procfile` can be used before or after the subcommand.\n"
-      else
-        opt.banner = "Usage: procodile command [options]"
-      end
-
-      opt.separator
-      opt.separator("Global options (can be used before or after the subcommand):\n")
-
-      opt.on("-r", "--root PATH", "The path to the root of your application") do |root|
-        options[:root] = root
-      end
-
-      opt.on("--procfile PATH", "The path to the Procfile (default: Procfile)") do |path|
-        options[:procfile] = path
-      end
-
-      opt.on("-h", "--help", "Show this help message and exit") do
-        STDERR.puts opt
-
-        exit 0
-      end
-
-      opt.on("-v", "--version", "Show the version and exit\n") do
-        abort VERSION, status: 0
-      end
-
-      opt.invalid_option do |flag|
-        abort "Invalid option: #{flag}\n\n#{opt}"
-      end
-
-      opt.missing_option do |flag|
-        abort "Missing option for #{flag}\n\n#{opt}"
-      end
-
-      opt.unknown_args do |args|
-        remaining_args = args
-      end
-    end
-
-    {options, remaining_args}
   end
 
   private def self.load_global_config : Array(Config::GlobalOption)
