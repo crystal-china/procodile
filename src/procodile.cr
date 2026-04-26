@@ -13,7 +13,7 @@ module Procodile
     # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
     # ORIGINAL_ARGV 这份快照也不变
     cli = CLI.new
-    invocation = parse_invocation(ORIGINAL_ARGV, cli)
+    invocation = CLIParser.parse(ORIGINAL_ARGV, cli)
     cli.options.extra_args = invocation.extra_args
     global_config = load_global_config
     ap = if command_requires_app?(invocation.valid_command)

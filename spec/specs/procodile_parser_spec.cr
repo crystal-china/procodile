@@ -4,12 +4,12 @@ module Procodile
   def self.parse_invocation_for_spec(
     args : Array(String),
     cli : CLI = CLI.new,
-  ) : ParsedInvocation
-    parse_invocation(args, cli)
+  ) : CLIParser::ParsedInvocation
+    CLIParser.parse(args, cli)
   end
 end
 
-private def parsed_invocation(args : Array(String)) : Tuple(Procodile::ParsedInvocation, Procodile::CLI)
+private def parsed_invocation(args : Array(String)) : Tuple(Procodile::CLIParser::ParsedInvocation, Procodile::CLI)
   cli = Procodile::CLI.new
   {Procodile.parse_invocation_for_spec(args, cli), cli}
 end
