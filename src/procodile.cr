@@ -3,11 +3,11 @@ require "./procodile/cli"
 
 module Procodile
   VERSION = {{
-               `shards version "#{__DIR__}"`.chomp.stringify +
-                 " (rev " +
-                 `git rev-parse --short HEAD`.chomp.stringify +
-                 ")"
-             }}
+              `shards version "#{__DIR__}"`.chomp.stringify +
+              " (rev " +
+              `git rev-parse --short HEAD`.chomp.stringify +
+              ")"
+            }}
 
   class Error < Exception
   end
@@ -32,8 +32,15 @@ module Procodile
          end
 
     begin
-      validate_command_arguments(invocation.valid_command, invocation.extra_args)
-      configure_command_environment(cli, ap, invocation.valid_command)
+      valid_command = invocation.valid_command
+      extra_args = invocation.extra_args
+
+      if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && extra_args.any?
+        raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{extra_args.join(" ")}. \
+Use `-p/--processes` to target processes."
+      end
+
+      prepare_command_execution(cli, ap, valid_command)
       cli.dispatch(invocation.command || "help")
     rescue ex : Error
       abort "Error: #{ex.message}".colorize.red
@@ -97,12 +104,12 @@ Global options (can be used before or after the subcommand):"
 
     command = selected_command.try(&.name) || remaining_args[0]?
     extra_args = if selected_command
-                     remaining_args
-                   elsif remaining_args.size > 1
-                     remaining_args[1..]
-                   else
-                     [] of String
-                   end
+                   remaining_args
+                 elsif remaining_args.size > 1
+                   remaining_args[1..]
+                 else
+                   [] of String
+                 end
 
     ParsedInvocation.new(
       command: command,
@@ -136,8 +143,8 @@ Global options (can be used before or after the subcommand):"
     ap = AppDetermination.new(
       pwd,
       options[:root]?,
-             options[:procfile]?,
-             global_config
+      options[:procfile]?,
+      global_config
     )
 
     if ap.ambiguous?
@@ -178,13 +185,7 @@ Global options (can be used before or after the subcommand):"
     !!(valid_command && valid_command.name != "help")
   end
 
-  private def self.validate_command_arguments(valid_command : CLI::Command?, extra_args : Array(String)) : Nil
-    if valid_command && valid_command.name.in?({"start", "restart", "stop"}) && extra_args.any?
-      raise Error.new "Invalid argument(s) for `#{valid_command.name}`: #{extra_args.join(" ")}. Use `-p/--processes` to target processes."
-    end
-  end
-
-  private def self.configure_command_environment(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?) : Nil
+  private def self.prepare_command_execution(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?) : Nil
     return unless command_requires_app?(valid_command)
 
     resolved_app = ap.not_nil!
