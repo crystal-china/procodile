@@ -7,13 +7,6 @@ module Procodile
   ) : ParsedInvocation
     parse_invocation(args, cli)
   end
-
-  def self.validate_command_arguments_for_spec(
-    valid_command : CLI::Command?,
-    extra_args : Array(String),
-  ) : Nil
-    validate_command_arguments(valid_command, extra_args)
-  end
 end
 
 private def parsed_invocation(args : Array(String)) : Tuple(Procodile::ParsedInvocation, Procodile::CLI)
@@ -29,6 +22,15 @@ private def run_procodile_help(*args : String) : String
 
   status.success?.should be_true
   error.to_s + output.to_s
+end
+
+private def run_procodile(*args : String) : {Process::Status, String}
+  output = IO::Memory.new
+  error = IO::Memory.new
+  executable = File.expand_path("../../bin/procodile", __DIR__)
+  status = Process.run(executable, args.to_a, output: output, error: error)
+
+  {status, error.to_s + output.to_s}
 end
 
 describe Procodile do
@@ -110,12 +112,9 @@ describe Procodile do
     invocation.command.should eq("start")
     invocation.extra_args.should eq(["worker.1"])
 
-    expect_raises(Procodile::Error, /Use `-p\/--processes`/) do
-      Procodile.validate_command_arguments_for_spec(
-        invocation.valid_command,
-        invocation.extra_args
-      )
-    end
+    status, output = run_procodile("start", "worker.1")
+    status.success?.should be_false
+    output.should contain("Use `-p/--processes` to target processes.")
   end
 
   it "treats unknown commands as plain command names without a valid command" do
