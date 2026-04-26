@@ -12,6 +12,13 @@ module Procodile
     command_requires_app?(valid_command)
   end
 
+  def self.parse_invocation_with_subcommands_for_spec(
+    args : Array(String),
+    cli : CLI = CLI.new,
+  ) : ParsedInvocation
+    parse_invocation_with_subcommands(args, cli)
+  end
+
   def self.validate_command_arguments_for_spec(
     valid_command : CLI::Command?,
     command_args : Array(String),
@@ -23,6 +30,30 @@ end
 private def parsed_invocation(args : Array(String)) : Tuple(Procodile::ParsedInvocation, Procodile::CLI)
   cli = Procodile::CLI.new
   {Procodile.parse_invocation_for_spec(args, cli), cli}
+end
+
+private def parsed_invocation_with_subcommands(args : Array(String)) : Tuple(Procodile::ParsedInvocation, Procodile::CLI)
+  cli = Procodile::CLI.new
+  {Procodile.parse_invocation_with_subcommands_for_spec(args, cli), cli}
+end
+
+private def invocation_signature(invocation : Procodile::ParsedInvocation) : NamedTuple(command: String?, valid_command_name: String?, options: Hash(Symbol, String), command_args: Array(String))
+  {
+    command: invocation.command,
+    valid_command_name: invocation.valid_command.try(&.name),
+    options: invocation.options,
+    command_args: invocation.command_args,
+  }
+end
+
+private def run_procodile_help(*args : String) : String
+  output = IO::Memory.new
+  error = IO::Memory.new
+  executable = File.expand_path("../../bin/procodile", __DIR__)
+  status = Process.run(executable, args.to_a, output: output, error: error)
+
+  status.success?.should be_true
+  error.to_s + output.to_s
 end
 
 describe Procodile do
@@ -121,5 +152,121 @@ describe Procodile do
     invocation.command.should eq("not-a-command")
     invocation.valid_command.should be_nil
     invocation.command_args.should eq([] of String)
+  end
+
+  it "matches the existing parser for help" do
+    old_invocation, old_cli = parsed_invocation(["help"])
+    new_invocation, new_cli = parsed_invocation_with_subcommands(["help"])
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for start with global options before the subcommand" do
+    args = ["-r", "/app", "--procfile", "PFile", "start", "-d"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for start with global options after the subcommand" do
+    args = ["start", "-r", "app/app1", "--procfile", "config/PFile", "-d"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for restart command options" do
+    args = ["restart", "-p", "app1,app2", "-t", "release-1"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for stop command options" do
+    args = ["stop", "-p", "app1,app2", "-s", "--wait"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for status command options" do
+    args = ["status", "--json-pretty"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for reload" do
+    args = ["reload"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for check_concurrency options" do
+    args = ["check_concurrency", "--no-reload"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for run trailing arguments" do
+    args = ["run", "bundle", "exec", "rake", "db:migrate"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for exec trailing arguments" do
+    args = ["exec", "env"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "matches the existing parser for unknown commands" do
+    args = ["not-a-command"]
+    old_invocation, old_cli = parsed_invocation(args)
+    new_invocation, new_cli = parsed_invocation_with_subcommands(args)
+
+    invocation_signature(new_invocation).should eq(invocation_signature(old_invocation))
+    new_cli.options.should eq(old_cli.options)
+  end
+
+  it "prints start help with global and subcommand option sections" do
+    output = run_procodile_help("start", "-h")
+
+    output.should contain("Usage: procodile start [options]")
+    output.should contain("Global options (can be used before or after the subcommand):")
+    output.should contain("Subcommand options:")
+    output.should contain("--stop-when-none")
+  end
+
+  it "prints status help with global and subcommand option sections" do
+    output = run_procodile_help("status", "-h")
+
+    output.should contain("Usage: procodile status [options]")
+    output.should contain("Global options (can be used before or after the subcommand):")
+    output.should contain("Subcommand options:")
+    output.should contain("--json-pretty")
   end
 end

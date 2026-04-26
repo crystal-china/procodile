@@ -17,13 +17,18 @@ private def parse_command_options(
   cli.options
 end
 
+private def build_cli_with_config(config : Procodile::Config) : Procodile::CLI
+  cli = Procodile::CLI.new
+  cli.config = config
+  cli
+end
+
 describe Procodile::CLI do
   context "an application with a Procfile" do
     config = Procodile::Config.new(root: File.join(APPS_ROOT, "full"))
-    cli = Procodile::CLI.new
-    cli.config = config
 
     it "should run help command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["help"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "help"
@@ -34,6 +39,7 @@ describe Procodile::CLI do
     end
 
     it "should run kill command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["kill"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "kill"
@@ -44,6 +50,7 @@ describe Procodile::CLI do
     end
 
     it "should run start command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["start"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "start"
@@ -54,6 +61,7 @@ describe Procodile::CLI do
     end
 
     it "should run stop command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["stop"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "stop"
@@ -63,6 +71,7 @@ describe Procodile::CLI do
     end
 
     it "should run status command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["status"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "status"
@@ -72,6 +81,7 @@ describe Procodile::CLI do
     end
 
     it "should run exec command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["exec"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "exec"
@@ -81,6 +91,7 @@ describe Procodile::CLI do
     end
 
     it "should run reload command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["reload"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "reload"
@@ -90,6 +101,7 @@ describe Procodile::CLI do
     end
 
     it "should run check_concurrency command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["check_concurrency"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "check_concurrency"
@@ -99,6 +111,7 @@ describe Procodile::CLI do
     end
 
     it "should run log command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["log"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "log"
@@ -108,6 +121,7 @@ describe Procodile::CLI do
     end
 
     it "should run restart command" do
+      cli = build_cli_with_config(config)
       command = cli.class.commands["restart"]
       command.should be_a Procodile::CLI::Command
       command.name.should eq "restart"
@@ -117,12 +131,14 @@ describe Procodile::CLI do
     end
 
     it "parses tag for start" do
+      cli = build_cli_with_config(config)
       options = parse_command_options(cli, "start", ["--tag", "release-20260420"])
 
       options.tag.should eq("release-20260420")
     end
 
     it "parses tag for restart" do
+      cli = build_cli_with_config(config)
       options = parse_command_options(cli, "restart", ["--tag", "release-20260420"])
 
       options.tag.should eq("release-20260420")
