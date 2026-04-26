@@ -98,6 +98,8 @@ Global options (can be used before or after the subcommand):"
     command = selected_command.try(&.name) || remaining_args[0]?
     command_args = if selected_command
                      remaining_args
+                   elsif remaining_args.size > 1
+                     remaining_args[1..]
                    else
                      [] of String
                    end
