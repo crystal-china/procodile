@@ -147,28 +147,7 @@ Global options (can be used before or after the subcommand):"
       elsif ap.app_options.empty?
         abort "Error: Could not find Procfile in #{pwd}/Procfile".colorize.red
       else
-        puts "There are multiple applications configured in #{ENV["PROCODILE_CONFIG"]? || "/etc/
-             procodile"}"
-        puts "Choose an application:".colorize.light_gray.on_magenta
-
-        ap.app_options.each do |i, app|
-          col = i % 3
-          print "#{(i + 1)}) #{app}"[0, 28].ljust(col != 2 ? 30 : 0, ' ')
-          if col == 2 || i == ap.app_options.size - 1
-            puts
-          end
-        end
-
-        input = STDIN.gets
-        if !input.nil?
-          app_id = input.strip.to_i - 1
-
-          if ap.app_options[app_id]?
-            ap.set_app_id_and_find_root_and_procfile(app_id)
-          else
-            abort "Invalid app number: #{app_id + 1}"
-          end
-        end
+        choose_application(ap)
       end
     end
 
@@ -177,6 +156,31 @@ Global options (can be used before or after the subcommand):"
 
   private def self.command_requires_app?(valid_command : CLI::Command?) : Bool
     !!(valid_command && valid_command.name != "help")
+  end
+
+  private def self.choose_application(ap : AppDetermination) : Nil
+    puts "There are multiple applications configured in #{ENV["PROCODILE_CONFIG"]? || "/etc/procodile"}"
+    puts "Choose an application:".colorize.light_gray.on_magenta
+
+    ap.app_options.each do |i, app|
+      col = i % 3
+      print "#{(i + 1)}) #{app}"[0, 28].ljust(col != 2 ? 30 : 0, ' ')
+      if col == 2 || i == ap.app_options.size - 1
+        puts
+      end
+    end
+
+    input = STDIN.gets
+
+    return if input.nil?
+
+    app_id = input.strip.to_i - 1
+
+    if ap.app_options[app_id]?
+      ap.set_app_id_and_find_root_and_procfile(app_id)
+    else
+      abort "Invalid app number: #{app_id + 1}"
+    end
   end
 
   private def self.prepare_command_execution(cli : CLI, ap : AppDetermination?, valid_command : CLI::Command?) : Nil
