@@ -25,8 +25,7 @@ module Procodile
     # 把当前 ARGV 里的内容复制一份，以后就算 ARGV 自己被 OptionParser 改了、clear 了、shift 了
     # ORIGINAL_ARGV 这份快照也不变
     cli = CLI.new
-    invocation = parse_invocation_with_subcommands(ORIGINAL_ARGV, cli)
-
+    invocation = parse_invocation(ORIGINAL_ARGV, cli)
     cli.options.command_args = invocation.command_args
     global_config = load_global_config
     ap = if command_requires_app?(invocation.valid_command)
@@ -44,7 +43,7 @@ module Procodile
 
   run
 
-  private def self.parse_invocation_with_subcommands(original_argv : Array(String), cli : CLI) : ParsedInvocation
+  private def self.parse_invocation(original_argv : Array(String), cli : CLI) : ParsedInvocation
     options = {} of Symbol => String
     raw_remaining_args = [] of String
     selected_command : CLI::Command? = nil
