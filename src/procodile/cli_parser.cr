@@ -1,12 +1,6 @@
 module Procodile
   module CLIParser
-    record ParsedInvocation,
-      command : String?,
-      valid_command : CLI::Command?,
-      options : Hash(Symbol, String),
-      extra_args : Array(String)
-
-    def self.parse(original_argv : Array(String), cli : CLI) : ParsedInvocation
+    def self.parse(original_argv : Array(String), cli : CLI)
       options = {} of Symbol => String
       remaining_args = [] of String
       selected_command : CLI::Command? = nil
@@ -68,12 +62,7 @@ Global options (can be used before or after the subcommand):"
                      [] of String
                    end
 
-      ParsedInvocation.new(
-        command: command,
-        valid_command: selected_command,
-        options: options,
-        extra_args: extra_args
-      )
+      {command, selected_command, options, extra_args}
     end
   end
 end
