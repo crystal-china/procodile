@@ -11,7 +11,7 @@ end
 
 private def parsed_invocation(args : Array(String)) : Tuple(
   Tuple(String?, Procodile::CLI::Command?, Hash(Symbol, String), Array(String)),
-  Procodile::CLI
+  Procodile::CLI,
 )
   cli = Procodile::CLI.new
   {Procodile.parse_invocation_for_spec(args, cli), cli}

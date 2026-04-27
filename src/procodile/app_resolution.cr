@@ -28,8 +28,8 @@ module Procodile
       ap = AppDetermination.new(
         pwd,
         options[:root]?,
-               options[:procfile]?,
-               global_config
+        options[:procfile]?,
+        global_config
       )
 
       if ap.ambiguous?
