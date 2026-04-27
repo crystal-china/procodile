@@ -36,8 +36,7 @@ Use `-p/--processes` to target processes."
   run
 
   private def self.prepare_command_execution(cli : CLI, ap : AppDetermination) : Nil
-    resolved_app = ap.not_nil!
-    cli.config = Config.new(resolved_app.root || "", resolved_app.procfile)
+    cli.config = Config.new(ap.root || "", ap.procfile)
     user = cli.config.user
 
     if user && user != ENV["USER"]
