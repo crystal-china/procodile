@@ -18,20 +18,29 @@ private def parsed_invocation(args : Array(String)) : Tuple(
 end
 
 private def run_procodile_help(*args : String) : String
-  output = IO::Memory.new
-  error = IO::Memory.new
-  executable = File.expand_path("../../bin/procodile", __DIR__)
-  status = Process.run(executable, args.to_a, output: output, error: error)
-
+  status, output = run_procodile(*args)
   status.success?.should be_true
-  error.to_s + output.to_s
+  output
+end
+
+private def procodile_command(*args : String) : {String, Array(String)}
+  executable = File.expand_path("../../bin/procodile", __DIR__)
+
+  if File.exists?(executable)
+    {executable, args.to_a}
+  else
+    {
+      "crystal",
+      ["run", File.expand_path("../../src/procodile.cr", __DIR__), "--"] + args.to_a,
+    }
+  end
 end
 
 private def run_procodile(*args : String) : {Process::Status, String}
   output = IO::Memory.new
   error = IO::Memory.new
-  executable = File.expand_path("../../bin/procodile", __DIR__)
-  status = Process.run(executable, args.to_a, output: output, error: error)
+  command, command_args = procodile_command(*args)
+  status = Process.run(command, command_args, output: output, error: error)
 
   {status, error.to_s + output.to_s}
 end
