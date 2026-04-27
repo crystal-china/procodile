@@ -4,7 +4,7 @@ module Procodile
       OPTIONS = ->(opts : OptionParser, cli : CLI) do
         opts.on(
           "--no-reload",
-          "Do not reload the configuration before checking"
+          "Check concurrency without reloading the configuration first"
         ) do |_processes|
           cli.options.reload = false
         end

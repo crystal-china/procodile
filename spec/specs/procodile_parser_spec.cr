@@ -1,0 +1,157 @@
+require "../spec_helper"
+
+module Procodile
+  def self.parse_invocation_for_spec(
+    args : Array(String),
+    cli : CLI = CLI.new,
+  ) : {String?, CLI::Command?, Hash(Symbol, String), Array(String)}
+    CLIParser.parse(args, cli)
+  end
+end
+
+private def parsed_invocation(args : Array(String)) : Tuple(
+  Tuple(String?, Procodile::CLI::Command?, Hash(Symbol, String), Array(String)),
+  Procodile::CLI
+)
+  cli = Procodile::CLI.new
+  {Procodile.parse_invocation_for_spec(args, cli), cli}
+end
+
+private def run_procodile_help(*args : String) : String
+  output = IO::Memory.new
+  error = IO::Memory.new
+  executable = File.expand_path("../../bin/procodile", __DIR__)
+  status = Process.run(executable, args.to_a, output: output, error: error)
+
+  status.success?.should be_true
+  error.to_s + output.to_s
+end
+
+private def run_procodile(*args : String) : {Process::Status, String}
+  output = IO::Memory.new
+  error = IO::Memory.new
+  executable = File.expand_path("../../bin/procodile", __DIR__)
+  status = Process.run(executable, args.to_a, output: output, error: error)
+
+  {status, error.to_s + output.to_s}
+end
+
+describe Procodile do
+  it "defaults to help when no command is given" do
+    invocation, cli = parsed_invocation([] of String)
+    command, valid_command, options, extra_args = invocation
+
+    command.should be_nil
+    valid_command.should be_nil
+    options.should eq({} of Symbol => String)
+    extra_args.should eq([] of String)
+    cli.options.extra_args.should be_nil
+  end
+
+  it "recognizes the help command without requiring an app" do
+    invocation, _cli = parsed_invocation(["help"])
+    command, valid_command, _options, extra_args = invocation
+
+    command.should eq("help")
+    valid_command.not_nil!.name.should eq("help")
+    extra_args.should eq([] of String)
+  end
+
+  it "parses global options before a subcommand" do
+    invocation, cli = parsed_invocation(["-r", "/app", "--procfile", "PFile", "start", "-d"])
+    command, valid_command, options, extra_args = invocation
+
+    command.should eq("start")
+    valid_command.not_nil!.name.should eq("start")
+    options.should eq({:root => "/app", :procfile => "PFile"})
+    extra_args.should eq([] of String)
+
+    cli.options.foreground?.should be_true
+    cli.options.proxy?.should be_true
+    cli.options.stop_when_none?.should be_true
+    cli.options.respawn?.should be_false
+  end
+
+  it "parses global options after a subcommand" do
+    invocation, cli = parsed_invocation(["start", "-r", "app/app1", "--procfile", "config/PFile", "-d"])
+    command, valid_command, options, extra_args = invocation
+
+    command.should eq("start")
+    valid_command.not_nil!.name.should eq("start")
+    options.should eq({:root => "app/app1", :procfile => "config/PFile"})
+    extra_args.should eq([] of String)
+
+    cli.options.foreground?.should be_true
+    cli.options.proxy?.should be_true
+    cli.options.stop_when_none?.should be_true
+    cli.options.respawn?.should be_false
+  end
+
+  it "preserves trailing command arguments for run" do
+    invocation, _cli = parsed_invocation(["run", "bundle", "exec", "rake", "db:migrate"])
+    command, valid_command, _options, extra_args = invocation
+
+    command.should eq("run")
+    valid_command.not_nil!.name.should eq("run")
+    extra_args.should eq(["bundle", "exec", "rake", "db:migrate"])
+  end
+
+  it "preserves trailing command arguments for exec" do
+    invocation, _cli = parsed_invocation(["exec", "env"])
+    command, valid_command, _options, extra_args = invocation
+
+    command.should eq("exec")
+    valid_command.not_nil!.name.should eq("exec")
+    extra_args.should eq(["env"])
+  end
+
+  it "keeps explicit process targets as command options and not command args" do
+    invocation, cli = parsed_invocation(["restart", "-p", "app1,app2", "-t", "release-1"])
+    command, valid_command, _options, extra_args = invocation
+
+    command.should eq("restart")
+    valid_command.not_nil!.name.should eq("restart")
+    extra_args.should eq([] of String)
+    cli.options.processes.should eq("app1,app2")
+    cli.options.tag.should eq("release-1")
+  end
+
+  it "captures positional args for start so validation can reject them" do
+    invocation, _cli = parsed_invocation(["start", "worker.1"])
+    command, _valid_command, _options, extra_args = invocation
+
+    command.should eq("start")
+    extra_args.should eq(["worker.1"])
+
+    status, output = run_procodile("start", "worker.1")
+    status.success?.should be_false
+    output.should contain("Use `-p/--processes` to target processes.")
+  end
+
+  it "treats unknown commands as plain command names without a valid command" do
+    invocation, _cli = parsed_invocation(["not-a-command"])
+    command, valid_command, _options, extra_args = invocation
+
+    command.should eq("not-a-command")
+    valid_command.should be_nil
+    extra_args.should eq([] of String)
+  end
+
+  it "prints start help with global and subcommand option sections" do
+    output = run_procodile_help("start", "-h")
+
+    output.should contain("Usage: procodile start [options]")
+    output.should contain("Global options (can be used before or after the subcommand):")
+    output.should contain("Subcommand options:")
+    output.should contain("--stop-when-none")
+  end
+
+  it "prints status help with global and subcommand option sections" do
+    output = run_procodile_help("status", "-h")
+
+    output.should contain("Usage: procodile status [options]")
+    output.should contain("Global options (can be used before or after the subcommand):")
+    output.should contain("Subcommand options:")
+    output.should contain("--json-pretty")
+  end
+end

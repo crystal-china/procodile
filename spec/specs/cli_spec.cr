@@ -17,115 +17,77 @@ private def parse_command_options(
   cli.options
 end
 
+private def build_cli_with_config(config : Procodile::Config) : Procodile::CLI
+  cli = Procodile::CLI.new
+  cli.config = config
+  cli
+end
+
 describe Procodile::CLI do
   context "an application with a Procfile" do
     config = Procodile::Config.new(root: File.join(APPS_ROOT, "full"))
-    cli = Procodile::CLI.new
-    cli.config = config
 
-    it "should run help command" do
-      command = cli.class.commands["help"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "help"
-      command.description.should eq "Shows this help output"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-      command.callable.call
+    it "registers the expected commands" do
+      cli = build_cli_with_config(config)
+      cli.class.commands.keys.sort.should eq(%w[
+        check_concurrency
+        console
+        exec
+        help
+        kill
+        log
+        reload
+        restart
+        run
+        start
+        status
+        stop
+      ])
     end
 
-    it "should run kill command" do
-      command = cli.class.commands["kill"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "kill"
-      command.description.should eq "Forcefully kill all known processes"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-      command.callable.call
-    end
+    it "parses dev mode for start" do
+      cli = build_cli_with_config(config)
+      options = parse_command_options(cli, "start", ["--dev"])
 
-    it "should run start command" do
-      command = cli.class.commands["start"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "start"
-      command.description.should eq "Starts processes and/or the supervisor"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-      # command.callable.call
-    end
-
-    it "should run stop command" do
-      command = cli.class.commands["stop"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "stop"
-      command.description.should eq "Stops processes and/or the supervisor"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-    end
-
-    it "should run status command" do
-      command = cli.class.commands["status"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "status"
-      command.description.should eq "Show the current status of processes"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-    end
-
-    it "should run exec command" do
-      command = cli.class.commands["exec"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "exec"
-      command.description.should eq "Execute a command within the environment"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-    end
-
-    it "should run reload command" do
-      command = cli.class.commands["reload"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "reload"
-      command.description.should eq "Reload Procodile configuration"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-    end
-
-    it "should run check_concurrency command" do
-      command = cli.class.commands["check_concurrency"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "check_concurrency"
-      command.description.should eq "Check process concurrency"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-    end
-
-    it "should run log command" do
-      command = cli.class.commands["log"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "log"
-      command.description.should eq "Open/stream a Procodile log file"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
-    end
-
-    it "should run restart command" do
-      command = cli.class.commands["restart"]
-      command.should be_a Procodile::CLI::Command
-      command.name.should eq "restart"
-      command.description.should eq "Restart processes"
-      command.options.should be_a Proc(OptionParser, Procodile::CLI, Nil)
-      command.callable.should be_a Proc(Nil)
+      options.foreground?.should be_true
+      options.proxy?.should be_true
+      options.stop_when_none?.should be_true
+      options.respawn?.should be_false
     end
 
     it "parses tag for start" do
+      cli = build_cli_with_config(config)
       options = parse_command_options(cli, "start", ["--tag", "release-20260420"])
 
       options.tag.should eq("release-20260420")
     end
 
     it "parses tag for restart" do
+      cli = build_cli_with_config(config)
       options = parse_command_options(cli, "restart", ["--tag", "release-20260420"])
 
       options.tag.should eq("release-20260420")
+    end
+
+    it "parses wait for stop" do
+      cli = build_cli_with_config(config)
+      options = parse_command_options(cli, "stop", ["--wait"])
+
+      options.wait_until_supervisor_stopped?.should be_true
+    end
+
+    it "parses pretty JSON for status" do
+      cli = build_cli_with_config(config)
+      options = parse_command_options(cli, "status", ["--json-pretty"])
+
+      options.json_pretty?.should be_true
+    end
+
+    it "parses no-reload for check_concurrency" do
+      cli = build_cli_with_config(config)
+      options = parse_command_options(cli, "check_concurrency", ["--no-reload"])
+
+      options.reload?.should be_false
     end
   end
 end

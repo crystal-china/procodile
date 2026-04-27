@@ -6,8 +6,8 @@ require "./commands/*"
 module Procodile
   class CLI
     COMMANDS = [
-      {:help, "Shows this help output"},
-      {:kill, "Forcefully kill all known processes"},
+      {:help, "Show this help output"},
+      {:kill, "Forcefully kill all managed processes"},
       {:start, "Starts processes and/or the supervisor"},
       {:stop, "Stops processes and/or the supervisor"},
       {:exec, "Execute a command within the environment"},
@@ -243,7 +243,7 @@ module Procodile
       property tag : String?
       property port_allocations : Hash(String, Int32)?
       property processes : String? # A String split by comma.
-      property command_args : Array(String)?
+      property extra_args : Array(String)?
       property lines : Int32?
       property process : String?
 
