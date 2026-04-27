@@ -23,7 +23,7 @@ module Procodile
 Use `-p/--processes` to target processes."
       end
 
-      if command_requires_app?(valid_command)
+      if !!(valid_command && valid_command.name != "help")
         prepare_command_execution(cli, AppResolution.resolve(options))
       end
 
@@ -34,10 +34,6 @@ Use `-p/--processes` to target processes."
   end
 
   run
-
-  private def self.command_requires_app?(valid_command : CLI::Command?) : Bool
-    !!(valid_command && valid_command.name != "help")
-  end
 
   private def self.prepare_command_execution(cli : CLI, ap : AppDetermination) : Nil
     resolved_app = ap.not_nil!
