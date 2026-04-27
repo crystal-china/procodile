@@ -3,7 +3,7 @@ module Procodile
   struct OkResponse
     include JSON::Serializable
 
-    getter ok : Bool
+    getter? ok : Bool
 
     def initialize(@ok : Bool)
     end
@@ -151,7 +151,7 @@ module Procodile
 
     getter started_at : Int64?
     getter pid : Int64
-    getter proxy_enabled : Bool
+    getter? proxy_enabled : Bool
 
     def initialize(
       @started_at : Int64?,

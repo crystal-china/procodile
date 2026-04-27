@@ -56,7 +56,7 @@ describe Procodile::ControlHandler do
       response.should start_with("200 ")
       reply = response.sub(/\A200\s+/, "")
       parsed = Procodile::OkResponse.from_json(reply)
-      parsed.ok.should be_true
+      parsed.ok?.should be_true
     ensure
       cleanup_control_session_app(app_root, supervisor, client)
     end
