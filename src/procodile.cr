@@ -23,8 +23,12 @@ module Procodile
 Use `-p/--processes` to target processes."
       end
 
-      if !!(valid_command && valid_command.name != "help")
-        prepare_command_execution(cli, AppResolution.resolve(options))
+      if valid_command && valid_command.name != "help"
+        ap = AppResolution.resolve(options)
+        cli.config = Config.new(ap.root || "", ap.procfile)
+        user = cli.config.user
+
+        reexec_as_configured_user(user) if user && user != ENV["USER"]
       end
 
       cli.dispatch(command || "help")
@@ -33,21 +37,16 @@ Use `-p/--processes` to target processes."
     end
   end
 
-  run
+  private def self.reexec_as_configured_user(user : String) : Nil
+    STDERR.puts "Procodile must be run as #{user}. Re-executing as #{user}...".colorize.red
 
-  private def self.prepare_command_execution(cli : CLI, ap : AppDetermination) : Nil
-    cli.config = Config.new(ap.root || "", ap.procfile)
-    user = cli.config.user
+    exe = ::Process.executable_path || $0
 
-    if user && user != ENV["USER"]
-      STDERR.puts "Procodile must be run as #{user}. Re-executing as #{user}...".colorize.red
-
-      exe = ::Process.executable_path || $0
-
-      ::Process.exec(
-        "sudo",
-        ["-H", "-u", user, "--", exe] + ORIGINAL_ARGV
-      )
-    end
+    ::Process.exec(
+      "sudo",
+      ["-H", "-u", user, "--", exe] + ORIGINAL_ARGV
+    )
   end
 end
+
+Procodile.run
