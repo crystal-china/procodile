@@ -203,6 +203,11 @@ or `#{suggested_restart_command}`."
       process.create_instance(@supervisor).start
     rescue ex
       scheduled_running.delete(name)
+      @issue_tracker.report(
+        :scheduled_run_failed,
+        name,
+        %|Scheduled process '#{name}' failed to start: #{ex.message} Fix it, then run `#{config.suggested_command("restart -p #{name}")}`.|
+      )
       Procodile.log "system", "Scheduled process #{name} failed to start: #{ex.message}"
     end
 

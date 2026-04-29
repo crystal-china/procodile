@@ -1,5 +1,11 @@
 require "../spec_helper"
 
+private class BrokenScheduledProcess < Procodile::Process
+  def create_instance(supervisor : Procodile::Supervisor) : Procodile::Instance
+    raise "boom from create_instance"
+  end
+end
+
 private def wait_for_control_socket(sock_path : String) : Bool
   wait_until(5.seconds, 50.milliseconds) do
     begin
@@ -89,6 +95,49 @@ RUBY
       output.should_not contain("invalid cron schedule")
     ensure
       File.write(File.join(app_root, "Procfile"), "noop: env -u RUBYOPT -u RUBYLIB ruby scheduled_task.rb\n")
+      supervisor.reload_config
+      FileUtils.rm_rf(config.supervisor_pid_path)
+      FileUtils.rm_rf(app_root)
+    end
+  end
+
+  it "reports a runtime issue when a scheduled process fails before instance start" do
+    app_root = File.join("/tmp", "procodile-scheduled-create-failure-#{Random.rand(1_000_000)}")
+    FileUtils.mkdir_p(File.join(app_root, "pids"))
+
+    File.write(
+      File.join(app_root, "Procfile"),
+      %Q("job__AT__*/1 * * * * *": echo ok\n)
+    )
+
+    config = Procodile::Config.new(root: app_root)
+    original_process = config.processes["job"]
+    config.processes["job"] = BrokenScheduledProcess.new(
+      config,
+      original_process.name,
+      original_process.command,
+      original_process.options,
+      original_process.schedule
+    )
+
+    supervisor = Procodile::Supervisor.new(config)
+
+    begin
+      File.write(config.supervisor_pid_path, ::Process.pid.to_s)
+      Procodile::ControlServer.start(supervisor)
+      wait_for_control_socket(config.sock_path).should be_true
+
+      supervisor.start_processes(nil).should be_empty
+
+      wait_until(5.seconds, 50.milliseconds) do
+        supervisor.runtime_issues_for_spec.any? do |issue|
+          issue.type.scheduled_run_failed? &&
+            issue.process_name == "job" &&
+            issue.message.includes?("boom from create_instance")
+        end
+      end.should be_true
+    ensure
+      File.write(File.join(app_root, "Procfile"), "noop: echo ok\n")
       supervisor.reload_config
       FileUtils.rm_rf(config.supervisor_pid_path)
       FileUtils.rm_rf(app_root)
