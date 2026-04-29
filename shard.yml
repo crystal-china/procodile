@@ -1,9 +1,9 @@
 name: procodile
-version: 2.0.0-rc.7
+version: 2.0.0
 
 authors:
   - Adam Cooke <me@adamcooke.io>
-  - Billy.Zheng <vil963@gmail.com>
+  - Billy.Zheng <vil963@gmail.com> (Current Maintainer)
 
 targets:
   procodile:
