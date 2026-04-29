@@ -18,7 +18,7 @@ module Procodile
           end
         end
       else
-        instances = long_running_instances(process_names)
+        instances = long_running_instances(process_selectors: process_names)
 
         Procodile.log "system", "Stopping #{instances.size} process(es)"
 
@@ -75,7 +75,7 @@ module Procodile
 
         Procodile.log "system", "Restarting all #{config.app_name} processes"
       else
-        instances = long_running_instances(process_names)
+        instances = long_running_instances(process_selectors: process_names)
 
         Procodile.log "system", "Restarting #{instances.size} process(es)"
       end
@@ -165,14 +165,14 @@ module Procodile
       messages
     end
 
-    private def long_running_instances(processes : Array(String))
-      process_names_to_instances(processes).reject do |instance|
-        instance.process.scheduled? && processes.includes?(instance.process.name)
+    private def long_running_instances(*, process_selectors : Array(String))
+      instances_for(process_selectors: process_selectors).reject do |instance|
+        instance.process.scheduled? && process_selectors.includes?(instance.process.name)
       end
     end
 
-    private def process_names_to_instances(names : Array(String)) : Array(Instance)
-      names.each_with_object([] of Instance) do |name, array|
+    private def instances_for(*, process_selectors : Array(String)) : Array(Instance)
+      process_selectors.each_with_object([] of Instance) do |name, array|
         process_name, instance_id = ProcessSelector.parse(name)
 
         # 如果进程不在 Procfile 中，用原始 name 在 @supervisor.processes 中查找（已被移除的进程）

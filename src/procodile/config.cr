@@ -11,7 +11,7 @@ module Procodile
       Colorize::ColorANSI::Blue,    # 34 蓝
     ]
 
-    PROCFILE_SCHEDULE_ENTRY_REGEX     = /\A(.+?)(?:__AT__)(.+)\z/
+    PROCFILE_SCHEDULE_ENTRY_REGEX = /\A(.+?)(?:__AT__)(.+)\z/
 
     getter procfile_entries : NamedTuple(commands: Hash(String, String), schedules: Hash(String, String?)) { parse_procfile_entries }
     getter process_list : Hash(String, String) { procfile_entries[:commands] }
