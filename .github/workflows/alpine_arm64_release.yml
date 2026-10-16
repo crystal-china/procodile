@@ -3,6 +3,9 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,27 +14,27 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
       - name: Download source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Cache shards
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /home/runner/.cache/shards
-          key: ${{ runner.os }}-arm64-shards-${{ hashFiles('shard.yml') }}
+          key: ${{ runner.os }}-arm64-shards-${{ hashFiles('shard.yml', 'shard.lock') }}
           restore-keys: ${{ runner.os }}-arm64-shards-
 
       - name: Build binary in ARM container
         run: |
-          docker run --rm --platform linux/arm64 -v ${{ github.workspace }}:/workspace -w /workspace \
+          docker run --rm --platform linux/arm64 -v "${{ github.workspace }}:/workspace" -w /workspace \
             -v /home/runner/.cache/shards:/root/.cache/shards \
             crystallang/crystal:latest-alpine \
-            sh -c "
-              git config --global --add safe.directory /workspace && \
-              apk add --no-cache bash ruby && \
-              crystal tool format --check && \
-              shards check || shards install --without-development && \
-              shards build --production --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast --static --link-flags='-s -Wl,-z,relro,-z,now'
-            "
+            sh -ec '
+              git config --global --add safe.directory /workspace
+              apk add --no-cache bash ruby
+              crystal tool format --check
+              shards check || shards install --without-development
+              shards build --production --progress --no-debug -Dstrict_multi_assign -Dno_number_autocast --static --link-flags="-s -Wl,-z,relro,-z,now"
+            '
 
       - name: Collect package information
         run: |
@@ -51,7 +54,7 @@ jobs:
           tar zcvf ${{env.ASSET_NAME}} ${{env.BINARY_NAME}} LICENSE
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |

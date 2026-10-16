@@ -1,19 +1,32 @@
+name: CI
+
 on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 3 * * 1" # Every monday at 3:15 AM
   workflow_call:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Download source
+        uses: actions/checkout@v7
+
       - name: Cache shards
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/shards
-          key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
+          key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml', 'shard.lock') }}
           restore-keys: ${{ runner.os }}-shards-
-
-      - name: Download source
-        uses: actions/checkout@v4
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -25,6 +38,7 @@ jobs:
         run: shards check || shards install
 
       - name: Run Ameba
+        if: hashFiles('bin/ameba') != ''
         run: bin/ameba
 
       # - name: Run typer
@@ -32,11 +46,14 @@ jobs:
 
       - name: Run tests
         run: crystal spec --order=random --error-on-warnings
-        
+
       - name: Build docs
         run: crystal docs
-        
+
       - name: Deploy docs
+        if: >-
+          github.event_name != 'pull_request' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

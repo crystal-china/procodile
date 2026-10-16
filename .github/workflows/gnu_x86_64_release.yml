@@ -2,10 +2,9 @@ on:
   push:
     tags:
       - "v*.*.*"
-    branches:
-      - master
-  schedule:
-    - cron: "15 3 * * 1" # Every monday at 3:15 AM
+
+permissions:
+  contents: write
 
 jobs:
   call-ci:
@@ -15,15 +14,15 @@ jobs:
     needs: call-ci
     runs-on: ubuntu-latest
     steps:
+      - name: Download source
+        uses: actions/checkout@v7
+
       - name: Cache shards
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/shards
-          key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
+          key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml', 'shard.lock') }}
           restore-keys: ${{ runner.os }}-shards-
-
-      - name: Download source
-        uses: actions/checkout@v4
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -50,7 +49,7 @@ jobs:
           tar zcvf ${{env.ASSET_NAME}} ${{env.BINARY_NAME}} LICENSE
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |

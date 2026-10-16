@@ -3,19 +3,22 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-latest
     steps:
+      - name: Download source
+        uses: actions/checkout@v7
+
       - name: Cache shards
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/shards
-          key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
+          key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml', 'shard.lock') }}
           restore-keys: ${{ runner.os }}-shards-
-
-      - name: Download source
-        uses: actions/checkout@v4
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -32,7 +35,7 @@ jobs:
       - name: Collect package information
         run: |
           echo "BINARY_NAME=bin/$(cat shard.yml |grep targets -A1|tail -n1 |sed 's#[ :]##g')" >> $GITHUB_ENV
-          echo "PKG_ARCH=x86_64" >> $GITHUB_ENV
+          echo "PKG_ARCH=$(uname -m)" >> $GITHUB_ENV
           echo "PLATFORM=apple-darwin.tar.gz" >> $GITHUB_ENV
           echo "BUILD_ARGS=" >> $GITHUB_ENV
 
@@ -49,7 +52,7 @@ jobs:
           tar zcvf ${{env.ASSET_NAME}} ${{env.BINARY_NAME}} LICENSE
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |

@@ -1,48 +1,43 @@
 # start_supervisor_daemon.cr
 #
-# Daemonize by re-exec: spawn a real OS child process and return its PID.
-# The child re-runs the normal CLI path; we only mark it via ENV.
+# Daemonize via fork(2) + setsid(2): the child detaches from the
+# controlling terminal and redirects stdio to the log file.
+# Returns the child's PID to the parent, nil in the child.
 
 module Procodile
   module Daemon
-    ENV_KEY = "PROCODILE_DAEMON_CHILD"
+    # Fork the current process. The parent receives the child's PID;
+    # the child detaches from the terminal, redirects stdio, and returns nil.
+    def self.daemonize!(config : Config) : Int64?
+      pid = LibC.fork
 
-    # True when running in the re-exec'ed daemon child.
-    def self.child? : Bool
-      ENV[ENV_KEY]? == "1"
-    end
+      case pid
+      when -1
+        raise Error.new("Cannot daemonize: fork failed")
+      when 0
+        # Child: create a new session to detach from the controlling terminal.
+        if LibC.setsid < 0
+          raise Error.new("Cannot daemonize: failed to detach from controlling terminal.")
+        end
 
-    def self.detach_child! : Nil
-      if LibC.setsid < 0
-        raise Error.new("Cannot daemonize: failed to detach supervisor from the controlling terminal.")
+        # Redirect stdio to the log file.
+        log_file = File.open(config.log_path, "a")
+        log_fd = log_file.fd
+        LibC.dup2(log_fd, 0) # stdin
+        LibC.dup2(log_fd, 1) # stdout
+        LibC.dup2(log_fd, 2) # stderr
+        log_file.close if log_fd > 2
+
+        nil
+      else
+        pid.to_i64
       end
-    end
-
-    # Spawn a daemon child (same executable, same argv), redirecting output to log.
-    # Returns the child's PID. Also does a tiny sanity check that the PID exists.
-    def self.daemonize!(config : Config) : Int64
-      exe = ::Process.executable_path
-
-      raise Error.new("Cannot daemonize: failed to determine the current executable path.") unless exe
-
-      log_path = File.open(config.log_path, "a")
-
-      child = ::Process.new(
-        exe,
-        Procodile::ORIGINAL_ARGV.dup,
-        output: log_path,
-        error: log_path,
-        env: {ENV_KEY => "1"}
-      )
-
-      # Close the fd in the parent, sub-process will continue write log.
-      log_path.close
-
-      child.pid
     end
   end
 
   lib LibC
+    fun fork : Int32
     fun setsid : Int32
+    fun dup2(oldfd : Int32, newfd : Int32) : Int32
   end
 end

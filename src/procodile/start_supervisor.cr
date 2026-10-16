@@ -29,19 +29,21 @@ module Procodile
 Cannot start unless things are clean."
       end
 
-      set_process_title("[procodile] #{config.app_name} (#{config.root})")
-
-      if options.foreground? || Procodile::Daemon.child?
-        Procodile::Daemon.detach_child! if Procodile::Daemon.child?
-
+      if options.foreground?
+        set_process_title("[procodile] #{config.app_name} (#{config.root})")
         File.write(config.supervisor_pid_path, ::Process.pid)
-
         Supervisor.new(config, run_options).start(after_start)
       else
         FileUtils.rm_rf(File.join(config.pid_root, "*.pid"))
-
-        pid = Procodile::Daemon.daemonize!(config)
-        puts "Started Procodile supervisor with PID #{pid}"
+        if (pid = Procodile::Daemon.daemonize!(config))
+          # Parent: report the child PID. Runtime issues are checked in dispatch.
+          puts "Started Procodile supervisor with PID #{pid}"
+        else
+          # Child: set up and start the supervisor.
+          set_process_title("[procodile] #{config.app_name} (#{config.root})")
+          File.write(config.supervisor_pid_path, ::Process.pid)
+          Supervisor.new(config, run_options).start(after_start)
+        end
       end
     end
 
@@ -68,10 +70,8 @@ Cannot start unless things are clean."
     private def self.set_process_title(title : String) : Nil
       # Set process title in platform-specific ways.
       {% if flag?(:linux) %}
-        begin
-          File.write("/proc/self/comm", title)
-        rescue ex : File::Error
-          Procodile.log "system", "Failed to set process title: #{ex.message}"
+        if LibC.prctl(LibC::PR_SET_NAME, title, 0, 0, 0) != 0
+          Procodile.log "system", "Failed to set process title: #{Errno.value}"
         end
       {% elsif flag?(:darwin) %}
         LibC.setprogname(title)
@@ -80,6 +80,14 @@ Cannot start unless things are clean."
       {% end %}
     end
   end
+
+  {% if flag?(:linux) %}
+    lib LibC
+      PR_SET_NAME = 15
+
+      fun prctl(option : Int32, name : UInt8*, arg3 : UInt64, arg4 : UInt64, arg5 : UInt64) : Int32
+    end
+  {% end %}
 
   {% if flag?(:darwin) %}
     lib LibC
