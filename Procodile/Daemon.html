@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.19.1">
+<meta name="generator" content="Crystal Docs 1.21.0">
 <meta name="crystal_docs.project_version" content="master">
 <meta name="crystal_docs.project_name" content="procodile">
 
@@ -436,7 +436,7 @@
   </h2>
   
     
-      <a href="https://github.com/crystal-china/procodile/blob/b6aeaf4b8f6c09a97d07825c7aec625ea00801a6/src/procodile/start_supervisor_daemon.cr#L7" target="_blank">
+      <a href="https://github.com/crystal-china/procodile/blob/a1aae3f902c8e3d384bd6515010522275308fac6/src/procodile/start_supervisor_daemon.cr#L8" target="_blank">
         procodile/start_supervisor_daemon.cr
       </a>
     
@@ -444,25 +444,6 @@
   
 
 
-
-  
-    <h2>
-      <a id="constant-summary" class="anchor" href="#constant-summary">
-  <svg class="octicon-link" aria-hidden="true">
-    <use href="#octicon-link"/>
-  </svg>
-</a>
-      Constant Summary
-    </h2>
-  
-  <dl>
-    
-      <dt class="entry-const" id="ENV_KEY">
-        <strong>ENV_KEY</strong> = <code><span class="s">&quot;PROCODILE_DAEMON_CHILD&quot;</span></code>
-      </dt>
-      
-    
-  </dl>
 
 
 
@@ -480,21 +461,9 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
-        <a href="#child%3F%3ABool-class-method" class="signature"><strong>.child?</strong> : Bool</a>
+        <a href="#daemonize%21%28config%3AConfig%29%3AInt64%7CNil-class-method" class="signature"><strong>.daemonize!</strong>(config : Config) : Int64 | Nil</a>
         
-          <div class="summary"><p>True when running in the re-exec'ed daemon child.</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#daemonize%21%28config%3AConfig%29%3AInt64-class-method" class="signature"><strong>.daemonize!</strong>(config : Config) : Int64</a>
-        
-          <div class="summary"><p>Spawn a daemon child (same executable, same argv), redirecting output to log.</p></div>
-        
-      </li>
-    
-      <li class="entry-summary">
-        <a href="#detach_child%21%3ANil-class-method" class="signature"><strong>.detach_child!</strong> : Nil</a>
+          <div class="summary"><p>Fork the current process.</p></div>
         
       </li>
     
@@ -522,61 +491,24 @@
     Class Method Detail
   </h2>
   
-    <div class="entry-detail" id="child?:Bool-class-method">
+    <div class="entry-detail" id="daemonize!(config:Config):Int64|Nil-class-method">
       <div class="signature">
         
-        def self.<strong>child?</strong> : Bool
+        def self.<strong>daemonize!</strong>(config : <a href="../Procodile/Config.html">Config</a>) : Int64 | Nil
 
-        <a class="method-permalink" href="#child%3F%3ABool-class-method">#</a>
+        <a class="method-permalink" href="#daemonize%21%28config%3AConfig%29%3AInt64%7CNil-class-method">#</a>
       </div>
       
         <div class="doc">
           
-          <p>True when running in the re-exec'ed daemon child.</p>
+          <p>Fork the current process. The parent receives the child's PID;
+the child detaches from the terminal, redirects stdio, and returns nil.</p>
         </div>
       
       <br/>
       <div>
         
-          [<a href="https://github.com/crystal-china/procodile/blob/b6aeaf4b8f6c09a97d07825c7aec625ea00801a6/src/procodile/start_supervisor_daemon.cr#L11" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="daemonize!(config:Config):Int64-class-method">
-      <div class="signature">
-        
-        def self.<strong>daemonize!</strong>(config : <a href="../Procodile/Config.html">Config</a>) : Int64
-
-        <a class="method-permalink" href="#daemonize%21%28config%3AConfig%29%3AInt64-class-method">#</a>
-      </div>
-      
-        <div class="doc">
-          
-          <p>Spawn a daemon child (same executable, same argv), redirecting output to log.
-Returns the child's PID. Also does a tiny sanity check that the PID exists.</p>
-        </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/b6aeaf4b8f6c09a97d07825c7aec625ea00801a6/src/procodile/start_supervisor_daemon.cr#L23" target="_blank">View source</a>]
-        
-      </div>
-    </div>
-  
-    <div class="entry-detail" id="detach_child!:Nil-class-method">
-      <div class="signature">
-        
-        def self.<strong>detach_child!</strong> : Nil
-
-        <a class="method-permalink" href="#detach_child%21%3ANil-class-method">#</a>
-      </div>
-      
-      <br/>
-      <div>
-        
-          [<a href="https://github.com/crystal-china/procodile/blob/b6aeaf4b8f6c09a97d07825c7aec625ea00801a6/src/procodile/start_supervisor_daemon.cr#L15" target="_blank">View source</a>]
+          [<a href="https://github.com/crystal-china/procodile/blob/a1aae3f902c8e3d384bd6515010522275308fac6/src/procodile/start_supervisor_daemon.cr#L11" target="_blank">View source</a>]
         
       </div>
     </div>
